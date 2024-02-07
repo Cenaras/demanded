@@ -1,3 +1,6 @@
+import main.constraint.ConstraintVar
+import main.program.{AssignInsn, Instruction, LoadInsn, NewInsn, Program, StoreInsn}
+import main.solver.{ConstraintVariables, ExhaustiveSolver}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ArrayBuffer
@@ -23,8 +26,8 @@ class Exhaustive extends AnyFunSuite {
       LoadInsn(4, 1, "f")
     )
 
-    val solver = Solver(p);
-    solver.genConstraints()
+    val solver = ExhaustiveSolver(p);
+    solver.generateConstraints()
     val solution = solver.solve();
 
 
@@ -43,7 +46,6 @@ class Exhaustive extends AnyFunSuite {
 
   test("Aliasing") {
     /*
-
       // x = {f: {}}
       x1 = new t1
       x2 = new t2
@@ -69,8 +71,8 @@ class Exhaustive extends AnyFunSuite {
       LoadInsn(5, 1, "f")
     )
 
-    val solver = Solver(p);
-    solver.genConstraints()
+    val solver = ExhaustiveSolver(p);
+    solver.generateConstraints()
     val solution = solver.solve();
 
 
@@ -90,7 +92,17 @@ class Exhaustive extends AnyFunSuite {
 
 
 
-  def getCvar(solution: Solution, id: Int, base: Boolean): ConstraintVar = {
+
+
+
+
+
+
+
+
+
+
+  def getCvar(solution: ConstraintVariables, id: Int, base: Boolean): ConstraintVar = {
     solution.find(c => c.getId == id && base == c.base).get;
   }
 

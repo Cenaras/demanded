@@ -1,3 +1,8 @@
+package main
+
+import main.program.ProgramGenerator
+import main.solver.ExhaustiveSolver
+import main.util.PrettyPrinter
 
 object Main {
 
@@ -13,11 +18,10 @@ object Main {
     PrettyPrinter.printProgram(program)
 
 
-    val solver = new Solver(program)
-    solver.genConstraints()
-
-//    PrettyPrinter.printConstraints(solver)
-
+    val solver = new ExhaustiveSolver(program)
+    solver.generateConstraints()
+    
+    PrettyPrinter.printConstraints(solver)
     val solution = solver.solve()
     PrettyPrinter.printSolution(solution)
   }

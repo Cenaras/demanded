@@ -1,21 +1,19 @@
+package main.util
+
+import main.constraint.ConstraintVar
+import main.program.Program
+import main.solver.Solver
+
 import scala.collection.mutable
 
 object PrettyPrinter {
 
   def printSolution(solution: mutable.Set[ConstraintVar]): Unit = {
-//    solution.foreachEntry((k, v) => {
-//      println(k.string())
-//      v.foreach(t => println(t.string()))
-//    })
-
   solution.foreach(f => {
-    println(f.string())
-    f.solution.foreach(t => {print(t.string())})
+    println(f)
+    f.solution.foreach(t => {print(t)})
     println()
   })
-
-
-
   }
 
    def printProgram(program: Program): Unit = {
@@ -23,14 +21,15 @@ object PrettyPrinter {
   }
 
   def printConstraints(solver: Solver): Unit = {
+    val constraints = solver.getConstraints
     println("Token Constraints:")
-    solver.addrConstraints.foreach(f => println(f))
+    constraints.addrConstraints.foreach(f => println(f))
     println()
     println("Copy Constraints:")
-    solver.copyConstraints.foreach(f => println(f))
+    constraints.copyConstraints.foreach(f => println(f))
     println()
     println("Complex Constraints:")
-    solver.complexConstraints.foreach(f => println(f))
+    constraints.complexConstraints.foreach(f => println(f))
   }
 
 }
