@@ -5,8 +5,6 @@ import main.solver.HTSolver
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.collection.mutable.ArrayBuffer
-
 class HT extends AnyFunSuite {
 
 
@@ -36,20 +34,7 @@ class HT extends AnyFunSuite {
   }
 
   test("Demanded") {
-    /*
-      x1 = new t1
-      x2 = new t2
-      x3 = new t3
-      x1 = x2
-    */
-
-    val p: Program = Program(
-      ArrayBuffer[Instruction](
-        NewInsn(1, 1),
-        NewInsn(2, 2),
-        NewInsn(3, 3),
-        AssignInsn(1, 2)
-      ))
+    val p: Program = ProgramTemplates.demandedSimple
 
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)

@@ -16,7 +16,8 @@ object Util {
 
     val tokenIds: Seq[Int] = cvar.solution.map(f => f.id).toSeq
 
-    assert(expectedIds.size == tokenIds.size)
+    if (!(expectedIds.size == tokenIds.size))
+      return false
 
     for (t <- expectedIds) {
       result &= tokenIds.contains(t)
@@ -34,9 +35,5 @@ object Util {
     val exhaustiveTokenSequence = exhaustiveCvar.solution.map(t => t.id).toSeq
 
     assertTokenIds(demandedCvar, exhaustiveTokenSequence)
-  }
-
-  def assertSizeOfPointsToFacts(exhaustive: ConstraintVariables, demanded: ConstraintVariables): Boolean = {
-    ???
   }
 }

@@ -1,17 +1,20 @@
 package main.solver
 
 import main.constraint.*
+import main.program.BaseSolver
 
 import scala.collection.mutable
 
+/** A query is either for a base constraint variable (denoted by varId)
+ * or a field constraint variable (denoted by (tokenId, field)) */
+type QueryID = Int | (Int, String)
 
-class HTSolver {
+class HTSolver extends BaseSolver {
 
 
-  val Q: mutable.Set[ConstraintVar] = mutable.Set()
-  val W: mutable.Set[Token] = mutable.Set()
+  private val Q: mutable.Set[ConstraintVar] = mutable.Set()
+  private val W: mutable.Set[Token] = mutable.Set()
 
-  val DEBUG = false;
 
   private def addDemand(constraintVar: ConstraintVar): Boolean = {
     if (Q.add(constraintVar)) {
@@ -31,13 +34,7 @@ class HTSolver {
 
   }
 
-  private def debug(msg: String): Unit = {
-    if (DEBUG) then println(msg)
-  }
 
-  /** A query is either for a base constraint variable (denoted by varId)
-   * or a field constraint variable (denoted by (tokenId, field)) */
-  private type QueryID = Int | (Int, String)
 
   def solve(constraints: Constraints, queryId: QueryID): ConstraintVariables = {
 
@@ -134,14 +131,4 @@ class HTSolver {
     changed
   }
 
-
-  private def propagate(from: ConstraintVar, to: ConstraintVar): Boolean = {
-    var changed = false
-    val fromTokens = from.solution
-    fromTokens.foreach(t => {
-      changed |= to.addToken(t)
-    })
-    if changed then debug("Processing propagation from %s to %s".format(from, to))
-    changed
-  }
 }

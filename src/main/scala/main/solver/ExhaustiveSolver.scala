@@ -1,11 +1,11 @@
 package main.solver
 
 import main.constraint.*
+import main.program.BaseSolver
 
 import scala.collection.mutable
 
-class ExhaustiveSolver {
-  val DEBUG = false
+class ExhaustiveSolver extends BaseSolver {
 
   def solve(constraints: Constraints): ConstraintVariables = {
     constraints.addrConstraints.foreach(c => {
@@ -30,15 +30,6 @@ class ExhaustiveSolver {
     constraints.constraintVars
   }
 
-
-  private def propagate(from: ConstraintVar, to: ConstraintVar): Boolean = {
-    var changed = false
-    val fromTokens = from.solution
-    fromTokens.foreach(t => {
-      changed |= to.addToken(t)
-    })
-    changed
-  }
 
   private def solveComplex(constraint: ComplexConstraint, constraints: Constraints): Boolean = {
     var changed = false

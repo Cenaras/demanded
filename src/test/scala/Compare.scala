@@ -1,11 +1,19 @@
-import main.constraint.ConstraintGenerator
-import main.program.{ProgramDistribution, ProgramGenerator}
-import main.solver.{ExhaustiveSolver, HTSolver}
+import main.constraint.{ConstraintGenerator, ConstraintVariables}
+import main.program.*
+import main.solver.{ExhaustiveSolver, HTSolver, QueryID}
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 
 class Compare extends AnyFunSuite {
+
+  test("Demanded Simple") {
+    val queryId = 1
+    val p = ProgramTemplates.demandedSimple
+    val (e, d) = solveBoth(p, queryId)
+    assert(Util.assertSolutions(e, d, queryId))
+    assert(SolverUtil.solutionSize(d) < SolverUtil.solutionSize(e))
+  }
 
 
   test("Random program") {
@@ -26,17 +34,27 @@ class Compare extends AnyFunSuite {
       val program = generator.generate()
       val query = program.getRandomVar
 
-      val constraints = ConstraintGenerator.generate(program)
-
-      val exhaustive = ExhaustiveSolver()
-      val ht = new HTSolver()
-
-      val exhaustiveSolution = exhaustive.solve(constraints)
-      val demandedSolution = ht.solve(constraints, query)
+      val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
       if (!Util.assertSolutions(exhaustiveSolution, demandedSolution, query)) {
         throw Error("Solutions did not match for program\n%s".format(PrettyPrinter.printProgram(program)))
       }
+
+      val demandedSolutionSize = SolverUtil.solutionSize(demandedSolution)
+      val exhaustiveSolutionSize = SolverUtil.solutionSize(exhaustiveSolution)
+      assert(demandedSolutionSize <= exhaustiveSolutionSize)
     }
+  }
+
+  def solveBoth(p: Program, queryId: QueryID): (ConstraintVariables, ConstraintVariables) = {
+    val eConstraints = ConstraintGenerator.generate(p)
+    val dConstraints = ConstraintGenerator.generate(p)
+
+    val exhaustive = ExhaustiveSolver()
+    val ht = new HTSolver()
+
+    val exhaustiveSolution = exhaustive.solve(eConstraints)
+    val demandedSolution = ht.solve(dConstraints, queryId)
+    (exhaustiveSolution, demandedSolution)
   }
 
   def newGenerator(varNumber: Int, tokenNum: Int, size: Int, dist: ProgramDistribution): ProgramGenerator = {

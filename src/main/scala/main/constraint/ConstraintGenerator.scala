@@ -8,7 +8,9 @@ import scala.collection.mutable
 
 object ConstraintGenerator {
 
-
+  // TODO: Do we really want the constraints to store the solutions? That makes it such that we can't reuse constraints
+  //  but rather, each solver instance must have its own set of constraints. 
+  //  Probably rewrite this, so the same set of constraints can be given to two different solvers.
   def generate(program: Program): Constraints = {
 
     val addrConstraints: mutable.Set[AddrConstraint] = mutable.Set()

@@ -6,12 +6,12 @@ object ProgramTemplates {
 
   /**
    *
-   x1 = new t1
-   x2 = new t2
-   x1 = x2
-   x3 = new t2
-   x1.f = x3
-   x4 = x1.f
+   * x1 = new t1
+   * x2 = new t2
+   * x1 = x2
+   * x3 = new t2
+   * x1.f = x3
+   * x4 = x1.f
    */
   def LoadStore: Program = {
     Program(
@@ -51,6 +51,22 @@ object ProgramTemplates {
         NewInsn(4, 3),
         StoreInsn(3, "f", 4),
         LoadInsn(5, 1, "f")
+      ))
+  }
+
+  /**
+   * x1 = new t1
+   * x2 = new t2
+   * x3 = new t3
+   * x1 = x2
+   */
+  def demandedSimple: Program = {
+    Program(
+      ArrayBuffer[Instruction](
+        NewInsn(1, 1),
+        NewInsn(2, 2),
+        NewInsn(3, 3),
+        AssignInsn(1, 2)
       ))
   }
 
