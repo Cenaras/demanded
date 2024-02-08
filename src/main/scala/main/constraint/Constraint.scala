@@ -7,25 +7,18 @@ import scala.collection.mutable
 type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint
 
 class Constraints(
-                   var addrConstraints: mutable.Set[AddrConstraint], 
-                   var copyConstraints: mutable.Set[CopyConstraint], 
+                   var addrConstraints: mutable.Set[AddrConstraint],
+                   var copyConstraints: mutable.Set[CopyConstraint],
                    var complexConstraints: mutable.Set[ComplexConstraint],
                    var id2Cvar: mutable.Map[Int, ConstraintVar],
                    var id2Token: mutable.Map[Int, Token],
-                   var token2Cvar: mutable.Map[Token, ConstraintVar],
+                   var tf2Cvar: mutable.Map[(Token, String), ConstraintVar],
                    var constraintVars: ConstraintVariables) {
- 
+
   def this() = {
     this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
   }
-  
-  
-  def addCopy(to: ConstraintVar, from: ConstraintVar): Boolean = {
-    copyConstraints.add(CopyConstraint(to, from))
-  }
-
 }
-
 
 
 trait Constraint {}
@@ -88,28 +81,38 @@ trait ConstraintVar {
 
 }
 
-class BaseConstraintVar(id: Int) extends ConstraintVar {
+case class BaseConstraintVar(id: Int) extends ConstraintVar {
 
   override def getId: Int = id;
   override val base: Boolean = true
 
   override def toString: String = {
-    "⟦x%d⟧:".format(id)
+    "⟦x%d⟧".format(id)
   }
 }
 
-class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
+case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
 
   override val base: Boolean = false
 
   override def toString: String = {
-    "⟦t%d.%s⟧:".format(token.id, field)
+    "⟦t%d.%s⟧".format(token.id, field)
   }
 }
 
 
-class Token(val id: Int) {
+case class Token(val id: Int) {
   override def toString: String = "t%d".format(id)
+
+  override def equals(obj: Any): Boolean = {
+    obj match
+      case Token(id) => true
+      case _ => false
+  }
+
+
+  override def hashCode(): Int = id.hashCode()
+
 }

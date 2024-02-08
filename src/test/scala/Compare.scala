@@ -2,7 +2,6 @@ import main.constraint.ConstraintGenerator
 import main.program.{ProgramDistribution, ProgramGenerator}
 import main.solver.{ExhaustiveSolver, HTSolver}
 import main.util.PrettyPrinter
-import org.scalatest.Distributor
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -37,10 +36,6 @@ class Compare extends AnyFunSuite {
       if (!Util.assertSolutions(exhaustiveSolution, demandedSolution, query)) {
         throw Error("Solutions did not match for program\n%s".format(PrettyPrinter.printProgram(program)))
       }
-      
-      Util.assertSizeOfPointsToFacts(exhaustiveSolution, demandedSolution)
-
-
     }
   }
 

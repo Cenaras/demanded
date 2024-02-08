@@ -1,6 +1,6 @@
 package main.constraint
 
-import main.program.{AssignInsn, LoadInsn, NewInsn, Program, StoreInsn}
+import main.program.*
 
 type ConstraintVariables = mutable.Set[ConstraintVar]
 
@@ -17,7 +17,7 @@ object ConstraintGenerator {
 
     val id2Cvar: mutable.Map[Int, ConstraintVar] = mutable.Map()
     val id2Token: mutable.Map[Int, Token] = mutable.Map()
-    val token2Cvar: mutable.Map[Token, ConstraintVar] = mutable.Map()
+    val token2Cvar: mutable.Map[(Token, String), ConstraintVar] = mutable.Map()
 
     val constraintVars: ConstraintVariables = mutable.Set()
 
@@ -52,21 +52,21 @@ object ConstraintGenerator {
     id2Cvar.get(varId) match
       case Some(value) => value
       case None =>
-        val cvar = new BaseConstraintVar(varId)
+        val cvar = BaseConstraintVar(varId)
         id2Cvar += varId ->cvar
         constraintVars.add(cvar)
         cvar
   }
 
-  private def getOrSetToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[Token, ConstraintVar], constraintVars: ConstraintVariables): Token = {
+  private def getOrSetToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
     id2Token.get(tokenId) match
       case Some(value) => value
       case None =>
-        val token = new Token(tokenId)
+        val token = Token(tokenId)
         id2Token += tokenId -> token
         // TODO: Don't hardcode + token + field maps to cvar
         val tokenCvar = FieldConstraintVar(token, "f")
-        token2Cvar += token -> tokenCvar
+        token2Cvar += (token, "f") -> tokenCvar
         constraintVars.add(tokenCvar)
         token
   }

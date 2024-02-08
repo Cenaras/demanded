@@ -29,16 +29,4 @@ object PrettyPrinter {
     pretty
   }
 
-  //  def printConstraints(solver: Solver): Unit = {
-  //    val constraints = solver.getConstraints
-  //    println("Token Constraints:")
-  //    constraints.addrConstraints.foreach(f => println(f))
-  //    println()
-  //    println("Copy Constraints:")
-  //    constraints.copyConstraints.foreach(f => println(f))
-  //    println()
-  //    println("Complex Constraints:")
-  //    constraints.complexConstraints.foreach(f => println(f))
-  //  }
-
 }

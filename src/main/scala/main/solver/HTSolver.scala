@@ -1,19 +1,17 @@
 package main.solver
 
-import main.constraint.{AddrConstraint, BaseConstraintVar, ComplexConstraint, ConstraintVar, ConstraintVariables, Constraints, CopyConstraint, FieldConstraintVar, ForallLoadConstraint, ForallStoreConstraint, Token}
-import main.program.{AssignInsn, LoadInsn, NewInsn, Program, StoreInsn}
+import main.constraint.*
 
 import scala.collection.mutable
 
-// TODO: Right now this is basically a copy of the original solver. Abstract things away, remove code duplication!
-//  Also, the solve signature is different here, so maybe it doesnt make much sense to have an abstraction of solvers
+
 class HTSolver {
 
 
   val Q: mutable.Set[ConstraintVar] = mutable.Set()
   val W: mutable.Set[Token] = mutable.Set()
 
-  private val DEBUG = false;
+  val DEBUG = false;
 
   private def addDemand(constraintVar: ConstraintVar): Boolean = {
     if (Q.add(constraintVar)) {
@@ -37,11 +35,17 @@ class HTSolver {
     if (DEBUG) then println(msg)
   }
 
+  /** A query is either for a base constraint variable (denoted by varId)
+   * or a field constraint variable (denoted by (tokenId, field)) */
+  private type QueryID = Int | (Int, String)
 
-  // TODO: We can only query base constraint variables like this, we need to be able to query tokens as well.
-  //  Hot fix is just a boolean flag. If we expand on this project, it might need a major refactoring
-  def solve(constraints: Constraints, queryId: Int): ConstraintVariables = {
-    constraints.id2Cvar.get(queryId) match
+  def solve(constraints: Constraints, queryId: QueryID): ConstraintVariables = {
+
+    val queriedCvar = queryId match
+      case (t, f) => constraints.tf2Cvar.get((constraints.id2Token(t), f))
+      case x: Int => constraints.id2Cvar.get(x)
+
+    queriedCvar match
       case None => throw Error("Queried variable does not exist")
       case Some(v) => addDemand(v)
     var changed = true;
@@ -72,7 +76,7 @@ class HTSolver {
           changed |= propagate(c.from, c.to)
         }
         val tracked = c.from.solution.intersect(W)
-        c.to.addTokens(tracked) // TODO: Copy constraint?
+        c.to.addTokens(tracked)
       })
 
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
@@ -92,31 +96,36 @@ class HTSolver {
           })
 
           base.solution.foreach(t => {
-            val tf = constraints.token2Cvar(t)
+            val tf = constraints.tf2Cvar((t, field))
             changed |= addDemand(tf)
-            changed |= constraints.addCopy(dst, tf)
+            // NOTE: By adding a copy constraint we also treat adding tf to demanded if dst was, so for now try with this.
+            changed |= dst.addTokens(tf.solution)
           })
         }
         base.solution.foreach(t => {
           val token = constraints.id2Token(t.id)
-          val cvar = constraints.token2Cvar(token)
+          val cvar = constraints.tf2Cvar((token, field))
           val tracked = cvar.solution.intersect(W)
-          changed |= dst.addTokens(tracked) // TODO: This is actually a subset constraint from t.f to W
+          changed |= dst.addTokens(tracked)
         })
 
       case ForallStoreConstraint(base, field, src) =>
         base.solution.foreach(t => {
-          val tf = constraints.token2Cvar(t)
+          val tf = constraints.tf2Cvar((t, field))
           if (Q.contains(tf)) {
             changed |= addDemand(src)
-            changed |= constraints.addCopy(tf, src)
-            changed |= tf.addTokens(src.solution.intersect(W)) // TODO: This is a subset constraint
+            // NOTE: Same applies here
+            changed |= tf.addTokens(src.solution)
+            changed |= tf.addTokens(src.solution.intersect(W))
+
+            // TODO: Is this actually needed?
             tf.solution.foreach(t => {
               changed |= addTracking(t)
             })
           }
         })
 
+        // TODO: Is this actually needed?
         if (src.solution.intersect(W).nonEmpty) {
           changed |= addDemand(base)
         }

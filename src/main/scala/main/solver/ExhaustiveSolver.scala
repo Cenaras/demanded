@@ -1,10 +1,11 @@
 package main.solver
 
-import main.constraint.{ConstraintVariables, *}
+import main.constraint.*
 
 import scala.collection.mutable
 
 class ExhaustiveSolver {
+  val DEBUG = false
 
   def solve(constraints: Constraints): ConstraintVariables = {
     constraints.addrConstraints.foreach(c => {
@@ -43,12 +44,12 @@ class ExhaustiveSolver {
     var changed = false
     constraint match
       case ForallLoadConstraint(dst, base, field) => base.solution.foreach(t => {
-        val cvar = constraints.token2Cvar(t) // TODO: t.f
-        changed |= constraints.addCopy(dst, cvar)
+        val cvar = constraints.tf2Cvar((t, field))
+        changed |= dst.addTokens(cvar.solution)
       })
       case ForallStoreConstraint(base, field, src) => base.solution.foreach(t => {
-        val cvar = constraints.token2Cvar(t) // TODO: t.f
-        changed |= constraints.addCopy(cvar, src)
+        val cvar = constraints.tf2Cvar((t, field))
+        changed |= cvar.addTokens(src.solution)
       })
     changed
   }

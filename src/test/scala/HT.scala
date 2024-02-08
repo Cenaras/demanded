@@ -1,7 +1,8 @@
 import Util.{assertTokenIds, getCvar}
 import main.constraint.ConstraintGenerator
-import main.program.{AssignInsn, Instruction, LoadInsn, NewInsn, Program, ProgramTemplates, StoreInsn}
+import main.program.*
 import main.solver.HTSolver
+import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ArrayBuffer
@@ -22,15 +23,14 @@ class HT extends AnyFunSuite {
 
 
   test("Aliasing") {
-
-
-
-    val p: Program = ProgramTemplates.Aliasing 
+    val p: Program = ProgramTemplates.Aliasing
 
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 5);
     assertTokenIds(getCvar(solution, 5, true), Seq(2, 3))
+
+    println(PrettyPrinter.printSolution(solution))
 
 
   }
