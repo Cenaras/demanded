@@ -1,13 +1,12 @@
 package main.solver
 
 import main.constraint.{ConstraintVariables, *}
-import main.program.*
 
 import scala.collection.mutable
 
 class ExhaustiveSolver {
 
-   def solve(constraints: Constraints): ConstraintVariables = {
+  def solve(constraints: Constraints): ConstraintVariables = {
     constraints.addrConstraints.foreach(c => {
       c.to.addToken(c.token)
     })
@@ -31,7 +30,6 @@ class ExhaustiveSolver {
   }
 
 
-
   private def propagate(from: ConstraintVar, to: ConstraintVar): Boolean = {
     var changed = false
     val fromTokens = from.solution
@@ -46,11 +44,11 @@ class ExhaustiveSolver {
     constraint match
       case ForallLoadConstraint(dst, base, field) => base.solution.foreach(t => {
         val cvar = constraints.token2Cvar(t) // TODO: t.f
-        changed |= constraints.copyConstraints.add(CopyConstraint(dst, cvar))
+        changed |= constraints.addCopy(dst, cvar)
       })
       case ForallStoreConstraint(base, field, src) => base.solution.foreach(t => {
         val cvar = constraints.token2Cvar(t) // TODO: t.f
-        changed |= constraints.copyConstraints.add(CopyConstraint(cvar, src))
+        changed |= constraints.addCopy(cvar, src)
       })
     changed
   }

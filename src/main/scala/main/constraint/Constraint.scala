@@ -18,6 +18,11 @@ class Constraints(
   def this() = {
     this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
   }
+  
+  
+  def addCopy(to: ConstraintVar, from: ConstraintVar): Boolean = {
+    copyConstraints.add(CopyConstraint(to, from))
+  }
 
 }
 

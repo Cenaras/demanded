@@ -10,7 +10,6 @@ import scala.collection.mutable
 class HTSolver {
 
 
-
   val Q: mutable.Set[ConstraintVar] = mutable.Set()
   val W: mutable.Set[Token] = mutable.Set()
 
@@ -95,7 +94,7 @@ class HTSolver {
           base.solution.foreach(t => {
             val tf = constraints.token2Cvar(t)
             changed |= addDemand(tf)
-            changed |= addCopy(dst, tf, constraints)
+            changed |= constraints.addCopy(dst, tf)
           })
         }
         base.solution.foreach(t => {
@@ -110,7 +109,7 @@ class HTSolver {
           val tf = constraints.token2Cvar(t)
           if (Q.contains(tf)) {
             changed |= addDemand(src)
-            changed |= addCopy(tf, src, constraints)
+            changed |= constraints.addCopy(tf, src)
             changed |= tf.addTokens(src.solution.intersect(W)) // TODO: This is a subset constraint
             tf.solution.foreach(t => {
               changed |= addTracking(t)
@@ -135,13 +134,5 @@ class HTSolver {
     })
     if changed then debug("Processing propagation from %s to %s".format(from, to))
     changed
-  }
-
-  private def addCopy(to: ConstraintVar, from: ConstraintVar, constraints: Constraints): Boolean = {
-    if (constraints.copyConstraints.add(CopyConstraint(to, from))) {
-      debug("Added copy constraint from %s to %s".format(from, to))
-      return true
-    }
-    false
   }
 }
