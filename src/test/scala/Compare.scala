@@ -17,16 +17,31 @@ class Compare extends AnyFunSuite {
 
 
   test("Transitive Token Tracking") {
-
     val queryId = 3
     val p = ProgramTemplates.TransitiveTokenTracking
     val (e, d) = solveBoth(p, queryId)
     assert(Util.assertSolutions(e, d, queryId))
   }
 
+  test("XXX") {
+    val queryId = 4
+    val p = ProgramTemplates.XXX
+    val (e, d) = solveBoth(p, queryId)
+
+    println(PrettyPrinter.printSolution(d))
+    println(PrettyPrinter.printSolution(e))
+
+    assert(Util.assertSolutions(e, d, queryId))
+  }
+
 
   test("Small programs") {
     repeatTest(10000, newGenerator(5, 2, 15, (20, 50, 20, 10)))
+  }
+
+
+  test("Medium programs") {
+    repeatTest(10000, newGenerator(10, 3, 25, (20, 50, 20, 10)))
   }
 
   test("Random program") {

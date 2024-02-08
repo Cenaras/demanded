@@ -72,7 +72,7 @@ object ProgramTemplates {
 
   /**
    * This program previously gave us problems. Since we are reading from x3.f, we must track all tokens from x3, which
-   * in this example initially will be t1. Then we must propagate t1 over to x4 and then from there to x2, such that 
+   * in this example initially will be t1. Then we must propagate t1 over to x4 and then from there to x2, such that
    * x2.f will actually perform the write (placing x1 in demand, then x2, then x0 which leads us to the t0 token)
    * This was implemented wrongly previously which caused an issue.
    *
@@ -85,7 +85,7 @@ object ProgramTemplates {
    *
    * x2.f = x1       t0.f and t1.f hold t0 and t1
    *
-   * x3 = x4         x3 holds t1       
+   * x3 = x4         x3 holds t1
    * x4 = x3.f       x4 holds t0, t1  which means x3 holds both due to above
    *
    */
@@ -103,4 +103,53 @@ object ProgramTemplates {
       )
     )
   }
+
+
+  /* Troublesome program for query 4 - program ordering might not be same in comment as program
+  x4 = new t1
+  x5 = new t2
+
+  x4 = x3
+  x3 = x4.f
+
+  x5.f = x4
+  x1.f = x5
+  x1 = x5.f
+  */
+
+  /* DEMANDED:
+    x4
+    x3
+    t1.f
+    x5
+
+  TRACKED:
+    t1
+
+  */
+  /*
+  We initially place t1 in x4 and add x3 to demand
+  Since x3 is in demand, we process x3 = x4.f, which places t1.f in demand, tracks t1
+  Since t1 is tracked and is in x4, we demand x5 (by x5.f = x4)
+  Now that x5 is demanded, it has t2 in its solution
+
+
+   */
+
+
+  def XXX: Program = {
+    Program(
+      ArrayBuffer[Instruction](
+        NewInsn(4, 1),
+        NewInsn(5, 2),
+        AssignInsn(4, 3),
+        StoreInsn(5, "f", 4),
+        StoreInsn(1, "f", 5),
+        LoadInsn(3, 4, "f"),
+        LoadInsn(1, 5, "f"),
+      )
+    )
+  }
+
+
 }

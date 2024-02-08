@@ -54,9 +54,16 @@ class HT extends AnyFunSuite {
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 3)
-
-
+    assertTokenIds(getCvar(solution, 3, true), Seq(1, 2))
   }
 
+  test("XXX") {
 
+    val p: Program = ProgramTemplates.XXX
+
+    val solver = HTSolver();
+    val constraints = ConstraintGenerator.generate(p)
+    val solution = solver.solve(constraints, 4)
+    println(PrettyPrinter.printSolution(solution))
+  }
 }
