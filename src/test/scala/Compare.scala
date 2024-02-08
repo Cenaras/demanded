@@ -16,6 +16,19 @@ class Compare extends AnyFunSuite {
   }
 
 
+  test("Transitive Token Tracking") {
+
+    val queryId = 3
+    val p = ProgramTemplates.TransitiveTokenTracking
+    val (e, d) = solveBoth(p, queryId)
+    assert(Util.assertSolutions(e, d, queryId))
+  }
+
+
+  test("Small programs") {
+    repeatTest(10000, newGenerator(5, 2, 15, (20, 50, 20, 10)))
+  }
+
   test("Random program") {
     repeatTest(100, newGenerator(100, 30, 200, (20, 50, 20, 10)))
   }
@@ -36,7 +49,7 @@ class Compare extends AnyFunSuite {
 
       val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
       if (!Util.assertSolutions(exhaustiveSolution, demandedSolution, query)) {
-        throw Error("Solutions did not match for program\n%s".format(PrettyPrinter.printProgram(program)))
+        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.printProgram(program)))
       }
 
       val demandedSolutionSize = SolverUtil.solutionSize(demandedSolution)

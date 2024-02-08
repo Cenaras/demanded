@@ -73,7 +73,7 @@ class HTSolver extends BaseSolver {
           changed |= propagate(c.from, c.to)
         }
         val tracked = c.from.solution.intersect(W)
-        c.to.addTokens(tracked)
+        changed |= c.to.addTokens(tracked)
       })
 
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))

@@ -47,4 +47,16 @@ class HT extends AnyFunSuite {
   }
 
 
+  test("Transitive Token Tracking") {
+
+    val p: Program = ProgramTemplates.TransitiveTokenTracking
+
+    val solver = HTSolver();
+    val constraints = ConstraintGenerator.generate(p)
+    val solution = solver.solve(constraints, 3)
+
+
+  }
+
+
 }
