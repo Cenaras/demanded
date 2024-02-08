@@ -14,16 +14,16 @@ object Main {
     val generator: ProgramGenerator = new ProgramGenerator(varNumber, tokenNum, programSize);
     val program = generator.generate()
 
-    println("Generated Program:")
-    PrettyPrinter.printProgram(program)
-
-
-    val solver = new ExhaustiveSolver(program)
-    solver.generateConstraints()
-    
-    PrettyPrinter.printConstraints(solver)
-    val solution = solver.solve()
-    PrettyPrinter.printSolution(solution)
+//    println("Generated Program:")
+//    PrettyPrinter.printProgram(program)
+//
+//
+//    val solver = new ExhaustiveSolver(program)
+//    solver.generateConstraints()
+//    
+//    PrettyPrinter.printConstraints(solver)
+//    val solution = solver.solve()
+//    PrettyPrinter.printSolution(solution)
   }
 
 }

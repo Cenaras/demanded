@@ -11,12 +11,14 @@ type ConstraintVariables = mutable.Set[ConstraintVar]
 //  Generate takes a program and produces a set of constraints from that program. 
 //  Then we call solve(generateConstraints(program))
 
+// TODO: We could let Constraints carry the id2Cvar maps as well
+
 trait Solver(val program: Program) {
 
-  def solve(): ConstraintVariables
+  def solve(constraints: Constraints): ConstraintVariables
+
+  def generateConstraints(): Constraints 
   
-  def generateConstraints(): Unit
-  
-  def getConstraints: Constraints
+//  def getConstraints: Constraints
   
 }

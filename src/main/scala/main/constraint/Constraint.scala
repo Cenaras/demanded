@@ -6,15 +6,17 @@ import scala.collection.mutable
 type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint
 
 class Constraints(var addrConstraints: mutable.Set[AddrConstraint], var copyConstraints: mutable.Set[CopyConstraint], var complexConstraints: mutable.Set[ComplexConstraint]) {}
+
 trait Constraint {}
 
-case class AddrConstraint(to: ConstraintVar, token: Token) extends Constraint{
+case class AddrConstraint(to: ConstraintVar, token: Token) extends Constraint {
   override def equals(obj: Any): Boolean = obj match
     case AddrConstraint(to, token) => true
     case _ => false
 
   override def hashCode(): Int = (to, token).hashCode()
 }
+
 case class CopyConstraint(to: ConstraintVar, from: ConstraintVar) extends Constraint {
   override def equals(obj: Any): Boolean = obj match
     case CopyConstraint(to, from) => true
@@ -23,6 +25,7 @@ case class CopyConstraint(to: ConstraintVar, from: ConstraintVar) extends Constr
   override def hashCode(): Int = (to, from).hashCode()
 
 }
+
 case class ForallLoadConstraint(dst: ConstraintVar, base: ConstraintVar, field: String) extends Constraint {
   override def equals(obj: Any): Boolean = obj match
     case ForallLoadConstraint(dst, base, field) => true
@@ -44,12 +47,24 @@ case class ForallStoreConstraint(base: ConstraintVar, field: String, src: Constr
  */
 trait ConstraintVar {
   override def toString: String
+
   def getId: Int
+
   val solution: mutable.Set[Token] = mutable.Set()
   val base: Boolean // TODO: Nicer solution - case class?
+
   def addToken(token: Token): Boolean = {
     solution.add(token)
   }
+
+  def addTokens(tokens: mutable.Set[Token]): Boolean = {
+    var added = false
+    tokens.foreach(t => {
+      added |= addToken(t)
+    })
+    added
+  }
+
 }
 
 class BaseConstraintVar(id: Int) extends ConstraintVar {
@@ -65,10 +80,12 @@ class BaseConstraintVar(id: Int) extends ConstraintVar {
 class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
+
   override val base: Boolean = false
 
   override def toString: String = {
-    "⟦t%d.%s⟧:".format(token.id, field)  }
+    "⟦t%d.%s⟧:".format(token.id, field)
+  }
 }
 
 

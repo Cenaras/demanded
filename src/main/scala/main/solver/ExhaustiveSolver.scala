@@ -17,12 +17,10 @@ class ExhaustiveSolver(program: Program) extends Solver(program: Program) {
   private var token2Cvar: Map[Token, ConstraintVar] = Map()
 
 
-  // TODO: Clean up
-  private val constraints: Constraints = Constraints(mutable.Set(), mutable.Set(), mutable.Set())
   private val constraintVars: ConstraintVariables = mutable.Set()
 
 
-  override def solve(): ConstraintVariables = {
+  override def solve(constraints: Constraints): ConstraintVariables = {
     constraints.addrConstraints.foreach(c => {
       c.to.addToken(c.token)
     })
@@ -39,16 +37,17 @@ class ExhaustiveSolver(program: Program) extends Solver(program: Program) {
 
       // Process complex constraints, adding new copy constraints
       constraints.complexConstraints.foreach(c => {
-        changed |= solveComplex(c)
+        changed |= solveComplex(c, constraints)
       })
     }
     constraintVars
   }
 
 
-  override def generateConstraints(): Unit = {
+  override def generateConstraints(): Constraints = {
+    val constraints = Constraints(mutable.Set(), mutable.Set(), mutable.Set())
     // Iterate all instructions in the program and generate constraints for them
-    program.foreach {
+    program.getInstructions.foreach {
       case NewInsn(varId, tokenId) =>
         val cvar = getOrSetCvar(varId)
         val token = getOrSetToken(tokenId)
@@ -66,10 +65,9 @@ class ExhaustiveSolver(program: Program) extends Solver(program: Program) {
         val src = getOrSetCvar(srcId)
         constraints.complexConstraints += ForallStoreConstraint(base, field, src)
     }
+    constraints
+    
   }
-
-  override def getConstraints: Constraints = constraints 
-
 
   private def getOrSetCvar(varId: Int): ConstraintVar = {
     id2Cvar.get(varId) match
@@ -103,7 +101,7 @@ class ExhaustiveSolver(program: Program) extends Solver(program: Program) {
     changed
   }
 
-  private def solveComplex(constraint: ComplexConstraint): Boolean = {
+  private def solveComplex(constraint: ComplexConstraint, constraints: Constraints): Boolean = {
     var changed = false
     constraint match
       case ForallLoadConstraint(dst, base, field) => base.solution.foreach(t => {

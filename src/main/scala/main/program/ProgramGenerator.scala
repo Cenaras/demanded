@@ -3,11 +3,10 @@ package main.program
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-type Program = ArrayBuffer[Instruction];
-
 /**
  * Generates random programs. Seeded with number of variables and number of instructions in the program.
- * @param varNumber number of variables.
+ *
+ * @param varNumber  number of variables.
  * @param insnNumber number of instructions.
  */
 class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: Int) {
@@ -19,11 +18,11 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   def generate(): Program = {
     println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
 
-    val program: Program = ArrayBuffer();
+    val program: Program = Program() 
 
     for (i <- 0 until insnNumber) {
       val number = rng.between(0, 100)
-      program += genInsn(number)
+      program.addInstruction(genInsn(number))
     }
     program
   }
@@ -31,23 +30,23 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   private def genInsn(seed: Int): Instruction = {
     seed match {
       case x if x <= opProp._1 =>
-        val varId = randomVar(None)
-        val tokenId = randomToken()
+        val varId = generateRandomVar(None)
+        val tokenId = generateRandomToken()
         NewInsn(varId, tokenId)
       case x if x <= opProp._1 + opProp._2 =>
-        val leftId = randomVar(None)
-        val rightId = randomVar(Some(leftId))
+        val leftId = generateRandomVar(None)
+        val rightId = generateRandomVar(Some(leftId))
         AssignInsn(leftId, rightId)
 
       case x if x <= opProp._1 + opProp._2 + opProp._3 =>
-        val leftId = randomVar(None)
-        val rightId = randomVar(Some(leftId))
+        val leftId = generateRandomVar(None)
+        val rightId = generateRandomVar(Some(leftId))
         val field = "f"
         LoadInsn(leftId, rightId, field)
       case _ =>
-        val leftId = randomVar(None)
+        val leftId = generateRandomVar(None)
         val field = "f"
-        val rightId = randomVar(Some(leftId))
+        val rightId = generateRandomVar(Some(leftId))
         StoreInsn(leftId, field, rightId)
     }
   }
@@ -55,11 +54,12 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
 
   /**
    * Generates a random variable. If exclude is defined, the variable is guaranteed to be different from exclude
+   *
    * @param exclude if specified, generated variable is guaranteed different from this.
    * @return random variable
    */
-  private def randomVar(exclude: Option[VarId]): Int = {
-   var res = exclude match
+  private def generateRandomVar(exclude: Option[VarId]): Int = {
+    var res = exclude match
       case None => rng.between(0, varNumber)
       case Some(ex) =>
         var random = -1
@@ -68,12 +68,14 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
           random == ex
         do ()
         random
-   res
+    res
   }
 
-  private def randomToken(): Int = {
+  private def generateRandomToken(): Int = {
     rng.between(0, tokenNum)
   }
+
+
 
 
 }
