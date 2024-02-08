@@ -2,7 +2,6 @@ package main.util
 
 import main.constraint.ConstraintVar
 import main.program.Program
-import main.solver.Solver
 
 import scala.collection.mutable
 

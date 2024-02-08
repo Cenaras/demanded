@@ -1,4 +1,5 @@
 import Util.{assertTokenIds, getCvar}
+import main.constraint.ConstraintGenerator
 import main.program.{AssignInsn, Instruction, LoadInsn, NewInsn, Program, ProgramTemplates, StoreInsn}
 import main.solver.HTSolver
 import org.scalatest.funsuite.AnyFunSuite
@@ -11,8 +12,8 @@ class HT extends AnyFunSuite {
   test("LoadStore") {
     val p: Program = ProgramTemplates.LoadStore
 
-    val solver = HTSolver(p);
-    val constraints = solver.generateConstraints()
+    val solver = HTSolver();
+    val constraints = ConstraintGenerator.generate(p) 
     val solution = solver.solve(constraints, 1)
 
     val x1 = getCvar(solution, 1, true)
@@ -26,8 +27,8 @@ class HT extends AnyFunSuite {
 
     val p: Program = ProgramTemplates.Aliasing 
 
-    val solver = HTSolver(p);
-    val constraints = solver.generateConstraints()
+    val solver = HTSolver();
+    val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 5);
     assertTokenIds(getCvar(solution, 5, true), Seq(2, 3))
 
@@ -50,8 +51,8 @@ class HT extends AnyFunSuite {
         AssignInsn(1, 2)
       ))
 
-    val solver = HTSolver(p);
-    val constraints = solver.generateConstraints()
+    val solver = HTSolver();
+    val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 1)
 
     // x1 holds t1 and t2 by demanded. x3 should be empty as it is not required to compute x1

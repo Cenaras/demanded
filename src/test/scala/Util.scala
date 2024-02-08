@@ -1,5 +1,4 @@
-import main.constraint.ConstraintVar
-import main.solver.ConstraintVariables
+import main.constraint.{ConstraintVar, ConstraintVariables}
 
 object Util {
   def getCvar(solution: ConstraintVariables, id: Int, base: Boolean): ConstraintVar = {

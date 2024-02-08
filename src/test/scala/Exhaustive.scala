@@ -1,6 +1,7 @@
 import Util.{assertTokenIds, getCvar}
+import main.constraint.{ConstraintGenerator, ConstraintVariables}
 import main.program.{AssignInsn, Instruction, LoadInsn, NewInsn, Program, ProgramTemplates, StoreInsn}
-import main.solver.{ConstraintVariables, ExhaustiveSolver}
+import main.solver.ExhaustiveSolver
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -11,8 +12,8 @@ class Exhaustive extends AnyFunSuite {
 
     val p: Program = ProgramTemplates.LoadStore
 
-    val solver = ExhaustiveSolver(p);
-    val constraints = solver.generateConstraints()
+    val solver = ExhaustiveSolver();
+    val constraints = ConstraintGenerator.generate(p) 
     val solution = solver.solve(constraints);
 
 
@@ -33,8 +34,8 @@ class Exhaustive extends AnyFunSuite {
 
     val p: Program = ProgramTemplates.Aliasing
 
-    val solver = ExhaustiveSolver(p);
-    val constraints = solver.generateConstraints()
+    val solver = ExhaustiveSolver();
+    val constraints = ConstraintGenerator.generate(p) 
     val solution = solver.solve(constraints);
 
 

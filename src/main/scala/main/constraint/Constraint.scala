@@ -1,11 +1,27 @@
 package main.constraint
 
+
 import scala.collection.mutable
 
 
 type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint
 
-class Constraints(var addrConstraints: mutable.Set[AddrConstraint], var copyConstraints: mutable.Set[CopyConstraint], var complexConstraints: mutable.Set[ComplexConstraint]) {}
+class Constraints(
+                   var addrConstraints: mutable.Set[AddrConstraint], 
+                   var copyConstraints: mutable.Set[CopyConstraint], 
+                   var complexConstraints: mutable.Set[ComplexConstraint],
+                   var id2Cvar: mutable.Map[Int, ConstraintVar],
+                   var id2Token: mutable.Map[Int, Token],
+                   var token2Cvar: mutable.Map[Token, ConstraintVar],
+                   var constraintVars: ConstraintVariables) {
+ 
+  def this() = {
+    this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
+  }
+
+}
+
+
 
 trait Constraint {}
 
