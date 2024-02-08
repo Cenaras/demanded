@@ -1,22 +1,23 @@
 package main.program
 
-import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+
+type ProgramDistribution = (Int, Int, Int, Int)
 
 /**
  * Generates random programs. Seeded with number of variables and number of instructions in the program.
  *
  * @param varNumber  number of variables.
+ * @param tokenNum number of tokens
  * @param insnNumber number of instructions.
+ * @param dist distribution of (new, assign, load, store) instructions respectively
  */
-class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: Int) {
+class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: Int, dist: ProgramDistribution) {
 
-  // Probability of new, assign, load, store respectively
-  private val opProp = (20, 50, 20, 10)
   private val rng = new Random();
 
   def generate(): Program = {
-    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
+//    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
 
     val program: Program = Program() 
 
@@ -29,16 +30,16 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
 
   private def genInsn(seed: Int): Instruction = {
     seed match {
-      case x if x <= opProp._1 =>
+      case x if x <= dist._1 =>
         val varId = generateRandomVar(None)
         val tokenId = generateRandomToken()
         NewInsn(varId, tokenId)
-      case x if x <= opProp._1 + opProp._2 =>
+      case x if x <= dist._1 + dist._2 =>
         val leftId = generateRandomVar(None)
         val rightId = generateRandomVar(Some(leftId))
         AssignInsn(leftId, rightId)
 
-      case x if x <= opProp._1 + opProp._2 + opProp._3 =>
+      case x if x <= dist._1 + dist._2 + dist._3 =>
         val leftId = generateRandomVar(None)
         val rightId = generateRandomVar(Some(leftId))
         val field = "f"
@@ -59,7 +60,7 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
    * @return random variable
    */
   private def generateRandomVar(exclude: Option[VarId]): Int = {
-    var res = exclude match
+    val res = exclude match
       case None => rng.between(0, varNumber)
       case Some(ex) =>
         var random = -1

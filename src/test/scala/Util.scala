@@ -7,7 +7,8 @@ object Util {
 
   /**
    * Asserts that the solution to a constraint variable is exactly the sequence of tokens provided.
-   * @param cvar constraint variable to test
+   *
+   * @param cvar        constraint variable to test
    * @param expectedIds sequence of tokens expected in the solution of the constraint variable
    */
   def assertTokenIds(cvar: ConstraintVar, expectedIds: Seq[Int]): Boolean = {
@@ -33,7 +34,9 @@ object Util {
     val exhaustiveTokenSequence = exhaustiveCvar.solution.map(t => t.id).toSeq
 
     assertTokenIds(demandedCvar, exhaustiveTokenSequence)
-
   }
 
+  def assertSizeOfPointsToFacts(exhaustive: ConstraintVariables, demanded: ConstraintVariables): Boolean = {
+    ???
+  }
 }
