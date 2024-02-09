@@ -4,22 +4,47 @@ import scala.util.Random
 
 type ProgramDistribution = (Int, Int, Int, Int)
 
+// TODO: Write a small naive parser that can translate statements into programs so the test output can be fed into produce programs
+
+object Parser {
+  def ParseProgram(program: String): Program = {
+
+    val newPattern = """x([0-9]+) = new t([0-9]+)""".r
+    val assignPattern = """x([0-9]+) = x([0-9]+)""".r
+    val loadPattern = """x([0-9]+) = x([0-9]+).([a-z])""".r
+    val storePattern = """x([0-9]+).([a-z]) = x([0-9]+)""".r
+
+    val p: Program = Program()
+
+    val lines = program.split("\n")
+    lines.foreach {
+      case newPattern(x, t) => p.addInstruction(NewInsn(x.toInt, t.toInt))
+      case assignPattern(left, right) => p.addInstruction(AssignInsn(left.toInt, right.toInt))
+      case loadPattern(left, right, field) => p.addInstruction(LoadInsn(left.toInt, right.toInt, field))
+      case storePattern(left, field, right) => p.addInstruction(StoreInsn(left.toInt, field, right.toInt))
+      case e => throw Error("Error in parsing %s".format(e))
+    }
+    p
+  }
+}
+
+
 /**
  * Generates random programs. Seeded with number of variables and number of instructions in the program.
  *
  * @param varNumber  number of variables.
- * @param tokenNum number of tokens
+ * @param tokenNum   number of tokens
  * @param insnNumber number of instructions.
- * @param dist distribution of (new, assign, load, store) instructions respectively
+ * @param dist       distribution of (new, assign, load, store) instructions respectively
  */
 class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: Int, dist: ProgramDistribution) {
 
   private val rng = new Random();
 
   def generate(): Program = {
-//    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
+    //    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
 
-    val program: Program = Program() 
+    val program: Program = Program()
 
     for (i <- 0 until insnNumber) {
       val number = rng.between(0, 100)
@@ -75,8 +100,6 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   private def generateRandomToken(): Int = {
     rng.between(0, tokenNum)
   }
-
-
 
 
 }

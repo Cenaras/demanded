@@ -39,6 +39,10 @@ class Compare extends AnyFunSuite {
     repeatTest(10000, newGenerator(5, 2, 15, (20, 50, 20, 10)))
   }
 
+  test("Medium Load/Store heavy") {
+    repeatTest(100000, newGenerator(7, 3, 10, (20, 20, 30, 30)))
+
+  }
 
   test("Medium programs") {
     repeatTest(10000, newGenerator(10, 3, 25, (20, 50, 20, 10)))

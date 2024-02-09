@@ -105,19 +105,19 @@ object ProgramTemplates {
   }
 
   /**
-   * This small program gave us problems with query id 4, due to tracked tokens not being propagated unconditionally in 
+   * This small program gave us problems with query id 4, due to tracked tokens not being propagated unconditionally in
    * a store operation. An error in our translation made it such that tracked tokens were only propagated if demand was
    * placed on the receiver constraint variable, which was wrong, as tracked tokens must always be propagated.
    *
    * x4 = new t1
-   *  x5 = new t2
+   * x5 = new t2
    *
-   *  x4 = x3
-   *  x3 = x4.f
+   * x4 = x3
+   * x3 = x4.f
    *
-   *  x5.f = x4
-   *  x1.f = x5
-   *  x1 = x5.f
+   * x5.f = x4
+   * x1.f = x5
+   * x1 = x5.f
    */
   def UnconditionalTokenTrackingInStore: Program = {
     Program(
@@ -129,6 +129,27 @@ object ProgramTemplates {
         StoreInsn(1, "f", 5),
         LoadInsn(3, 4, "f"),
         LoadInsn(1, 5, "f"),
+      )
+    )
+  }
+
+
+  /* query 6
+x4 = x6.f
+  x0.f = x1
+  x6 = x3.f
+  x3 = x4
+  x0 = x5.f
+  x1 = new t1
+  x2.f = x1
+  x5 = new t1
+  x1.f = x3
+  x3 = new t2
+  * */
+  def XXX: Program = {
+    Program(
+      ArrayBuffer[Instruction](
+        
       )
     )
   }
