@@ -14,15 +14,7 @@ object ProgramTemplates {
    * x4 = x1.f
    */
   def LoadStore: Program = {
-    Program(
-      ArrayBuffer[Instruction](
-        NewInsn(1, 1),
-        NewInsn(2, 2),
-        AssignInsn(1, 2),
-        NewInsn(3, 2),
-        StoreInsn(1, "f", 3),
-        LoadInsn(4, 1, "f")
-      ))
+    Parser.ParseProgram(readTemplate("LoadStore"))
   }
 
   /**
@@ -42,16 +34,7 @@ object ProgramTemplates {
    * x5 = x1.f
    */
   def Aliasing: Program = {
-    Program(
-      ArrayBuffer[Instruction](
-        NewInsn(1, 1),
-        NewInsn(2, 2),
-        StoreInsn(1, "f", 2),
-        AssignInsn(3, 1),
-        NewInsn(4, 3),
-        StoreInsn(3, "f", 4),
-        LoadInsn(5, 1, "f")
-      ))
+    Parser.ParseProgram(readTemplate("Aliasing"))
   }
 
   /**
@@ -90,18 +73,7 @@ object ProgramTemplates {
    *
    */
   def TransitiveTokenTracking: Program = {
-    Program(
-      ArrayBuffer[Instruction](
-        NewInsn(0, 0),
-        NewInsn(4, 1),
-        AssignInsn(0, 4),
-        AssignInsn(2, 0),
-        AssignInsn(1, 2),
-        StoreInsn(2, "f", 1),
-        AssignInsn(3, 4),
-        LoadInsn(4, 3, "f"),
-      )
-    )
+    Parser.ParseProgram(readTemplate("TransitiveTokenTracking"))
   }
 
   /**
@@ -111,26 +83,14 @@ object ProgramTemplates {
    *
    * x4 = new t1
    * x5 = new t2
-   *
    * x4 = x3
    * x3 = x4.f
-   *
    * x5.f = x4
    * x1.f = x5
    * x1 = x5.f
    */
   def UnconditionalTokenTrackingInStore: Program = {
-    Program(
-      ArrayBuffer[Instruction](
-        NewInsn(4, 1),
-        NewInsn(5, 2),
-        AssignInsn(4, 3),
-        StoreInsn(5, "f", 4),
-        StoreInsn(1, "f", 5),
-        LoadInsn(3, 4, "f"),
-        LoadInsn(1, 5, "f"),
-      )
-    )
+    Parser.ParseProgram(readTemplate("unconditionalTokenTrackingInStore"))
   }
 
 
@@ -180,9 +140,9 @@ x1.f = x3
   */
 
 
-  def XXX: Program = {
-    val program = "x1 = new t1\nx5 = new t1\nx3 = new t2\nx0.f = x1\nx6 = x3.f\nx0 = x5.f\nx1.f = x3"
-    Parser.ParseProgram(program)
+  // TODO: Better name
+  def query6: Program = {
+    Parser.ParseProgram(readTemplate("query6"))
   }
 
 
@@ -194,9 +154,7 @@ x1.f = x3
    */
   private def readTemplate(name: String): String = {
     val source = scala.io.Source.fromFile("src/main/scala/main/program/templates/" + name)
-    val lines = try source.mkString finally source.close()
-    lines //TODO: This does not work it seems, whatever is read maybe contains \cr or something so we dont match
+    val lines = try source.getLines().map(_.trim).mkString("\n") finally source.close()
+    lines
   }
-
-
 }

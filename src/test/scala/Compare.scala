@@ -31,13 +31,10 @@ class Compare extends AnyFunSuite {
     assert(Util.assertSolutions(e, d, queryId))
   }
 
-  test("XXX") {
+  test("query6") {
     val queryId = 6
-    val p = ProgramTemplates.XXX
+    val p = ProgramTemplates.query6
     val (e, d) = solveBoth(p, queryId)
-
-    println(PrettyPrinter.printSolution(d))
-    println(PrettyPrinter.printSolution(e))
 
     assert(Util.assertSolutions(e, d, queryId))
   }
