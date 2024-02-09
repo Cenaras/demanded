@@ -1,7 +1,6 @@
 package main.solver
 
 import main.constraint.*
-import main.program.BaseSolver
 
 import scala.collection.mutable
 

@@ -1,4 +1,4 @@
-package main.program
+package main.solver
 
 import main.constraint.{ConstraintVar, ConstraintVariables}
 

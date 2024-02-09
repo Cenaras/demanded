@@ -1,6 +1,6 @@
 import main.constraint.{ConstraintGenerator, ConstraintVariables}
 import main.program.*
-import main.solver.{ExhaustiveSolver, HTSolver, QueryID}
+import main.solver.{ExhaustiveSolver, HTSolver, QueryID, SolverUtil}
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
