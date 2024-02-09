@@ -113,12 +113,18 @@ class HTSolver extends BaseSolver {
             // NOTE: Same applies here
             changed |= tf.addTokens(src.solution)
             // TODO: Is this correct here? If we are to keep the invariant that tracked tokens must always flow, then we cannot place that behind a condition
-            changed |= tf.addTokens(src.solution.intersect(W))
+            //changed |= tf.addTokens(src.solution.intersect(W))
             // TODO: Is this actually needed?
-            tf.solution.foreach(t => {
-              changed |= addTracking(t)
-            })
+            //tf.solution.foreach(t => {
+            //  changed |= addTracking(t)
+            //})
           }
+
+          // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
+          changed |= tf.addTokens(src.solution.intersect(W))
+          tf.solution.foreach(t => {
+            changed |= addTracking(t)
+          })
         })
 
         // TODO: Is this actually needed?
