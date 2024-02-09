@@ -12,7 +12,7 @@ class HT extends AnyFunSuite {
     val p: Program = ProgramTemplates.LoadStore
 
     val solver = HTSolver();
-    val constraints = ConstraintGenerator.generate(p) 
+    val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 1)
 
     val x1 = getCvar(solution, 1, true)
@@ -46,24 +46,12 @@ class HT extends AnyFunSuite {
 
   }
 
-
   test("Transitive Token Tracking") {
-
     val p: Program = ProgramTemplates.TransitiveTokenTracking
 
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 3)
     assertTokenIds(getCvar(solution, 3, true), Seq(1, 2))
-  }
-
-  test("XXX") {
-
-    val p: Program = ProgramTemplates.XXX
-
-    val solver = HTSolver();
-    val constraints = ConstraintGenerator.generate(p)
-    val solution = solver.solve(constraints, 4)
-    println(PrettyPrinter.printSolution(solution))
   }
 }

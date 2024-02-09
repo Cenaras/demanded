@@ -23,9 +23,9 @@ class Compare extends AnyFunSuite {
     assert(Util.assertSolutions(e, d, queryId))
   }
 
-  test("XXX") {
+  test("Unconditional tracking in store") {
     val queryId = 4
-    val p = ProgramTemplates.XXX
+    val p = ProgramTemplates.UnconditionalTokenTrackingInStore
     val (e, d) = solveBoth(p, queryId)
 
     println(PrettyPrinter.printSolution(d))

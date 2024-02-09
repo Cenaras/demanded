@@ -104,43 +104,22 @@ object ProgramTemplates {
     )
   }
 
-
-  /* Troublesome program for query 4 - program ordering might not be same in comment as program
-  x4 = new t1
-  x5 = new t2
-
-  x4 = x3
-  x3 = x4.f
-
-  x5.f = x4
-  x1.f = x5
-  x1 = x5.f
-  */
-
-  /*
-  We initially place t1 in x4 and add x3 to demand
-  Since x3 is in demand, we process x3 = x4.f, which places t1.f in demand, tracks t1
-  Since t1 is tracked and is in x4, we demand x5 (by x5.f = x4)
-  Now that x5 is demanded, it has t2 in its solution.
-  Thus the store operation is considered:
-    - We ask if t2.f is demanded which it isn't.
-    - We have already demanded x, so nothing more happens and we terminate.
-
-  I feel like the rules are not actually correct!
-
-
-  How we would exhaustively solve:
-  t1 in x4, t2 in x5 from the start.
-  x5.f = 4x places t1 in t2.f
-  x1 = x5.f places t1 in x1
-  x1.f = x5 places t2 in t1.f
-  x3 = x4.f places t2 in x3 which is then propagated to x4 which gives us t1, t2 in x4.
-
-
+  /**
+   * This small program gave us problems with query id 4, due to tracked tokens not being propagated unconditionally in 
+   * a store operation. An error in our translation made it such that tracked tokens were only propagated if demand was
+   * placed on the receiver constraint variable, which was wrong, as tracked tokens must always be propagated.
+   *
+   * x4 = new t1
+   *  x5 = new t2
+   *
+   *  x4 = x3
+   *  x3 = x4.f
+   *
+   *  x5.f = x4
+   *  x1.f = x5
+   *  x1 = x5.f
    */
-
-
-  def XXX: Program = {
+  def UnconditionalTokenTrackingInStore: Program = {
     Program(
       ArrayBuffer[Instruction](
         NewInsn(4, 1),
