@@ -15,18 +15,18 @@ class HTSolver extends BaseSolver {
   private val W: mutable.Set[Token] = mutable.Set()
 
 
-  private def addDemand(constraintVar: ConstraintVar): Boolean = {
+  private def addDemand(constraintVar: ConstraintVar, constraint: Option[Constraint]): Boolean = {
     if (Q.add(constraintVar)) {
-      debug("Adding %s to demand".format(constraintVar))
+      debug("Adding %s to demand due to %s".format(constraintVar, constraint))
       return true
     }
     false
   }
 
 
-  private def addTracking(token: Token): Boolean = {
+  private def addTracking(token: Token, constraint: Constraint): Boolean = {
     if (W.add(token)) {
-      debug("Adding %s to tracking".format(token))
+      debug("Adding %s to tracking due to %s".format(token, constraint))
       return true
     }
     false
@@ -43,7 +43,7 @@ class HTSolver extends BaseSolver {
 
     queriedCvar match
       case None => throw Error("Queried variable does not exist")
-      case Some(v) => addDemand(v)
+      case Some(v) => addDemand(v, None)
     var changed = true;
 
 
@@ -67,7 +67,7 @@ class HTSolver extends BaseSolver {
       // Copy constraints
       constraints.copyConstraints.foreach(c => {
         if (Q.contains(c.to)) {
-          changed |= addDemand(c.from)
+          changed |= addDemand(c.from, Some(c))
           changed |= propagate(c.from, c.to)
         }
         val tracked = c.from.solution.intersect(W)
@@ -85,14 +85,14 @@ class HTSolver extends BaseSolver {
     constraint match {
       case ForallLoadConstraint(dst, base, field) =>
         if (Q.contains(dst)) {
-          changed |= addDemand(base)
+          changed |= addDemand(base, Some(constraint))
           base.solution.foreach(t => {
-            changed |= addTracking(t)
+            changed |= addTracking(t, constraint)
           })
 
           base.solution.foreach(t => {
             val tf = constraints.tf2Cvar((t, field))
-            changed |= addDemand(tf)
+            changed |= addDemand(tf, Some(constraint))
             // NOTE: By adding a copy constraint we also treat adding tf to demanded if dst was, so for now try with this.
             changed |= dst.addTokens(tf.solution)
           })
@@ -109,27 +109,22 @@ class HTSolver extends BaseSolver {
           debug("Processing token %s for store on %s.%s = %s".format(t, base, field, src.toString))
           val tf = constraints.tf2Cvar((t, field))
           if (Q.contains(tf)) {
-            changed |= addDemand(src)
+            changed |= addDemand(src, Some(constraint))
             // NOTE: Same applies here
             changed |= tf.addTokens(src.solution)
-            // TODO: Is this correct here? If we are to keep the invariant that tracked tokens must always flow, then we cannot place that behind a condition
-            //changed |= tf.addTokens(src.solution.intersect(W))
-            // TODO: Is this actually needed?
-            //tf.solution.foreach(t => {
-            //  changed |= addTracking(t)
-            //})
           }
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
+
           tf.solution.foreach(t => {
-            changed |= addTracking(t)
+            changed |= addTracking(t, constraint)
           })
         })
 
         // TODO: Is this actually needed?
         if (src.solution.intersect(W).nonEmpty) {
-          changed |= addDemand(base)
+          changed |= addDemand(base, Some(constraint))
         }
     }
 

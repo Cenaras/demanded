@@ -17,9 +17,6 @@ class ParserTest extends AnyFunSuite {
     if (!(pString == parsedString)) {
       throw Error("Pretty printing of program p, and PrettyPrint(Parse(PrettyPrint(p))) did not match:\n%s".format(pString))
     }
-
-
-
   }
 
 }

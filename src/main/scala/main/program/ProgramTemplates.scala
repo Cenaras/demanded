@@ -135,23 +135,61 @@ object ProgramTemplates {
 
 
   /* query 6
+x1 = new t1
+x5 = new t1
+x3 = new t2
 x4 = x6.f
-  x0.f = x1
-  x6 = x3.f
-  x3 = x4
-  x0 = x5.f
-  x1 = new t1
-  x2.f = x1
-  x5 = new t1
-  x1.f = x3
-  x3 = new t2
-  * */
+x0.f = x1
+x6 = x3.f
+x0 = x5.f
+x1.f = x3
+*/
+
+  /*
+    We initially place x6 in demand
+    From x6 = x3.f we place x3 in demand and thus t2 in x3
+    We now track t2 since we used it in a read operation and we demand t2.f since we must propagate that to x6
+    Since t2 is tracked, for x1.f = x3 we must demand x1 so we can transfer t2 into all x1.f
+    Now t1 in x1 and t2 enters t1.f, but t1.f is not demanded!
+
+
+  Exhaustive solution
+  t1 in x1, t1 in x5, t2 in x3
+  From x1.f = x3, we get that t1.f has t2
+  From x0 = x5.f we get that x0 has t2 (due to above placing t2 in t1.f and t1 in x5)
+  From x0.f = x1 we get t2.f has t1
+  From x6 = x3.f we get x6 has t1
+
+
+  Demand:
+    x6 (query)
+    x3 (x6 = x3.f)
+    t2.f (x6 = x3.f since t2 in x3)
+    x1 (x1.f = x3 since t2 is tracked)
+
+  Tracked:
+    t2 (x6 = x3.f since t2 in x3)
+
+
+  */
+
+
   def XXX: Program = {
-    Program(
-      ArrayBuffer[Instruction](
-        
-      )
-    )
+    val program = "x1 = new t1\nx5 = new t1\nx3 = new t2\nx4 = x6.f\nx0.f = x1\nx6 = x3.f\nx0 = x5.f\nx1.f = x3"
+    Parser.ParseProgram(program)
+  }
+
+
+  /**
+   * Reads a template from the templates folder
+   *
+   * @param name filename from template folder.
+   * @return contents of filename
+   */
+  private def readTemplate(name: String): String = {
+    val source = scala.io.Source.fromFile("src/main/scala/main/program/templates/" + name)
+    val lines = try source.mkString finally source.close()
+    lines //TODO: This does not work it seems, whatever is read maybe contains \cr or something so we dont match
   }
 
 

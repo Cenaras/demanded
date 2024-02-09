@@ -28,12 +28,19 @@ class Compare extends AnyFunSuite {
     val p = ProgramTemplates.UnconditionalTokenTrackingInStore
     val (e, d) = solveBoth(p, queryId)
 
+    assert(Util.assertSolutions(e, d, queryId))
+  }
+
+  test("XXX") {
+    val queryId = 6
+    val p = ProgramTemplates.XXX
+    val (e, d) = solveBoth(p, queryId)
+
     println(PrettyPrinter.printSolution(d))
     println(PrettyPrinter.printSolution(e))
 
     assert(Util.assertSolutions(e, d, queryId))
   }
-
 
   test("Small programs") {
     repeatTest(10000, newGenerator(5, 2, 15, (20, 50, 20, 10)))
