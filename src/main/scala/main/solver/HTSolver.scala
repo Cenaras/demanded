@@ -117,6 +117,7 @@ class HTSolver extends BaseSolver {
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
 
+          // TODO: Is this needed?
           tf.solution.foreach(t => {
             changed |= addTracking(t, constraint)
           })
@@ -125,6 +126,10 @@ class HTSolver extends BaseSolver {
         // TODO: Is this actually needed?
         if (src.solution.intersect(W).nonEmpty) {
           changed |= addDemand(base, Some(constraint))
+          // FIXME: Added this rule, unsure if it is correct for minimal solution
+          base.solution.foreach(t => {
+            changed |= addTracking(t, constraint)
+          })
         }
     }
 

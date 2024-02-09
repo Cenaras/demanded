@@ -138,7 +138,6 @@ object ProgramTemplates {
 x1 = new t1
 x5 = new t1
 x3 = new t2
-x4 = x6.f
 x0.f = x1
 x6 = x3.f
 x0 = x5.f
@@ -148,9 +147,16 @@ x1.f = x3
   /*
     We initially place x6 in demand
     From x6 = x3.f we place x3 in demand and thus t2 in x3
-    We now track t2 since we used it in a read operation and we demand t2.f since we must propagate that to x6
-    Since t2 is tracked, for x1.f = x3 we must demand x1 so we can transfer t2 into all x1.f
-    Now t1 in x1 and t2 enters t1.f, but t1.f is not demanded!
+      We track t2 and demand t2.f
+    From x1.f = x3 we demand x1
+      Since x3 holds t2 and t2 is tracked
+      t1 in x1 now
+      t2 in t1.f now
+
+
+    TODO: We are missing the flow of t2 into x0.
+      We are adding the entire x to demanded, but we were never tracking the tokens meaning alias relations
+      for x1 and x5 were missed, so we never processed x0 = x5.f and thereby t2 never flowed into x0
 
 
   Exhaustive solution
@@ -175,7 +181,7 @@ x1.f = x3
 
 
   def XXX: Program = {
-    val program = "x1 = new t1\nx5 = new t1\nx3 = new t2\nx4 = x6.f\nx0.f = x1\nx6 = x3.f\nx0 = x5.f\nx1.f = x3"
+    val program = "x1 = new t1\nx5 = new t1\nx3 = new t2\nx0.f = x1\nx6 = x3.f\nx0 = x5.f\nx1.f = x3"
     Parser.ParseProgram(program)
   }
 

@@ -1,7 +1,7 @@
 x1 = new t1
 x5 = new t1
 x3 = new t2
-x4 = x6.f
+x0.f = x1
 x6 = x3.f
 x0 = x5.f
 x1.f = x3
