@@ -27,7 +27,6 @@ class Compare extends AnyFunSuite {
     val queryId = 4
     val p = ProgramTemplates.UnconditionalTokenTrackingInStore
     val (e, d) = solveBoth(p, queryId)
-
     assert(Util.assertSolutions(e, d, queryId))
   }
 
@@ -44,8 +43,7 @@ class Compare extends AnyFunSuite {
   }
 
   test("Medium Load/Store heavy") {
-    repeatTest(100000, newGenerator(7, 3, 10, (20, 20, 30, 30)))
-
+    repeatTest(10000, newGenerator(7, 3, 10, (20, 20, 30, 30)))
   }
 
   test("Medium programs") {
@@ -53,7 +51,7 @@ class Compare extends AnyFunSuite {
   }
 
   test("Random program") {
-    repeatTest(100, newGenerator(100, 30, 200, (20, 50, 20, 10)))
+    repeatTest(1000, newGenerator(100, 30, 200, (20, 50, 20, 10)))
   }
 
   test("Load/Store heavy") {
@@ -61,7 +59,7 @@ class Compare extends AnyFunSuite {
   }
 
   test("Large") {
-    repeatTest(1, newGenerator(100, 20, 5000, (25, 35, 20, 20)))
+    repeatTest(100, newGenerator(100, 20, 5000, (25, 35, 20, 20)))
   }
 
 

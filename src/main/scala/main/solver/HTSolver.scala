@@ -9,9 +9,10 @@ import scala.collection.mutable
 type QueryID = Int | (Int, String)
 
 class HTSolver extends BaseSolver {
-
-
+  
+  /** List of queried constraint variables. */
   private val Q: mutable.Set[ConstraintVar] = mutable.Set()
+  /** List of tracked tokens. Tracked tokens must be propagated regardless of demand. */
   private val W: mutable.Set[Token] = mutable.Set()
 
 
@@ -30,9 +31,7 @@ class HTSolver extends BaseSolver {
       return true
     }
     false
-
   }
-
 
 
   def solve(constraints: Constraints, queryId: QueryID): ConstraintVariables = {
@@ -73,7 +72,6 @@ class HTSolver extends BaseSolver {
         val tracked = c.from.solution.intersect(W)
         changed |= c.to.addTokens(tracked)
       })
-
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
     }
     constraints.constraintVars
