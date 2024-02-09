@@ -117,21 +117,24 @@ object ProgramTemplates {
   x1 = x5.f
   */
 
-  /* DEMANDED:
-    x4
-    x3
-    t1.f
-    x5
-
-  TRACKED:
-    t1
-
-  */
   /*
   We initially place t1 in x4 and add x3 to demand
   Since x3 is in demand, we process x3 = x4.f, which places t1.f in demand, tracks t1
   Since t1 is tracked and is in x4, we demand x5 (by x5.f = x4)
-  Now that x5 is demanded, it has t2 in its solution
+  Now that x5 is demanded, it has t2 in its solution.
+  Thus the store operation is considered:
+    - We ask if t2.f is demanded which it isn't.
+    - We have already demanded x, so nothing more happens and we terminate.
+
+  I feel like the rules are not actually correct!
+
+
+  How we would exhaustively solve:
+  t1 in x4, t2 in x5 from the start.
+  x5.f = 4x places t1 in t2.f
+  x1 = x5.f places t1 in x1
+  x1.f = x5 places t2 in t1.f
+  x3 = x4.f places t2 in x3 which is then propagated to x4 which gives us t1, t2 in x4.
 
 
    */

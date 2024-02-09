@@ -56,9 +56,8 @@ class HTSolver extends BaseSolver {
         if (Q.contains(c.to)) {
           changed |= c.to.addToken(c.token)
           if changed then debug("Processing address constraint %s in %s".format(c.token, c.to))
-
         }
-
+        // TODO: This prints also if above made changed go true and this statement actually did nothing...
         if (W.contains(c.token)) {
           changed |= c.to.addToken(c.token)
           if changed then debug("Processing tracking in address constraint %s in %s".format(c.token, c.to))
@@ -107,13 +106,14 @@ class HTSolver extends BaseSolver {
 
       case ForallStoreConstraint(base, field, src) =>
         base.solution.foreach(t => {
+          debug("Processing token %s for store on %s.%s = %s".format(t, base, field, src.toString))
           val tf = constraints.tf2Cvar((t, field))
           if (Q.contains(tf)) {
             changed |= addDemand(src)
             // NOTE: Same applies here
             changed |= tf.addTokens(src.solution)
+            // TODO: Is this correct here? If we are to keep the invariant that tracked tokens must always flow, then we cannot place that behind a condition
             changed |= tf.addTokens(src.solution.intersect(W))
-
             // TODO: Is this actually needed?
             tf.solution.foreach(t => {
               changed |= addTracking(t)
