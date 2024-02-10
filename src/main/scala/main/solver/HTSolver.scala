@@ -116,12 +116,11 @@ class HTSolver extends BaseSolver {
           changed |= tf.addTokens(src.solution.intersect(W))
 
           // TODO: Is this needed?
-          tf.solution.foreach(t => {
-            changed |= addTracking(t, constraint)
-          })
+//          tf.solution.foreach(t => {
+//            changed |= addTracking(t, constraint)
+//          })
         })
 
-        // TODO: Is this actually needed?
         if (src.solution.intersect(W).nonEmpty) {
           changed |= addDemand(base, Some(constraint))
           // FIXME: Added this rule, unsure if it is correct for minimal solution

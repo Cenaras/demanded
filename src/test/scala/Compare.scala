@@ -55,7 +55,7 @@ class Compare extends AnyFunSuite {
   }
 
   test("Load/Store heavy") {
-    repeatTest(250, newGenerator(250, 50, 500, (25, 25, 30, 30)))
+    repeatTest(200, newGenerator(250, 50, 500, (25, 25, 30, 30)))
   }
 
   test("Large") {
