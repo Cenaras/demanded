@@ -1,9 +1,20 @@
-import main.constraint.{ConstraintVar, ConstraintVariables}
+import main.constraint.{BaseConstraintVar, ConstraintVar, ConstraintVariables, FieldConstraintVar}
 
 object Util {
-  def getCvar(solution: ConstraintVariables, id: Int, base: Boolean): ConstraintVar = {
-    solution.find(c => c.getId == id && base == c.base).get;
+  def getFieldCvar(solution: ConstraintVariables, id: Int, field: String): ConstraintVar = {
+    solution.find {
+      case FieldConstraintVar(token, fld) => token.id == id && field == fld
+      case _ => false
+    }.get
   }
+
+  def getBaseCvar(solution: ConstraintVariables, id: Int): ConstraintVar = {
+    solution.find {
+      case BaseConstraintVar(varId) => varId == id
+      case _ => false
+    }.get
+  }
+
 
   /**
    * Asserts that the solution to a constraint variable is exactly the sequence of tokens provided.
@@ -13,24 +24,24 @@ object Util {
    */
   def assertTokenIds(cvar: ConstraintVar, expectedIds: Seq[Int]): Boolean = {
     var result: Boolean = true;
-
     val tokenIds: Seq[Int] = cvar.solution.map(f => f.id).toSeq
-
     if (!(expectedIds.size == tokenIds.size))
       return false
 
     for (t <- expectedIds) {
       result &= tokenIds.contains(t)
     }
-
     result
   }
 
+  def assertEmpty(cvar: ConstraintVar): Boolean = {
+    cvar.solution.isEmpty
+  }
 
   def assertSolutions(exhaustive: ConstraintVariables, demanded: ConstraintVariables, query: Int): Boolean = {
 
-    val demandedCvar = getCvar(demanded, query, true);
-    val exhaustiveCvar = getCvar(exhaustive, query, true)
+    val demandedCvar = getBaseCvar(demanded, query);
+    val exhaustiveCvar = getBaseCvar(exhaustive, query)
 
     val exhaustiveTokenSequence = exhaustiveCvar.solution.map(t => t.id).toSeq
 

@@ -40,6 +40,7 @@ object Parser {
 class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: Int, dist: ProgramDistribution) {
 
   private val rng = new Random();
+  private val fields = Array("f", "g")
 
   def generate(): Program = {
     //    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
@@ -67,11 +68,11 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
       case x if x <= dist._1 + dist._2 + dist._3 =>
         val leftId = generateRandomVar(None)
         val rightId = generateRandomVar(Some(leftId))
-        val field = "f"
+        val field = generateRandomField()
         LoadInsn(leftId, rightId, field)
       case _ =>
         val leftId = generateRandomVar(None)
-        val field = "f"
+        val field = generateRandomField()
         val rightId = generateRandomVar(Some(leftId))
         StoreInsn(leftId, field, rightId)
     }
@@ -99,6 +100,10 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
 
   private def generateRandomToken(): Int = {
     rng.between(0, tokenNum)
+  }
+
+  private def generateRandomField(): String = {
+    fields(rng.between(0, fields.length - 1))
   }
 
 

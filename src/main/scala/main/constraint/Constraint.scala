@@ -65,7 +65,6 @@ trait ConstraintVar {
   def getId: Int
 
   val solution: mutable.Set[Token] = mutable.Set()
-  val base: Boolean // TODO: Nicer solution - case class?
 
   def addToken(token: Token): Boolean = {
     solution.add(token)
@@ -83,8 +82,7 @@ trait ConstraintVar {
 
 case class BaseConstraintVar(id: Int) extends ConstraintVar {
 
-  override def getId: Int = id;
-  override val base: Boolean = true
+  override def getId: Int = id
 
   override def toString: String = {
     "⟦x%d⟧".format(id)
@@ -94,16 +92,16 @@ case class BaseConstraintVar(id: Int) extends ConstraintVar {
 case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
-
-  override val base: Boolean = false
-
   override def toString: String = {
     "⟦t%d.%s⟧".format(token.id, field)
   }
+
+  def getField: String = field
+
 }
 
 
-case class Token(val id: Int) {
+case class Token(id: Int) {
   override def toString: String = "t%d".format(id)
 
   override def equals(obj: Any): Boolean = {

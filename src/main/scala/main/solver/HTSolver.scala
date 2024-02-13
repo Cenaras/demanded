@@ -37,7 +37,10 @@ class HTSolver extends BaseSolver {
   def solve(constraints: Constraints, queryId: QueryID): ConstraintVariables = {
 
     val queriedCvar = queryId match
-      case (t, f) => constraints.tf2Cvar.get((constraints.id2Token(t), f))
+      case (t, f) =>
+        W.add(constraints.id2Token(t)) // FIXME: Added this rule to ensure tracking when querying field cvar
+        constraints.tf2Cvar.get((constraints.id2Token(t), f))
+
       case x: Int => constraints.id2Cvar.get(x)
 
     queriedCvar match

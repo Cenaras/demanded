@@ -8,9 +8,6 @@ import scala.collection.mutable
 
 object ConstraintGenerator {
 
-  // TODO: Do we really want the constraints to store the solutions? That makes it such that we can't reuse constraints
-  //  but rather, each solver instance must have its own set of constraints. 
-  //  Probably rewrite this, so the same set of constraints can be given to two different solvers.
   def generate(program: Program): Constraints = {
 
     val addrConstraints: mutable.Set[AddrConstraint] = mutable.Set()
@@ -43,7 +40,7 @@ object ConstraintGenerator {
         val src = getOrSetCvar(srcId, id2Cvar, constraintVars)
         complexConstraints += ForallStoreConstraint(base, field, src)
     }
-    
+
     Constraints(addrConstraints, copyConstraints, complexConstraints, id2Cvar, id2Token, token2Cvar, constraintVars)
 
 
@@ -55,7 +52,7 @@ object ConstraintGenerator {
       case Some(value) => value
       case None =>
         val cvar = BaseConstraintVar(varId)
-        id2Cvar += varId ->cvar
+        id2Cvar += varId -> cvar
         constraintVars.add(cvar)
         cvar
   }
@@ -66,10 +63,11 @@ object ConstraintGenerator {
       case None =>
         val token = Token(tokenId)
         id2Token += tokenId -> token
-        // TODO: Don't hardcode + token + field maps to cvar
-        val tokenCvar = FieldConstraintVar(token, "f")
-        token2Cvar += (token, "f") -> tokenCvar
-        constraintVars.add(tokenCvar)
+        // TODO: Don't hardcode
+        for (f <- Array("f", "g"))
+          val tokenCvar = FieldConstraintVar(token, f)
+          token2Cvar += (token, f) -> tokenCvar
+          constraintVars.add(tokenCvar)
         token
   }
 

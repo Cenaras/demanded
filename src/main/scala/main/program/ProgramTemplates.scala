@@ -146,6 +146,10 @@ x1.f = x3
   }
 
 
+  def MultipleFields: Program = {
+    Parser.ParseProgram(readTemplate("MultipleFields"))
+  }
+
   /**
    * Reads a template from the templates folder
    *
