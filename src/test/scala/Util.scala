@@ -22,7 +22,7 @@ object Util {
    * @param cvar        constraint variable to test
    * @param expectedIds sequence of tokens expected in the solution of the constraint variable
    */
-  def assertTokenIds(cvar: ConstraintVar, expectedIds: Seq[Int]): Boolean = {
+  def assertTokens(cvar: ConstraintVar, expectedIds: Seq[Int]): Boolean = {
     var result: Boolean = true;
     val tokenIds: Seq[Int] = cvar.solution.map(f => f.id).toSeq
     if (!(expectedIds.size == tokenIds.size))
@@ -33,6 +33,15 @@ object Util {
     }
     result
   }
+
+  def assertTokens(solution: ConstraintVariables, id: Int, expectedIds: Seq[Int]): Boolean = {
+    assertTokens(getBaseCvar(solution, id), expectedIds)
+  }
+
+  def assertTokens(solution: ConstraintVariables, tokenId: Int, field: String, expectedIds: Seq[Int]): Boolean = {
+    assertTokens(getFieldCvar(solution, tokenId, field), expectedIds)
+  }
+
 
   def assertEmpty(cvar: ConstraintVar): Boolean = {
     cvar.solution.isEmpty
@@ -45,6 +54,6 @@ object Util {
 
     val exhaustiveTokenSequence = exhaustiveCvar.solution.map(t => t.id).toSeq
 
-    assertTokenIds(demandedCvar, exhaustiveTokenSequence)
+    assertTokens(demandedCvar, exhaustiveTokenSequence)
   }
 }

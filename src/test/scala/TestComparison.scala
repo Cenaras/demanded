@@ -5,7 +5,7 @@ import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 
-class Compare extends AnyFunSuite {
+class TestComparison extends AnyFunSuite {
 
   test("Demanded Simple") {
     val queryId = 1
@@ -30,9 +30,9 @@ class Compare extends AnyFunSuite {
     assert(Util.assertSolutions(e, d, queryId))
   }
 
-  test("query6") {
+  test("TrackBaseInStore") {
     val queryId = 6
-    val p = ProgramTemplates.query6
+    val p = ProgramTemplates.TrackBaseInStore
     val (e, d) = solveBoth(p, queryId)
 
     assert(Util.assertSolutions(e, d, queryId))

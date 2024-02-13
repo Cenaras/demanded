@@ -4,8 +4,9 @@ import scala.util.Random
 
 type ProgramDistribution = (Int, Int, Int, Int)
 
-// TODO: Write a small naive parser that can translate statements into programs so the test output can be fed into produce programs
-
+/**
+ * A simple parser that parses programs programs for our simple language.
+ */
 object Parser {
   def ParseProgram(program: String): Program = {
 
@@ -22,7 +23,7 @@ object Parser {
       case assignPattern(left, right) => p.addInstruction(AssignInsn(left.toInt, right.toInt))
       case loadPattern(left, right, field) => p.addInstruction(LoadInsn(left.toInt, right.toInt, field))
       case storePattern(left, field, right) => p.addInstruction(StoreInsn(left.toInt, field, right.toInt))
-      case e => throw Error("Error in parsing %s".format(e))
+      case e => throw Error("Error in parsing statement %s".format(e))
     }
     p
   }
@@ -43,18 +44,22 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   private val fields = Array("f", "g")
 
   def generate(): Program = {
-    //    println("Producing random program with %d variables, %d tokens and %d instructions".format(varNumber, tokenNum, insnNumber))
-
     val program: Program = Program()
 
     for (i <- 0 until insnNumber) {
       val number = rng.between(0, 100)
-      program.addInstruction(genInsn(number))
+      program.addInstruction(genInstruction(number))
     }
     program
   }
 
-  private def genInsn(seed: Int): Instruction = {
+  /**
+   * Generate a random instruction based on the seed
+   *
+   * @param seed random number deciding the instruction to generate based on the distribution
+   * @return
+   */
+  private def genInstruction(seed: Int): Instruction = {
     seed match {
       case x if x <= dist._1 =>
         val varId = generateRandomVar(None)
@@ -105,8 +110,6 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   private def generateRandomField(): String = {
     fields(rng.between(0, fields.length - 1))
   }
-
-
 }
 
 
@@ -128,7 +131,3 @@ case class LoadInsn(left: VarId, right: VarId, field: String) extends Instructio
 
 case class StoreInsn(left: VarId, field: String, right: VarId) extends Instruction:
   override def print(): String = "x%d.%s = x%d".format(left, field, right)
-
-//case class Variable(id: Int):
-//   def print(): String = "x%d".format(id)
-//   def equals(other: Variable): Boolean = id == other.id

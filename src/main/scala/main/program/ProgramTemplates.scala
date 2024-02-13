@@ -79,7 +79,8 @@ object ProgramTemplates {
   /**
    * This small program gave us problems with query id 4, due to tracked tokens not being propagated unconditionally in
    * a store operation. An error in our translation made it such that tracked tokens were only propagated if demand was
-   * placed on the receiver constraint variable, which was wrong, as tracked tokens must always be propagated.
+   * placed on the receiver constraint variable, which was wrong, as tracked tokens must always be propagated. (That is,
+   * the tracking was placed behind the implication x in Q => ... which is wrong).
    *
    * x4 = new t1
    * x5 = new t2
@@ -90,59 +91,30 @@ object ProgramTemplates {
    * x1 = x5.f
    */
   def UnconditionalTokenTrackingInStore: Program = {
-    Parser.ParseProgram(readTemplate("unconditionalTokenTrackingInStore"))
+    Parser.ParseProgram(readTemplate("UnconditionalTokenTrackingInStore"))
   }
 
-
-  /* query 6
-x1 = new t1
-x5 = new t1
-x3 = new t2
-x0.f = x1
-x6 = x3.f
-x0 = x5.f
-x1.f = x3
-*/
-
-  /*
-    We initially place x6 in demand
-    From x6 = x3.f we place x3 in demand and thus t2 in x3
-      We track t2 and demand t2.f
-    From x1.f = x3 we demand x1
-      Since x3 holds t2 and t2 is tracked
-      t1 in x1 now
-      t2 in t1.f now
-
-
-    TODO: We are missing the flow of t2 into x0.
-      We are adding the entire x to demanded, but we were never tracking the tokens meaning alias relations
-      for x1 and x5 were missed, so we never processed x0 = x5.f and thereby t2 never flowed into x0
-
-
-  Exhaustive solution
-  t1 in x1, t1 in x5, t2 in x3
-  From x1.f = x3, we get that t1.f has t2
-  From x0 = x5.f we get that x0 has t2 (due to above placing t2 in t1.f and t1 in x5)
-  From x0.f = x1 we get t2.f has t1
-  From x6 = x3.f we get x6 has t1
-
-
-  Demand:
-    x6 (query)
-    x3 (x6 = x3.f)
-    t2.f (x6 = x3.f since t2 in x3)
-    x1 (x1.f = x3 since t2 is tracked)
-
-  Tracked:
-    t2 (x6 = x3.f since t2 in x3)
-
-
-  */
-
-
-  // TODO: Better name
-  def query6: Program = {
-    Parser.ParseProgram(readTemplate("query6"))
+  /**
+   * This program showcases the importance of always tracking the entire points-to set of a base variable in a store
+   * operation. Intuitively, if we perform a store operation x.f = y, then we must track all tokens in x, since alias
+   * relations might mean another (possibly non-demanded) operation may alter the solution of our demanded variable
+   *
+   * For this particular program with query x6, when processing x1.f = x3, we must track t1 since otherwise we never
+   * realize that x5 holds t1, which means x0 = x5.f does not transfer ⟦t1.f⟧ to x0 (i.e., t2) and thereby we miss from
+   * x0.f = x1 and x6 = x3.f that x6 holds t1 (which we determine in an exhaustive setting)
+   *
+   * x1 = new t1
+   * x5 = new t1
+   * x3 = new t2
+   * x0.f = x1
+   * x6 = x3.f
+   * x0 = x5.f
+   * x1.f = x3
+   *
+   * @return
+   */
+  def TrackBaseInStore: Program = {
+    Parser.ParseProgram(readTemplate("TrackBaseInStore"))
   }
 
 

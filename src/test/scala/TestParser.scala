@@ -2,7 +2,7 @@ import main.program.{Parser, ProgramGenerator}
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
-class ParserTest extends AnyFunSuite {
+class TestParser extends AnyFunSuite {
 
 
   test("Program-to-string-to-program-to-string") {
