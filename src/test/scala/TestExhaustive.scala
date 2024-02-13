@@ -1,7 +1,7 @@
-import Util.{assertTokens, getBaseCvar, getFieldCvar}
 import main.constraint.ConstraintGenerator
 import main.program.{Program, ProgramTemplates}
 import main.solver.ExhaustiveSolver
+import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar}
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -22,9 +22,9 @@ class TestExhaustive extends AnyFunSuite {
     assert(x2.solution.size == 1)
     assert(x1f.solution.size == 1)
 
-    assert(assertTokens(x1, Seq(1, 2)))
-    assert(assertTokens(x2, Seq(2)))
-    assert(assertTokens(x1f, Seq(2)))
+    assert(containsExactly(x1, Seq(1, 2)))
+    assert(containsExactly(x2, Seq(2)))
+    assert(containsExactly(x1f, Seq(2)))
   }
 
   test("Aliasing") {
@@ -35,12 +35,12 @@ class TestExhaustive extends AnyFunSuite {
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints)
 
-    assert(assertTokens(solution, 1, Seq(1)))
-    assert(assertTokens(solution, 1, "f", Seq(2, 3)))
-    assert(assertTokens(solution, 2, Seq(2)))
-    assert(assertTokens(solution, 3, Seq(1)))
-    assert(assertTokens(solution, 4, Seq(3)))
-    assert(assertTokens(solution, 5, Seq(2, 3)))
+    assert(containsExactly(solution, 1, Seq(1)))
+    assert(containsExactly(solution, 1, "f", Seq(2, 3)))
+    assert(containsExactly(solution, 2, Seq(2)))
+    assert(containsExactly(solution, 3, Seq(1)))
+    assert(containsExactly(solution, 4, Seq(3)))
+    assert(containsExactly(solution, 5, Seq(2, 3)))
   }
 
   test("Multiple Fields") {
@@ -49,11 +49,11 @@ class TestExhaustive extends AnyFunSuite {
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints)
 
-    assert(assertTokens(solution, 1, Seq(1)))
-    assert(assertTokens(solution, 1, "f", Seq(2)))
-    assert(assertTokens(solution, 2, "g", Seq(1)))
-    assert(assertTokens(solution, 3, "f", Seq(4)))
-    assert(assertTokens(solution, 3, "g", Seq(4)))
+    assert(containsExactly(solution, 1, Seq(1)))
+    assert(containsExactly(solution, 1, "f", Seq(2)))
+    assert(containsExactly(solution, 2, "g", Seq(1)))
+    assert(containsExactly(solution, 3, "f", Seq(4)))
+    assert(containsExactly(solution, 3, "g", Seq(4)))
   }
 }
 

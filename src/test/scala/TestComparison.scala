@@ -1,5 +1,6 @@
 import main.constraint.{ConstraintGenerator, ConstraintVariables}
 import main.program.*
+import main.solver.SolverUtil.compareSolutions
 import main.solver.{ExhaustiveSolver, HTSolver, QueryID, SolverUtil}
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
@@ -11,7 +12,7 @@ class TestComparison extends AnyFunSuite {
     val queryId = 1
     val p = ProgramTemplates.demandedSimple
     val (e, d) = solveBoth(p, queryId)
-    assert(Util.assertSolutions(e, d, queryId))
+    assert(compareSolutions(e, d, queryId))
     assert(SolverUtil.solutionSize(d) < SolverUtil.solutionSize(e))
   }
 
@@ -20,14 +21,14 @@ class TestComparison extends AnyFunSuite {
     val queryId = 3
     val p = ProgramTemplates.TransitiveTokenTracking
     val (e, d) = solveBoth(p, queryId)
-    assert(Util.assertSolutions(e, d, queryId))
+    assert(compareSolutions(e, d, queryId))
   }
 
   test("Unconditional tracking in store") {
     val queryId = 4
     val p = ProgramTemplates.UnconditionalTokenTrackingInStore
     val (e, d) = solveBoth(p, queryId)
-    assert(Util.assertSolutions(e, d, queryId))
+    assert(compareSolutions(e, d, queryId))
   }
 
   test("TrackBaseInStore") {
@@ -35,7 +36,15 @@ class TestComparison extends AnyFunSuite {
     val p = ProgramTemplates.TrackBaseInStore
     val (e, d) = solveBoth(p, queryId)
 
-    assert(Util.assertSolutions(e, d, queryId))
+    assert(compareSolutions(e, d, queryId))
+  }
+
+  test("MultipleFields") {
+    val queryId = (1, "f")
+    val p = ProgramTemplates.MultipleFields
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
   }
 
   test("Small programs") {
@@ -69,7 +78,7 @@ class TestComparison extends AnyFunSuite {
       val query = program.getRandomVar
 
       val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
-      if (!Util.assertSolutions(exhaustiveSolution, demandedSolution, query)) {
+      if (!compareSolutions(exhaustiveSolution, demandedSolution, query)) {
         throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.printProgram(program)))
       }
 
