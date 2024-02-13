@@ -1,5 +1,6 @@
 package main.program
 
+import java.io.FileWriter
 import scala.util.Random
 
 type ProgramDistribution = (Int, Int, Int, Int)
@@ -27,6 +28,39 @@ object Parser {
     }
     p
   }
+
+  /**
+   * Writes the given program into the facts files in the src/datalog directory
+   *
+   * @param p the program to translate
+   */
+  def WriteDatalog(p: Program): Unit = {
+    var newFacts = ""
+    var assignFacts = ""
+    var loadFacts = ""
+    var storeFacts = ""
+
+    p.getInstructions.foreach {
+      case NewInsn(varId, tokenId) => newFacts += "x%s\tt%s\n".format(varId, tokenId)
+      case AssignInsn(left, right) => assignFacts += "x%s\tx%s\n".format(left, right)
+      case LoadInsn(left, right, field) => loadFacts += "x%s\tx%s\t%s\n".format(left, right, field)
+      case StoreInsn(left, field, right) => storeFacts += "x%s\t%s\tx%s\n".format(left, field, right)
+    }
+
+    def write(file: String, content: String): Unit = {
+      val fw = new FileWriter("src/datalog/" + file + ".facts")
+      fw.write(content)
+      fw.close()
+    }
+
+    write("new", newFacts)
+    write("assign", assignFacts)
+    write("load", loadFacts)
+    write("store", storeFacts)
+
+  }
+
+
 }
 
 

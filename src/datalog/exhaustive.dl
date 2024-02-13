@@ -1,0 +1,34 @@
+.type var <: symbol
+.type token <: symbol
+.type field <: symbol
+
+.output pointsTo
+
+// x = new t
+.decl new(x: var, t: token)
+.input new
+
+// x = y
+.decl assign(x: var, y: var)
+.input assign
+
+// x = y.f
+.decl load(dst: var, base: var, f: field)
+.input load
+
+// x.f = y
+.decl store(base: var, f: field, src: var)
+.input store
+
+// ⟦x⟧
+.decl pointsTo(x: var, t: token)
+
+// ⟦t.f⟧
+.decl pointsToField(t: token, f: field, v: token)
+
+
+// analysis
+pointsTo(x, y) :- new(x, y).
+pointsTo(x, z) :- assign(x, y), pointsTo(y, z).
+pointsTo(x, v) :- load(x, y, f), pointsTo(y, z), pointsToField(z, f, v).
+pointsToField(t, f, v) :- store(r, f, s), pointsTo(r, t), pointsTo(s, v).
