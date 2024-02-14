@@ -27,6 +27,15 @@ class Program(instructions: ArrayBuffer[Instruction]) {
       case StoreInsn(left, field, right) =>
         varIds.add(left)
         varIds.add(right)
+
+      case NewFunInsn(varId, argId, tokenId) =>
+        varIds.add(varId)
+
+      case CallInsn(res, fun, arg) =>
+        varIds.add(res)
+        varIds.add(fun)
+        varIds.add(arg)
+
   }
 
 

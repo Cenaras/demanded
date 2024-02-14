@@ -2,10 +2,11 @@ import main.constraint.ConstraintGenerator
 import main.program.{Program, ProgramTemplates}
 import main.solver.ExhaustiveSolver
 import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
 
-class TestExhaustive extends AnyFunSuite {
+class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
 
   test("LoadStore") {
     val p: Program = ProgramTemplates.LoadStore
@@ -55,6 +56,15 @@ class TestExhaustive extends AnyFunSuite {
     assert(containsExactly(solution, 3, "f", Seq(4)))
     assert(containsExactly(solution, 3, "g", Seq(4)))
   }
+
+  test("FunCall") {
+    val p = ProgramTemplates.FunCall
+    val solver = ExhaustiveSolver()
+    val constraints = ConstraintGenerator.generate(p)
+    val solution = solver.solve(constraints)
+  }
+
+
 }
 
 

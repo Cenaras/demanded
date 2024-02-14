@@ -53,6 +53,11 @@ object ProgramTemplates {
       ))
   }
 
+
+  def FunCall: Program = {
+    Parser.ParseProgram(readTemplate("FunCall"))
+  }
+  
   /**
    * This program previously gave us problems. Since we are reading from x3.f, we must track all tokens from x3, which
    * in this example initially will be t1. Then we must propagate t1 over to x4 and then from there to x2, such that

@@ -15,6 +15,9 @@ object Parser {
     val assignPattern = """x([0-9]+) = x([0-9]+)""".r
     val loadPattern = """x([0-9]+) = x([0-9]+).([a-z])""".r
     val storePattern = """x([0-9]+).([a-z]) = x([0-9]+)""".r
+    val newFunPattern = """x([0-9]+) = \(x([0-9]+)\) =>_t([0-9]+) x([0-9]+)""".r //FIXME: Use capture group to ensure always identity func
+    val callPattern = """x([0-9]+) = x([0-9]+)\(x([0-9]+)\)""".r
+
 
     val p: Program = Program()
 
@@ -24,6 +27,8 @@ object Parser {
       case assignPattern(left, right) => p.addInstruction(AssignInsn(left.toInt, right.toInt))
       case loadPattern(left, right, field) => p.addInstruction(LoadInsn(left.toInt, right.toInt, field))
       case storePattern(left, field, right) => p.addInstruction(StoreInsn(left.toInt, field, right.toInt))
+      case newFunPattern(left, arg, funId, _) => p.addInstruction(NewFunInsn(left.toInt, arg.toInt, funId.toInt))
+      case callPattern(res, cls, arg) => p.addInstruction(CallInsn(res.toInt, cls.toInt, arg.toInt))
       case e => throw Error("Error in parsing statement %s".format(e))
     }
     p
@@ -45,6 +50,7 @@ object Parser {
       case AssignInsn(left, right) => assignFacts += "x%s\tx%s\n".format(left, right)
       case LoadInsn(left, right, field) => loadFacts += "x%s\tx%s\t%s\n".format(left, right, field)
       case StoreInsn(left, field, right) => storeFacts += "x%s\t%s\tx%s\n".format(left, field, right)
+      case _ => throw Error("Unsupported datalog translation")
     }
 
     def write(file: String, content: String): Unit = {
@@ -165,3 +171,10 @@ case class LoadInsn(left: VarId, right: VarId, field: String) extends Instructio
 
 case class StoreInsn(left: VarId, field: String, right: VarId) extends Instruction:
   override def print(): String = "x%d.%s = x%d".format(left, field, right)
+
+case class NewFunInsn(varId: VarId, argId: VarId, tokenId: TokenId) extends Instruction:
+  override def print(): String = "x%d = (x%d) =>_%d x%d".format(varId, argId, tokenId, argId)
+
+// FIXME: All functions are identity functions fow now
+case class CallInsn(res: VarId, fun: VarId, arg: VarId) extends Instruction:
+  override def print(): String = "x%d = x%d(x%d)".format(res, fun, arg)

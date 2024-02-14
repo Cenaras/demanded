@@ -10,7 +10,7 @@ object ConstraintGenerator {
 
   def generate(program: Program): Constraints = {
 
-    val addrConstraints: mutable.Set[AddrConstraint] = mutable.Set()
+    val newConstraints: mutable.Set[NewConstraint] = mutable.Set()
     val copyConstraints: mutable.Set[CopyConstraint] = mutable.Set()
     val complexConstraints: mutable.Set[ComplexConstraint] = mutable.Set()
 
@@ -25,8 +25,8 @@ object ConstraintGenerator {
     program.getInstructions.foreach {
       case NewInsn(varId, tokenId) =>
         val cvar = getOrSetCvar(varId, id2Cvar, constraintVars)
-        val token = getOrSetToken(tokenId, id2Token, token2Cvar, constraintVars)
-        addrConstraints += AddrConstraint(cvar, token)
+        val token = getOrSetObjToken(tokenId, id2Token, token2Cvar, constraintVars)
+        newConstraints += NewConstraint(cvar, token)
       case AssignInsn(leftId, rightId) =>
         val left = getOrSetCvar(leftId, id2Cvar, constraintVars)
         val right = getOrSetCvar(rightId, id2Cvar, constraintVars)
@@ -39,13 +39,24 @@ object ConstraintGenerator {
         val base = getOrSetCvar(baseId, id2Cvar, constraintVars)
         val src = getOrSetCvar(srcId, id2Cvar, constraintVars)
         complexConstraints += ForallStoreConstraint(base, field, src)
+      case NewFunInsn(varId, argId, tokenId) =>
+        val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
+        val argCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
+        val token = getOrSetObjToken(tokenId, id2Token, token2Cvar, constraintVars)
+        newConstraints += NewConstraint(dstCvar, token)
+      case CallInsn(res, fun, arg) =>
+        val resCvar = getOrSetCvar(res, id2Cvar, constraintVars)
+        val funCvar = getOrSetCvar(fun, id2Cvar, constraintVars)
+        val argCvar = getOrSetCvar(arg, id2Cvar, constraintVars)
+      // TODO: ???
     }
 
-    Constraints(addrConstraints, copyConstraints, complexConstraints, id2Cvar, id2Token, token2Cvar, constraintVars)
+    Constraints(newConstraints, copyConstraints, complexConstraints, id2Cvar, id2Token, token2Cvar, constraintVars)
 
 
   }
 
+  // TODO: Refactor this file
 
   private def getOrSetCvar(varId: Int, id2Cvar: mutable.Map[Int, ConstraintVar], constraintVars: ConstraintVariables): ConstraintVar = {
     id2Cvar.get(varId) match
@@ -57,11 +68,11 @@ object ConstraintGenerator {
         cvar
   }
 
-  private def getOrSetToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
+  private def getOrSetObjToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
     id2Token.get(tokenId) match
       case Some(value) => value
       case None =>
-        val token = Token(tokenId)
+        val token = ObjToken(tokenId)
         id2Token += tokenId -> token
         // TODO: Don't hardcode
         for (f <- Array("f", "g"))
@@ -69,6 +80,10 @@ object ConstraintGenerator {
           token2Cvar += (token, f) -> tokenCvar
           constraintVars.add(tokenCvar)
         token
+  }
+
+  private def getOrSetFunToken(tokenId: Int, id2Token: mutable.Map[Int, Token]): Unit = {
+
   }
 
 }
