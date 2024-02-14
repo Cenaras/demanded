@@ -6,8 +6,8 @@ import scala.collection.mutable
 
 class ExhaustiveSolver extends BaseSolver {
 
-  def solve(constraints: Constraints): ConstraintVariables = {
-    constraints.addrConstraints.foreach(c => {
+  def solve(constraints: ConstraintEnvironment): ConstraintVariables = {
+    constraints.newConstraints.foreach(c => {
       c.to.addToken(c.token)
     })
 
@@ -30,7 +30,7 @@ class ExhaustiveSolver extends BaseSolver {
   }
 
 
-  private def solveComplex(constraint: ComplexConstraint, constraints: Constraints): Boolean = {
+  private def solveComplex(constraint: ComplexConstraint, constraints: ConstraintEnvironment): Boolean = {
     var changed = false
     constraint match
       case ForallLoadConstraint(dst, base, field) => base.solution.foreach(t => {

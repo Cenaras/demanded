@@ -11,12 +11,11 @@ object ConstraintGenerator {
   // TODO: This file is starting to become a big mess. There are too many maps, can we combine some or make
   //  some smarter data structures / types instead of this?
 
-  def generate(program: Program): Constraints = {
+  def generate(program: Program): ConstraintEnvironment = {
 
     // TODO: Merge into a single, let the solvers apply a .filter when solving
-    val newConstraints: mutable.Set[NewConstraint] = mutable.Set()
-    val copyConstraints: mutable.Set[CopyConstraint] = mutable.Set()
-    val complexConstraints: mutable.Set[ComplexConstraint] = mutable.Set()
+    val constraints: mutable.Set[Constraint] = mutable.Set()
+
 
     val id2Cvar: mutable.Map[Int, ConstraintVar] = mutable.Map()
     val id2ObjToken: mutable.Map[Int, ObjToken] = mutable.Map()
@@ -35,38 +34,37 @@ object ConstraintGenerator {
       case NewInsn(varId, tokenId) =>
         val cvar = getOrSetCvar(varId, id2Cvar, constraintVars)
         val token = getOrSetObjToken(tokenId, id2ObjToken, token2Cvar, constraintVars)
-        newConstraints += NewConstraint(cvar, token)
+        constraints += NewConstraint(cvar, token)
       case AssignInsn(leftId, rightId) =>
         val left = getOrSetCvar(leftId, id2Cvar, constraintVars)
         val right = getOrSetCvar(rightId, id2Cvar, constraintVars)
-        copyConstraints += CopyConstraint(left, right)
+        constraints += CopyConstraint(left, right)
       case LoadInsn(dstId, baseId, field) =>
         val dst = getOrSetCvar(dstId, id2Cvar, constraintVars)
         val base = getOrSetCvar(baseId, id2Cvar, constraintVars)
-        complexConstraints += ForallLoadConstraint(dst, base, field)
+        constraints += ForallLoadConstraint(dst, base, field)
       case StoreInsn(baseId, field, srcId) =>
         val base = getOrSetCvar(baseId, id2Cvar, constraintVars)
         val src = getOrSetCvar(srcId, id2Cvar, constraintVars)
-        complexConstraints += ForallStoreConstraint(base, field, src)
+        constraints += ForallStoreConstraint(base, field, src)
       case NewFunInsn(varId, argId, tokenId) =>
         val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(argId, id2Cvar, constraintVars)
         val token = getOrSetFunToken(tokenId, id2FunToken)
         funInfo += token -> (argCvar, argCvar) // FIXME: For now same since always identity function
-        newConstraints += NewConstraint(dstCvar, token)
+        constraints += NewConstraint(dstCvar, token)
       case CallInsn(res, fun, arg) =>
         val resCvar = getOrSetCvar(res, id2Cvar, constraintVars)
         val funCvar = getOrSetCvar(fun, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(arg, id2Cvar, constraintVars)
-        complexConstraints += CallConstraint(resCvar, funCvar, argCvar)
+        constraints += CallConstraint(resCvar, funCvar, argCvar)
     }
 
-    Constraints(newConstraints, copyConstraints, complexConstraints, id2Cvar, id2ObjToken, id2FunToken, token2Cvar, funInfo, constraintVars)
-
-
+    ConstraintEnvironment(constraints, id2Cvar, id2ObjToken, id2FunToken, token2Cvar, funInfo, constraintVars)
   }
 
-  // TODO: Refactor this file
+
+  // TODO: Refactor this file - remove as many mutable as possible.
 
   private def getOrSetCvar(varId: Int, id2Cvar: mutable.Map[Int, ConstraintVar], constraintVars: ConstraintVariables): ConstraintVar = {
     id2Cvar.get(varId) match

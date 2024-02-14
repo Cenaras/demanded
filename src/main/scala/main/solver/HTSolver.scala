@@ -34,7 +34,7 @@ class HTSolver extends BaseSolver {
   }
 
 
-  def solve(constraints: Constraints, queryId: QueryID): ConstraintVariables = {
+  def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
     val queriedCvar = queryId match
       case (t, f) =>
@@ -54,7 +54,7 @@ class HTSolver extends BaseSolver {
       changed = false
 
       // Address constraints are only processed if the constraint variable is queried or the token is tracked
-      constraints.addrConstraints.foreach(c => {
+      constraints.newConstraints.foreach(c => {
         if (Q.contains(c.to)) {
           changed |= c.to.addToken(c.token)
           if changed then debug("Processing address constraint %s in %s".format(c.token, c.to))
@@ -81,7 +81,7 @@ class HTSolver extends BaseSolver {
   }
 
 
-  private def solveComplex(constraint: ComplexConstraint, constraints: Constraints): Boolean = {
+  private def solveComplex(constraint: ComplexConstraint, constraints: ConstraintEnvironment): Boolean = {
     var changed = false
     constraint match {
       case ForallLoadConstraint(dst, base, field) =>

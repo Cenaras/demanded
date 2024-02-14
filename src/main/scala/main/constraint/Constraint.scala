@@ -6,20 +6,50 @@ import scala.collection.mutable
 
 type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint | CallConstraint
 
-class Constraints(
-                   var addrConstraints: mutable.Set[NewConstraint],
-                   var copyConstraints: mutable.Set[CopyConstraint],
-                   var complexConstraints: mutable.Set[ComplexConstraint],
-                   var id2Cvar: mutable.Map[Int, ConstraintVar],
-                   var id2ObjToken: mutable.Map[Int, ObjToken],
-                   var id2FunToken: mutable.Map[Int, FunToken],
-                   var tf2Cvar: mutable.Map[(Token, String), ConstraintVar],
-                   var funInfo: mutable.Map[FunToken, (ConstraintVar, ConstraintVar)],
-                   var constraintVars: ConstraintVariables) {
+/**
+ * A class responsible for storing a set of generated constraints as well as related meta information such as mappings from ids to said constraints
+ *
+ * @param constraints    set of constraints
+ * @param id2Cvar        mapping id's to constraint variables
+ * @param id2ObjToken    mapping token id's to obj tokens
+ * @param id2FunToken    mapping token id's to function tokens
+ * @param tf2Cvar        mapping pairs of (token, field) to constraints variables
+ * @param funInfo        mapping function tokens to constraint variables for arguments and return node
+ * @param constraintVars list of all constraint variables
+ */
+class ConstraintEnvironment(
+                             var constraints: mutable.Set[Constraint],
+                             var id2Cvar: mutable.Map[Int, ConstraintVar],
+                             var id2ObjToken: mutable.Map[Int, ObjToken],
+                             var id2FunToken: mutable.Map[Int, FunToken],
+                             var tf2Cvar: mutable.Map[(Token, String), ConstraintVar],
+                             var funInfo: mutable.Map[FunToken, (ConstraintVar, ConstraintVar)],
+                             var constraintVars: ConstraintVariables) {
 
   def this() = {
-    this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
+    this(mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
   }
+
+  def newConstraints: mutable.Set[NewConstraint] = {
+    constraints.collect {
+      case a: NewConstraint => a
+    }
+  }
+
+  def copyConstraints: mutable.Set[CopyConstraint] = {
+    constraints.collect {
+      case a: CopyConstraint => a
+    }
+  }
+
+  def complexConstraints: mutable.Set[ComplexConstraint] = {
+    constraints.collect {
+      case a: ForallStoreConstraint => a
+      case b: ForallLoadConstraint => b
+      case c: CallConstraint => c
+    }
+  }
+
 }
 
 
