@@ -20,7 +20,7 @@ object ConstraintGenerator {
 
     val constraintVars: ConstraintVariables = mutable.Set()
 
-
+    // TODO: Can we filter/map/reduce/... this instead of foreach and having mutable maps?
     // Iterate all instructions in the program and generate constraints for them
     program.getInstructions.foreach {
       case NewInsn(varId, tokenId) =>

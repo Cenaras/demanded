@@ -6,7 +6,7 @@ object Main {
 
 
   @main def run(): Unit = {
-    val p = ProgramTemplates.LoadStore
+    val p = ProgramTemplates.demandedSimple
     Parser.WriteDatalog(p)
   }
 

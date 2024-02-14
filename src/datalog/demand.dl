@@ -1,8 +1,10 @@
+// FIXME: This is work in progress
+
 .type var <: symbol
 .type token <: symbol
 .type field <: symbol
 
-.output pointsTo
+.output query
 
 // x = new t
 .decl new(x: var, t: token)
@@ -25,6 +27,11 @@
 
 // ⟦t.f⟧
 .decl pointsToField(t: token, f: field, v: token)
+
+// query
+.decl query(t: token)
+query(t) :- pointsTo("x1", t).
+
 
 // analysis
 pointsTo(x, y) :- new(x, y).
