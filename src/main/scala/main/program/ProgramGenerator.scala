@@ -15,7 +15,7 @@ object Parser {
     val assignPattern = """x([0-9]+) = x([0-9]+)""".r
     val loadPattern = """x([0-9]+) = x([0-9]+).([a-z])""".r
     val storePattern = """x([0-9]+).([a-z]) = x([0-9]+)""".r
-    val newFunPattern = """x([0-9]+) = \(x([0-9]+)\) =>_t([0-9]+) x([0-9]+)""".r //FIXME: Use capture group to ensure always identity func
+    val newFunPattern = """x([0-9]+) = \(x([0-9]+)\) =>_f([0-9]+) x([0-9]+)""".r //FIXME: Use capture group to ensure always identity func
     val callPattern = """x([0-9]+) = x([0-9]+)\(x([0-9]+)\)""".r
 
 

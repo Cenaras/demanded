@@ -4,19 +4,21 @@ package main.constraint
 import scala.collection.mutable
 
 
-type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint
+type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint | CallConstraint
 
 class Constraints(
                    var addrConstraints: mutable.Set[NewConstraint],
                    var copyConstraints: mutable.Set[CopyConstraint],
                    var complexConstraints: mutable.Set[ComplexConstraint],
                    var id2Cvar: mutable.Map[Int, ConstraintVar],
-                   var id2Token: mutable.Map[Int, Token],
+                   var id2ObjToken: mutable.Map[Int, ObjToken],
+                   var id2FunToken: mutable.Map[Int, FunToken],
                    var tf2Cvar: mutable.Map[(Token, String), ConstraintVar],
+                   var funInfo: mutable.Map[FunToken, (ConstraintVar, ConstraintVar)],
                    var constraintVars: ConstraintVariables) {
 
   def this() = {
-    this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
+    this(mutable.Set(), mutable.Set(), mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
   }
 }
 
@@ -54,6 +56,15 @@ case class ForallStoreConstraint(base: ConstraintVar, field: String, src: Constr
     case _ => false
 
   override def hashCode(): Int = (base, field, src).hashCode()
+}
+
+// TODO: Can this be represented as a load and a store constraint?
+case class CallConstraint(res: ConstraintVar, callNode: ConstraintVar, arg: ConstraintVar) extends Constraint {
+  override def equals(obj: Any): Boolean = {
+    obj match
+      case CallConstraint(res, callNode, arg) => true
+      case _ => false
+  }
 }
 
 /**

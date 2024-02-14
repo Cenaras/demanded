@@ -8,15 +8,24 @@ import scala.collection.mutable
 
 object ConstraintGenerator {
 
+  // TODO: This file is starting to become a big mess. There are too many maps, can we combine some or make
+  //  some smarter data structures / types instead of this?
+
   def generate(program: Program): Constraints = {
 
+    // TODO: Merge into a single, let the solvers apply a .filter when solving
     val newConstraints: mutable.Set[NewConstraint] = mutable.Set()
     val copyConstraints: mutable.Set[CopyConstraint] = mutable.Set()
     val complexConstraints: mutable.Set[ComplexConstraint] = mutable.Set()
 
     val id2Cvar: mutable.Map[Int, ConstraintVar] = mutable.Map()
-    val id2Token: mutable.Map[Int, Token] = mutable.Map()
+    val id2ObjToken: mutable.Map[Int, ObjToken] = mutable.Map()
+    val id2FunToken: mutable.Map[Int, FunToken] = mutable.Map()
     val token2Cvar: mutable.Map[(Token, String), ConstraintVar] = mutable.Map()
+
+    // Mapping a function token to its argument and return constraint variable
+    val funInfo: mutable.Map[FunToken, (ConstraintVar, ConstraintVar)] = mutable.Map()
+
 
     val constraintVars: ConstraintVariables = mutable.Set()
 
@@ -25,7 +34,7 @@ object ConstraintGenerator {
     program.getInstructions.foreach {
       case NewInsn(varId, tokenId) =>
         val cvar = getOrSetCvar(varId, id2Cvar, constraintVars)
-        val token = getOrSetObjToken(tokenId, id2Token, token2Cvar, constraintVars)
+        val token = getOrSetObjToken(tokenId, id2ObjToken, token2Cvar, constraintVars)
         newConstraints += NewConstraint(cvar, token)
       case AssignInsn(leftId, rightId) =>
         val left = getOrSetCvar(leftId, id2Cvar, constraintVars)
@@ -41,17 +50,18 @@ object ConstraintGenerator {
         complexConstraints += ForallStoreConstraint(base, field, src)
       case NewFunInsn(varId, argId, tokenId) =>
         val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
-        val argCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
-        val token = getOrSetObjToken(tokenId, id2Token, token2Cvar, constraintVars)
+        val argCvar = getOrSetCvar(argId, id2Cvar, constraintVars)
+        val token = getOrSetFunToken(tokenId, id2FunToken)
+        funInfo += token -> (argCvar, argCvar) // FIXME: For now same since always identity function
         newConstraints += NewConstraint(dstCvar, token)
       case CallInsn(res, fun, arg) =>
         val resCvar = getOrSetCvar(res, id2Cvar, constraintVars)
         val funCvar = getOrSetCvar(fun, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(arg, id2Cvar, constraintVars)
-      // TODO: ???
+        complexConstraints += CallConstraint(resCvar, funCvar, argCvar)
     }
 
-    Constraints(newConstraints, copyConstraints, complexConstraints, id2Cvar, id2Token, token2Cvar, constraintVars)
+    Constraints(newConstraints, copyConstraints, complexConstraints, id2Cvar, id2ObjToken, id2FunToken, token2Cvar, funInfo, constraintVars)
 
 
   }
@@ -68,12 +78,12 @@ object ConstraintGenerator {
         cvar
   }
 
-  private def getOrSetObjToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
-    id2Token.get(tokenId) match
+  private def getOrSetObjToken(tokenId: Int, id2ObjToken: mutable.Map[Int, ObjToken], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
+    id2ObjToken.get(tokenId) match
       case Some(value) => value
       case None =>
         val token = ObjToken(tokenId)
-        id2Token += tokenId -> token
+        id2ObjToken += tokenId -> token
         // TODO: Don't hardcode
         for (f <- Array("f", "g"))
           val tokenCvar = FieldConstraintVar(token, f)
@@ -82,8 +92,13 @@ object ConstraintGenerator {
         token
   }
 
-  private def getOrSetFunToken(tokenId: Int, id2Token: mutable.Map[Int, Token]): Unit = {
-
+  private def getOrSetFunToken(tokenId: Int, id2FunToken: mutable.Map[Int, FunToken]): FunToken = {
+    id2FunToken.get(tokenId) match
+      case Some(value) => value
+      case None =>
+        val token = FunToken(tokenId)
+        id2FunToken += tokenId -> token
+        token
   }
 
 }
