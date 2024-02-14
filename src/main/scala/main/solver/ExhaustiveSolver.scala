@@ -41,6 +41,14 @@ class ExhaustiveSolver extends BaseSolver {
         val cvar = constraints.tf2Cvar((t, field))
         changed |= cvar.addTokens(src.solution)
       })
+      case CallConstraint(res, call, arg) => call.solution.foreach {
+        case f: FunToken =>
+          val (param, ret) = constraints.funInfo(f)
+          changed |= param.addTokens(arg.solution)
+          changed |= res.addTokens(ret.solution)
+        case _ =>
+      }
+
     changed
   }
 

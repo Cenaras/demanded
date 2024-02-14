@@ -1,4 +1,4 @@
-import main.constraint.ConstraintGenerator
+import main.constraint.{ConstraintGenerator, FunToken}
 import main.program.{Program, ProgramTemplates}
 import main.solver.ExhaustiveSolver
 import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar}
@@ -62,6 +62,17 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
     val solver = ExhaustiveSolver()
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints)
+
+    assert(containsExactly(solution, 6, Seq(2)))
+    assert(containsExactly(solution, 6, Seq(2)))
+    assert(containsExactly(solution, 8, Seq(1)))
+    assert(containsExactly(solution, 1, Seq(1)))
+
+    getBaseCvar(solution, 3).solution.foreach {
+      case FunToken(id) =>
+      case _ => throw Error("Expected only function tokens")
+    }
+
   }
 
 

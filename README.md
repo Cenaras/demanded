@@ -27,3 +27,11 @@ To generate facts for a program, use the `Parser.WriteDatalog` function. An exam
 ```
 
 Running this main program will generate datalog facts corresponding to the program `LoadStore`.
+
+# TODO
+
+Add support for function calls and returns from functions. Consider allowing bodies in functions or always keep as
+identity functions
+Implement a HT variant that uses "the blue tracking constraint variables", i.e. make duplicates of all constraint
+variables (at init solving)
+Clean up some of the messy code

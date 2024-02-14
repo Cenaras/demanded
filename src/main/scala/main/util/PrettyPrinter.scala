@@ -10,16 +10,16 @@ object PrettyPrinter {
   def printSolution(solution: mutable.Set[ConstraintVar]): String = {
     var pretty = ""
 
+
     solution.foreach(f => {
       if (f.solution.nonEmpty) {
-        pretty += f
+        pretty += f.toString + ": "
         f.solution.foreach(t => {
           pretty += t.toString + ", "
         })
         pretty += "\n"
       }
     })
-
     pretty
   }
 
