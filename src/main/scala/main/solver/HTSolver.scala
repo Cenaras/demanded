@@ -152,7 +152,6 @@ class HTSolver extends BaseSolver {
               // flow to the parameters in other call instances
               changed |= addTracking(b, constraint)
           }
-
         }
 
         // If a call is tracked, we must copy the call site argument to the formal parameter
