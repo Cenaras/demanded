@@ -47,6 +47,15 @@ class TestComparison extends AnyFunSuite {
     assert(compareSolutions(e, d, queryId))
   }
 
+  test("FunctionAndField") {
+    val queryId = 4
+    val p = ProgramTemplates.FunctionAndField
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
+
   test("Small programs") {
     repeatTest(10000, newGenerator(5, 2, 15, newDist(20, 50, 20, 10)))
   }
