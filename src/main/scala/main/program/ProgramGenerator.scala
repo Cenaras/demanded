@@ -67,16 +67,25 @@ object Parser {
 
 }
 
-class ProgramDistribution(val newObj: Int, val assign: Int, val load: Int, val store: Int) {
-  assert(storeProp == 100)
+class ProgramDistribution(newObj: Int, assign: Int, load: Int, store: Int, newFun: Int, call: Int) {
 
-  def newObjProp = newObj
+  def this(newObj: Int, assign: Int, load: Int, store: Int) = {
+    this(newObj, assign, load, store, 0, 0)
+  }
 
-  def assignProp = newObjProp + assign
+  assert(callProp == 100)
 
-  def loadProp = assignProp + load
+  def newObjProp: Int = newObj
 
-  def storeProp = loadProp + store
+  def assignProp: Int = newObjProp + assign
+
+  def loadProp: Int = assignProp + load
+
+  def storeProp: Int = loadProp + store
+
+  def newFunProp: Int = storeProp + newFun
+
+  def callProp: Int = newFunProp + call
 }
 
 
@@ -117,19 +126,28 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
         NewInsn(varId, tokenId)
       case x if x <= dist.assignProp =>
         val leftId = generateRandomVar(None)
-        val rightId = generateRandomVar(Some(leftId))
+        val rightId = generateRandomVar(leftId)
         AssignInsn(leftId, rightId)
-
       case x if x <= dist.loadProp =>
         val leftId = generateRandomVar(None)
-        val rightId = generateRandomVar(Some(leftId))
+        val rightId = generateRandomVar(leftId)
         val field = generateRandomField()
         LoadInsn(leftId, rightId, field)
-      case _ =>
+      case x if x <= dist.storeProp =>
         val leftId = generateRandomVar(None)
         val field = generateRandomField()
-        val rightId = generateRandomVar(Some(leftId))
+        val rightId = generateRandomVar(leftId)
         StoreInsn(leftId, field, rightId)
+      case x if x <= dist.newFunProp =>
+        val funId = generateRandomVar(None)
+        val funToken = generateRandomToken()
+        val param = generateRandomParameter()
+        NewFunInsn(funId, param, funToken)
+      case x if x <= dist.callProp =>
+        val resNode = generateRandomVar(None)
+        val callNode = generateRandomVar(resNode)
+        val argNode = generateRandomVar(Some(Seq(resNode, callNode)))
+        CallInsn(resNode, callNode, argNode)
     }
   }
 
@@ -140,17 +158,21 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
    * @param exclude if specified, generated variable is guaranteed different from this.
    * @return random variable
    */
-  private def generateRandomVar(exclude: Option[VarId]): Int = {
+  private def generateRandomVar(exclude: Option[Seq[VarId]]): Int = {
     val res = exclude match
       case None => rng.between(0, varNumber)
       case Some(ex) =>
         var random = -1
         while
           random = rng.between(0, varNumber)
-          random == ex
+          ex.contains(random)
         do ()
         random
     res
+  }
+
+  private def generateRandomVar(exclude: VarId): Int = {
+    generateRandomVar(Some(Seq(exclude)))
   }
 
   private def generateRandomToken(): Int = {
@@ -160,6 +182,12 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   private def generateRandomField(): String = {
     fields(rng.between(0, fields.length - 1))
   }
+
+  // FIXME: ...
+  private def generateRandomParameter(): Int = {
+    rng.between(0, varNumber) + varNumber
+  }
+
 }
 
 
