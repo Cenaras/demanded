@@ -140,7 +140,7 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
         StoreInsn(leftId, field, rightId)
       case x if x <= dist.newFunProp =>
         val funId = generateRandomVar(None)
-        val funToken = generateRandomToken()
+        val funToken = generateRandomFunToken()
         val param = generateRandomParameter()
         NewFunInsn(funId, param, funToken)
       case x if x <= dist.callProp =>

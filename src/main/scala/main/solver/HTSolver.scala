@@ -130,24 +130,38 @@ class HTSolver extends BaseSolver {
       // If result is demanded, demand call to retrieve every function and demand all return nodes.
       // For now, since every function is identity, we also demand the argument <-- FIXME
       case CallConstraint(res, callNode, arg) =>
+
+        def propArgAndReturn(funToken: FunToken, resNode: ConstraintVar, argNode: ConstraintVar): Boolean = {
+          var changed = false
+          // FIXME: This might be a bit too naive
+          val (argNode, resNode) = constraints.funInfo(funToken)
+          changed |= addDemand(resNode, Some(constraint))
+          changed |= addDemand(arg, Some(constraint))
+          changed |= argNode.addTokens(arg.solution)
+          changed |= res.addTokens(resNode.solution)
+          changed
+        }
+
         if (Q.contains(res)) {
           changed |= addDemand(callNode, Some(constraint))
           callNode.solution.foreach {
             case a: ObjToken =>
             case b: FunToken =>
-              // FIXME: This might be a bit too naive
-              val (argNode, resNode) = constraints.funInfo(b)
-              changed |= addDemand(resNode, Some(constraint))
-              changed |= addDemand(arg, Some(constraint))
-
-              changed |= argNode.addTokens(arg.solution)
-              changed |= res.addTokens(resNode.solution)
+              changed |= propArgAndReturn(b, res, arg)
+              // Since arguments are merged, we must track all function tokens we see, to ensure their arguments
+              // flow to the parameters in other call instances
+              changed |= addTracking(b, constraint)
           }
 
         }
 
+        // If a call is tracked, we must copy the call site argument to the formal parameter
+        callNode.solution.intersect(W).foreach {
+          case a: ObjToken =>
+          case b: FunToken =>
+            changed |= propArgAndReturn(b, res, arg)
+        }
     }
-
     changed
   }
 

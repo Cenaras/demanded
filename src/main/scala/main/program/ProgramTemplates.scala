@@ -57,7 +57,7 @@ object ProgramTemplates {
   def FunCall: Program = {
     Parser.ParseProgram(readTemplate("FunCall"))
   }
-  
+
   /**
    * This program previously gave us problems. Since we are reading from x3.f, we must track all tokens from x3, which
    * in this example initially will be t1. Then we must propagate t1 over to x4 and then from there to x2, such that
@@ -120,6 +120,27 @@ object ProgramTemplates {
    */
   def TrackBaseInStore: Program = {
     Parser.ParseProgram(readTemplate("TrackBaseInStore"))
+  }
+
+
+
+  /*
+   Merge in arguments
+    x0 holds t1
+    x1 holds f2
+    the function calls to x1 merges x0 and x5 in x2
+    Thus both methods return t1, meaning that x4 should hold t1
+  
+x0 = new t1
+x1 = (x2) =>_f2 x2
+x3 = x1(x0)
+x4 = x1(x5)
+
+   */
+
+
+  def MergeInCall: Program = {
+    Parser.ParseProgram(readTemplate("MergeInCall"))
   }
 
 

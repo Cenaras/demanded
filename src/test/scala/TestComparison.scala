@@ -55,6 +55,14 @@ class TestComparison extends AnyFunSuite {
     assert(compareSolutions(e, d, queryId))
   }
 
+  test("MergeInCall") {
+    val queryId = 4
+    val p = ProgramTemplates.MergeInCall
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
 
   test("Small programs") {
     repeatTest(10000, newGenerator(5, 2, 15, newDist(20, 50, 20, 10)))
@@ -78,6 +86,10 @@ class TestComparison extends AnyFunSuite {
 
   test("Large") {
     repeatTest(100, newGenerator(100, 20, 5000, newDist(25, 35, 20, 20)))
+  }
+
+  test("Function call programs") {
+    repeatTest(5000, newGenerator(7, 3, 250, newDist(15, 25, 10, 10, 20, 20)))
   }
 
 
@@ -113,8 +125,12 @@ class TestComparison extends AnyFunSuite {
     new ProgramGenerator(varNumber, tokenNum, size, dist)
   }
 
-  def newDist(newObj: Int, assign: Int, load: Int, store: Int) = {
-    new ProgramDistribution(newObj, assign, load, store)
+  def newDist(newObj: Int, assign: Int, load: Int, store: Int): ProgramDistribution = {
+    newDist(newObj, assign, load, store, 0, 0)
+  }
+
+  def newDist(newObj: Int, assign: Int, load: Int, store: Int, newFun: Int, call: Int): ProgramDistribution = {
+    new ProgramDistribution(newObj, assign, load, store, newFun, call)
   }
 
 }
