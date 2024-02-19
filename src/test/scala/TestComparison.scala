@@ -48,27 +48,27 @@ class TestComparison extends AnyFunSuite {
   }
 
   test("Small programs") {
-    repeatTest(10000, newGenerator(5, 2, 15, (20, 50, 20, 10)))
+    repeatTest(10000, newGenerator(5, 2, 15, newDist(20, 50, 20, 10)))
   }
 
   test("Medium Load/Store heavy") {
-    repeatTest(10000, newGenerator(7, 3, 10, (20, 20, 30, 30)))
+    repeatTest(10000, newGenerator(7, 3, 10, newDist(20, 20, 30, 30)))
   }
 
   test("Medium programs") {
-    repeatTest(10000, newGenerator(10, 3, 25, (20, 50, 20, 10)))
+    repeatTest(10000, newGenerator(10, 3, 25, newDist(20, 50, 20, 10)))
   }
 
   test("Random program") {
-    repeatTest(1000, newGenerator(100, 30, 200, (20, 50, 20, 10)))
+    repeatTest(1000, newGenerator(100, 30, 200, newDist(20, 50, 20, 10)))
   }
 
   test("Load/Store heavy") {
-    repeatTest(200, newGenerator(250, 50, 500, (25, 25, 30, 30)))
+    repeatTest(200, newGenerator(250, 50, 500, newDist(25, 25, 25, 25)))
   }
 
   test("Large") {
-    repeatTest(100, newGenerator(100, 20, 5000, (25, 35, 20, 20)))
+    repeatTest(100, newGenerator(100, 20, 5000, newDist(25, 35, 20, 20)))
   }
 
 
@@ -79,7 +79,7 @@ class TestComparison extends AnyFunSuite {
 
       val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
       if (!compareSolutions(exhaustiveSolution, demandedSolution, query)) {
-        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.printProgram(program)))
+        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.stringifyProgram(program)))
       }
 
       val demandedSolutionSize = SolverUtil.solutionSize(demandedSolution)
@@ -104,5 +104,8 @@ class TestComparison extends AnyFunSuite {
     new ProgramGenerator(varNumber, tokenNum, size, dist)
   }
 
+  def newDist(newObj: Int, assign: Int, load: Int, store: Int) = {
+    new ProgramDistribution(newObj, assign, load, store)
+  }
 
 }

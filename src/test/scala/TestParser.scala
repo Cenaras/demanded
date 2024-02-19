@@ -6,7 +6,7 @@ class TestParser extends AnyFunSuite {
 
 
   test("Program-to-string-to-program-to-string") {
-    val g = new ProgramGenerator(20, 5, 50, ProgramDistribution(20, 50, 20, 10, 0, 0))
+    val g = new ProgramGenerator(20, 5, 50, ProgramDistribution(20, 50, 20, 10))
     val p = g.generate()
 
     val pString = PrettyPrinter.stringifyProgram(p)

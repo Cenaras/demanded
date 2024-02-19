@@ -3,8 +3,6 @@ package main.program
 import java.io.FileWriter
 import scala.util.Random
 
-type ProgramDistribution = (Int, Int, Int, Int)
-
 /**
  * A simple parser that parses programs programs for our simple language.
  */
@@ -69,6 +67,18 @@ object Parser {
 
 }
 
+class ProgramDistribution(val newObj: Int, val assign: Int, val load: Int, val store: Int) {
+  assert(storeProp == 100)
+
+  def newObjProp = newObj
+
+  def assignProp = newObjProp + assign
+
+  def loadProp = assignProp + load
+
+  def storeProp = loadProp + store
+}
+
 
 /**
  * Generates random programs. Seeded with number of variables and number of instructions in the program.
@@ -101,16 +111,16 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
    */
   private def genInstruction(seed: Int): Instruction = {
     seed match {
-      case x if x <= dist._1 =>
+      case x if x <= dist.newObjProp =>
         val varId = generateRandomVar(None)
         val tokenId = generateRandomToken()
         NewInsn(varId, tokenId)
-      case x if x <= dist._1 + dist._2 =>
+      case x if x <= dist.assignProp =>
         val leftId = generateRandomVar(None)
         val rightId = generateRandomVar(Some(leftId))
         AssignInsn(leftId, rightId)
 
-      case x if x <= dist._1 + dist._2 + dist._3 =>
+      case x if x <= dist.loadProp =>
         val leftId = generateRandomVar(None)
         val rightId = generateRandomVar(Some(leftId))
         val field = generateRandomField()
