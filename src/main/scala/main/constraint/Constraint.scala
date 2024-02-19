@@ -130,7 +130,7 @@ case class BaseConstraintVar(id: Int) extends ConstraintVar {
   }
 }
 
-case class FieldConstraintVar(token: ObjToken, field: String) extends ConstraintVar {
+case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
 

@@ -61,7 +61,7 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
 
   test("FunctionAndField") {
     val solution = solve(ProgramTemplates.FunctionAndField)
-    assert(containsExactly(solution, 4, Seq(1)))
+    assert(containsExactly(solution, 4, Seq(1, 4)))
   }
 
 

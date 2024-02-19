@@ -50,7 +50,7 @@ object ConstraintGenerator {
       case NewFunInsn(varId, argId, tokenId) =>
         val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(argId, id2Cvar, constraintVars)
-        val token = getOrSetFunToken(tokenId, id2FunToken)
+        val token = getOrSetFunToken(tokenId, id2FunToken, token2Cvar, constraintVars)
         funInfo += token -> (argCvar, argCvar) // FIXME: For now same since always identity function
         constraints += NewConstraint(dstCvar, token)
       case CallInsn(res, fun, arg) =>
@@ -90,12 +90,18 @@ object ConstraintGenerator {
         token
   }
 
-  private def getOrSetFunToken(tokenId: Int, id2FunToken: mutable.Map[Int, FunToken]): FunToken = {
+  // TODO: Duplicate...
+  private def getOrSetFunToken(tokenId: Int, id2FunToken: mutable.Map[Int, FunToken], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): FunToken = {
     id2FunToken.get(tokenId) match
       case Some(value) => value
       case None =>
         val token = FunToken(tokenId)
         id2FunToken += tokenId -> token
+
+        for (f <- Array("f", "g"))
+          val tokenCvar = FieldConstraintVar(token, f)
+          token2Cvar += (token, f) -> tokenCvar
+          constraintVars.add(tokenCvar)
         token
   }
 
