@@ -4,51 +4,14 @@ import main.constraint.*
 
 import scala.collection.mutable
 
-/** A query is either for a base constraint variable (denoted by varId)
- * or a field constraint variable (denoted by (tokenId, field)) */
-type QueryID = Int | (Int, String)
 
-class HTSolver extends BaseSolver, Demanded {
-
-  /** List of queried constraint variables. */
-  private val Q: mutable.Set[ConstraintVar] = mutable.Set()
-  /** List of tracked tokens. Tracked tokens must be propagated regardless of demand. */
-  private val W: mutable.Set[Token] = mutable.Set()
-
-
-  private def addDemand(constraintVar: ConstraintVar, constraint: Option[Constraint]): Boolean = {
-    if (Q.add(constraintVar)) {
-      debug("Adding %s to demand due to %s".format(constraintVar, constraint))
-      return true
-    }
-    false
-  }
-
-
-  private def addTracking(token: Token, constraint: Constraint): Boolean = {
-    if (W.add(token)) {
-      debug("Adding %s to tracking due to %s".format(token, constraint))
-      return true
-    }
-    false
-  }
-
+class HTSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
-    val queriedCvar = queryId match
-      case (t, f) =>
-        W.add(constraints.id2Token(t)) // FIXME: Added this rule to ensure tracking when querying field cvar
-        constraints.tf2Cvar.get((constraints.id2Token(t), f))
+    demandQuery(queryId, constraints)
 
-      case x: Int => constraints.id2Cvar.get(x)
-
-    queriedCvar match
-      case None => throw Error("Queried variable does not exist")
-      case Some(v) => addDemand(v, None)
-    var changed = true;
-
-
+    var changed = true
     // We also must iterate the address constraints in the demanded version
     while (changed) {
       changed = false
@@ -88,7 +51,7 @@ class HTSolver extends BaseSolver, Demanded {
         if (Q.contains(dst)) {
           changed |= addDemand(base, Some(constraint))
           base.solution.foreach(t => {
-            changed |= addTracking(t, constraint)
+            changed |= addTracking(t, Some(constraint))
           })
 
           base.solution.foreach(t => {
@@ -123,7 +86,7 @@ class HTSolver extends BaseSolver, Demanded {
           changed |= addDemand(base, Some(constraint))
           // FIXME: Added this rule, unsure if it is correct for minimal solution
           base.solution.foreach(t => {
-            changed |= addTracking(t, constraint)
+            changed |= addTracking(t, Some(constraint))
           })
         }
 
@@ -150,7 +113,7 @@ class HTSolver extends BaseSolver, Demanded {
               changed |= propArgAndReturn(b, res, arg)
               // Since arguments are merged, we must track all function tokens we see, to ensure their arguments
               // flow to the parameters in other call instances
-              changed |= addTracking(b, constraint)
+              changed |= addTracking(b, Some(constraint))
           }
         }
 
