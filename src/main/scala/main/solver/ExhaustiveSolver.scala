@@ -34,11 +34,11 @@ class ExhaustiveSolver extends BaseSolver {
     var changed = false
     constraint match
       case ForallLoadConstraint(dst, base, field) => base.solution.foreach(t => {
-        val cvar = constraints.tf2Cvar((t, field))
+        val cvar = constraints.tf2Cvar(t, field)
         changed |= dst.addTokens(cvar.solution)
       })
       case ForallStoreConstraint(base, field, src) => base.solution.foreach(t => {
-        val cvar = constraints.tf2Cvar((t, field))
+        val cvar = constraints.tf2Cvar(t, field)
         changed |= cvar.addTokens(src.solution)
       })
       case CallConstraint(res, call, arg) => call.solution.foreach {

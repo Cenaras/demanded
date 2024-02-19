@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 object PrettyPrinter {
 
-  def printSolution(solution: mutable.Set[ConstraintVar]): String = {
+  def stringifySolution(solution: mutable.Set[ConstraintVar]): String = {
     var pretty = ""
 
 
@@ -23,7 +23,7 @@ object PrettyPrinter {
     pretty
   }
 
-  def printProgram(program: Program): String = {
+  def stringifyProgram(program: Program): String = {
     var pretty = ""
     program.getInstructions.foreach(f => pretty += f.print() + "\n")
     pretty
