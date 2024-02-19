@@ -1,24 +1,106 @@
 package main.solver
 
-import main.constraint.{ConstraintEnvironment, ConstraintVar, ConstraintVariables}
+import main.constraint.*
 
 import scala.collection.mutable
 
 // TODO: Reuse code from HTSolver?
 class HTDouble extends Demanded {
+  private val cVar2Tracking: mutable.Map[ConstraintVar, ConstraintVar] = mutable.Map()
 
+  // TODO: There might end up being some code duplication that we can refactor between HTSolve and this, since
+  //  the rules are basically the same
 
-  private val cvarToTrackCvar: mutable.Map[ConstraintVar, ConstraintVar] = mutable.Map()
-
+  // We could make a strategy pattern where we have a strategy for demanded and a strategy for tracking
+  // Then we reuse the demanded in both and only alter the tracking
   def solve(constraints: ConstraintEnvironment, queryID: QueryID): ConstraintVariables = {
     generateTrackedConstraintVars(constraints.constraintVars)
-    ???
+    demandQuery(queryID, constraints)
+
+    var changed = true
+    while (changed) {
+      changed = false
+
+      constraints.newConstraints.foreach(c => {
+        if (Q.contains(c.to)) {
+          changed |= c.to.addToken(c.token)
+          if changed then debug("Processed address constraint %s in %s".format(c.token, c.to))
+        }
+        if (W.contains(c.token)) {
+          changed |= cVar2Tracking(c.to).addToken(c.token)
+          if changed then debug("Processing tracking in address constraint %s in %s".format(c.token, c.to))
+        }
+      })
+
+      constraints.copyConstraints.foreach(c => {
+        if (Q.contains(c.to)) {
+          changed |= addDemand(c.from, Some(c))
+          changed |= propagate(c.from, c.to)
+        }
+        changed |= cVar2Tracking(c.to).addTokens(cVar2Tracking(c.from).solution)
+      })
+
+      constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
+
+
+    }
+
+    constraints.constraintVars
+
   }
 
-  private def generateTrackedConstraintVars(constraints: ConstraintVariables): Unit = {
-    constraints.foreach(f => {
+  private def solveComplex(constraint: ComplexConstraint, environment: ConstraintEnvironment): Boolean = {
+    var changed = false
+    constraint match
+      case ForallLoadConstraint(dst, base, field) =>
+        if (Q.contains(dst)) {
+          changed |= addDemand(base, Some(constraint))
+          base.solution.foreach(t => {
+            changed |= addTracking(t, Some(constraint))
+          })
+
+          base.solution.foreach(t => {
+            val tf = environment.tf2Cvar((t, field))
+            changed |= addDemand(tf, Some(constraint))
+            changed |= dst.addTokens(tf.solution)
+          })
+        }
+
+        base.solution.foreach(t => {
+          val trackedTf = cVar2Tracking(environment.tf2Cvar((environment.id2Token(t.id), field)))
+          val trackedDst = cVar2Tracking(dst)
+          changed |= trackedDst.addTokens(trackedTf.solution)
+        })
+
+      case ForallStoreConstraint(base, field, src) =>
+        base.solution.foreach(t => {
+          val tf = environment.tf2Cvar((t, field))
+          if (Q.contains(tf)) {
+            changed |= addDemand(src, Some(constraint))
+            changed |= tf.addTokens(src.solution)
+          }
+          changed |= cVar2Tracking(tf).addTokens(cVar2Tracking(src).solution)
+        })
+
+        if (cVar2Tracking(src).solution.nonEmpty) {
+          changed |= addDemand(base, Some(constraint))
+          base.solution.foreach(t => {
+            changed |= addTracking(t, Some(constraint))
+          })
+        }
 
 
+      case _ => ???
+    changed
+  }
+
+  private def generateTrackedConstraintVars(constraintVariables: ConstraintVariables): Unit = {
+    constraintVariables.foreach(f => {
+      val tracked = f match {
+        case a: BaseConstraintVar => TrackedBaseConstraintVar(a.getId, a)
+        case b: FieldConstraintVar => TrackedFieldConstraintVar(b.getToken, b.getField, b)
+      }
+      cVar2Tracking += f -> tracked
     })
   }
 

@@ -127,6 +127,15 @@ case class BaseConstraintVar(id: Int) extends ConstraintVar {
   }
 }
 
+case class TrackedBaseConstraintVar(id: Int, base: BaseConstraintVar) extends ConstraintVar {
+
+  override def getId: Int = id
+
+  override def toString: String = {
+    "⟦x%d⟧_tracked".format(id)
+  }
+}
+
 case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
@@ -135,9 +144,21 @@ case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar
     "⟦t%d.%s⟧".format(token.id, field)
   }
 
-  def getField: String = field
+  def getToken: Token = token
 
+  def getField: String = field
 }
+
+case class TrackedFieldConstraintVar(token: Token, field: String, base: FieldConstraintVar) extends ConstraintVar {
+  override def getId: Int = token.id
+
+  override def toString: String = {
+    "⟦t%d.%s⟧_tracked".format(token.id, field)
+  }
+
+  def getField: String = field
+}
+
 
 trait Token(val id: Int) {
 
