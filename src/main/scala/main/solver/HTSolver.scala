@@ -117,11 +117,6 @@ class HTSolver extends BaseSolver {
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
-
-          // TODO: Is this needed?
-//          tf.solution.foreach(t => {
-//            changed |= addTracking(t, constraint)
-//          })
         })
 
         if (src.solution.intersect(W).nonEmpty) {
