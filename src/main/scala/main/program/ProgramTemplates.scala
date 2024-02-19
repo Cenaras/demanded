@@ -127,6 +127,11 @@ object ProgramTemplates {
     Parser.ParseProgram(readTemplate("MultipleFields"))
   }
 
+  def FunctionAndField: Program = {
+    Parser.ParseProgram(readTemplate("FunctionAndField"))
+  }
+
+
   /**
    * Reads a template from the templates folder
    *

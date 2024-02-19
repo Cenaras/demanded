@@ -179,6 +179,10 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
     rng.between(0, tokenNum)
   }
 
+  private def generateRandomFunToken(): Int = {
+    generateRandomToken() + tokenNum
+  }
+
   private def generateRandomField(): String = {
     fields(rng.between(0, fields.length - 1))
   }
@@ -211,7 +215,7 @@ case class StoreInsn(left: VarId, field: String, right: VarId) extends Instructi
   override def print(): String = "x%d.%s = x%d".format(left, field, right)
 
 case class NewFunInsn(varId: VarId, argId: VarId, tokenId: TokenId) extends Instruction:
-  override def print(): String = "x%d = (x%d) =>_%d x%d".format(varId, argId, tokenId, argId)
+  override def print(): String = "x%d = (x%d) =>_f%d x%d".format(varId, argId, tokenId, argId)
 
 // FIXME: All functions are identity functions fow now
 case class CallInsn(res: VarId, fun: VarId, arg: VarId) extends Instruction:

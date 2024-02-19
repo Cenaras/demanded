@@ -1,4 +1,4 @@
-import main.constraint.{ConstraintGenerator, FunToken}
+import main.constraint.{ConstraintGenerator, ConstraintVariables, FunToken}
 import main.program.{Program, ProgramTemplates}
 import main.solver.ExhaustiveSolver
 import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar}
@@ -9,11 +9,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
 
   test("LoadStore") {
-    val p: Program = ProgramTemplates.LoadStore
-
-    val solver = ExhaustiveSolver()
-    val constraints = ConstraintGenerator.generate(p)
-    val solution = solver.solve(constraints)
+    val solution = solve(ProgramTemplates.LoadStore)
 
     val x1 = getBaseCvar(solution, 1)
     val x2 = getBaseCvar(solution, 2)
@@ -29,12 +25,7 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
   }
 
   test("Aliasing") {
-
-    val p: Program = ProgramTemplates.Aliasing
-
-    val solver = ExhaustiveSolver()
-    val constraints = ConstraintGenerator.generate(p)
-    val solution = solver.solve(constraints)
+    val solution = solve(ProgramTemplates.Aliasing)
 
     assert(containsExactly(solution, 1, Seq(1)))
     assert(containsExactly(solution, 1, "f", Seq(2, 3)))
@@ -45,10 +36,7 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
   }
 
   test("Multiple Fields") {
-    val p = ProgramTemplates.MultipleFields
-    val solver = ExhaustiveSolver()
-    val constraints = ConstraintGenerator.generate(p)
-    val solution = solver.solve(constraints)
+    val solution = solve(ProgramTemplates.MultipleFields)
 
     assert(containsExactly(solution, 1, Seq(1)))
     assert(containsExactly(solution, 1, "f", Seq(2)))
@@ -58,10 +46,7 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
   }
 
   test("FunCall") {
-    val p = ProgramTemplates.FunCall
-    val solver = ExhaustiveSolver()
-    val constraints = ConstraintGenerator.generate(p)
-    val solution = solver.solve(constraints)
+    val solution = solve(ProgramTemplates.FunCall)
 
     assert(containsExactly(solution, 6, Seq(2)))
     assert(containsExactly(solution, 6, Seq(2)))
@@ -72,9 +57,19 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
       case FunToken(id) =>
       case _ => throw Error("Expected only function tokens")
     }
-
   }
 
+  test("FunctionAndField") {
+    val solution = solve(ProgramTemplates.FunctionAndField)
+    assert(containsExactly(solution, 4, Seq(1)))
+  }
+
+
+  def solve(p: Program): ConstraintVariables = {
+    val solver = ExhaustiveSolver()
+    val constraints = ConstraintGenerator.generate(p)
+    solver.solve(constraints)
+  }
 
 }
 
