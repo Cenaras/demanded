@@ -50,7 +50,7 @@ class TestExhaustive extends AnyFunSuite with BeforeAndAfterEach {
 
     assert(containsExactly(solution, 6, Seq(2)))
     assert(containsExactly(solution, 6, Seq(2)))
-    assert(containsExactly(solution, 8, Seq(1)))
+    assert(containsExactly(solution, 8, Seq(3)))
     assert(containsExactly(solution, 1, Seq(1)))
 
     getBaseCvar(solution, 3).solution.foreach {

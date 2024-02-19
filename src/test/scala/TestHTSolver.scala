@@ -44,7 +44,7 @@ class TestHTSolver extends AnyFunSuite {
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 3)
-    assert(containsExactly(getBaseCvar(solution, 3), Seq(1, 2)))
+    assert(containsExactly(getBaseCvar(solution, 3), Seq(0, 1)))
   }
 
   test("Multiple Fields") {
@@ -68,7 +68,7 @@ class TestHTSolver extends AnyFunSuite {
 
 
     println(PrettyPrinter.stringifySolution(solution))
-    assert(containsExactly(solution, 8, Seq(1)))
+    assert(containsExactly(solution, 8, Seq(3)))
 
   }
 

@@ -32,6 +32,15 @@ Running this main program will generate datalog facts corresponding to the progr
 
 Add support for function calls and returns from functions. Consider allowing bodies in functions or always keep as
 identity functions
-Implement a HT variant that uses "the blue tracking constraint variables", i.e. make duplicates of all constraint
+Implement an HT variant that uses "the blue tracking constraint variables", i.e. make duplicates of all constraint
 variables (at init solving)
 Clean up some of the messy code
+
+# Limitations
+
+- Currently, we use an invariant that object token ids and function token ids cannot overlap
+- All functions are hard-coded as identity functions
+- Function arguments must be unique from normal variables
+    - This is maintained in the program generator by using [0, varNum) for variable id's and [varNum, 2varNum) for
+      argument id's
+- A similar restriction (and solution) applies to object tokens and function tokens

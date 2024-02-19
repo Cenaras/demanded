@@ -38,8 +38,8 @@ class HTSolver extends BaseSolver {
 
     val queriedCvar = queryId match
       case (t, f) =>
-        W.add(constraints.id2ObjToken(t)) // FIXME: Added this rule to ensure tracking when querying field cvar
-        constraints.tf2Cvar.get((constraints.id2ObjToken(t), f))
+        W.add(constraints.id2Token(t)) // FIXME: Added this rule to ensure tracking when querying field cvar
+        constraints.tf2Cvar.get((constraints.id2Token(t), f))
 
       case x: Int => constraints.id2Cvar.get(x)
 
@@ -99,7 +99,7 @@ class HTSolver extends BaseSolver {
           })
         }
         base.solution.foreach(t => {
-          val token = constraints.id2ObjToken(t.id)
+          val token = constraints.id2Token(t.id)
           val cvar = constraints.tf2Cvar((token, field))
           val tracked = cvar.solution.intersect(W)
           changed |= dst.addTokens(tracked)

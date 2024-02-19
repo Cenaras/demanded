@@ -18,8 +18,7 @@ object ConstraintGenerator {
 
 
     val id2Cvar: mutable.Map[Int, ConstraintVar] = mutable.Map()
-    val id2ObjToken: mutable.Map[Int, ObjToken] = mutable.Map()
-    val id2FunToken: mutable.Map[Int, FunToken] = mutable.Map()
+    val id2Token: mutable.Map[Int, Token] = mutable.Map()
     val token2Cvar: mutable.Map[(Token, String), ConstraintVar] = mutable.Map()
 
     // Mapping a function token to its argument and return constraint variable
@@ -33,7 +32,7 @@ object ConstraintGenerator {
     program.getInstructions.foreach {
       case NewInsn(varId, tokenId) =>
         val cvar = getOrSetCvar(varId, id2Cvar, constraintVars)
-        val token = getOrSetObjToken(tokenId, id2ObjToken, token2Cvar, constraintVars)
+        val token = getOrSetObjToken(tokenId, id2Token, token2Cvar, constraintVars)
         constraints += NewConstraint(cvar, token)
       case AssignInsn(leftId, rightId) =>
         val left = getOrSetCvar(leftId, id2Cvar, constraintVars)
@@ -50,7 +49,7 @@ object ConstraintGenerator {
       case NewFunInsn(varId, argId, tokenId) =>
         val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(argId, id2Cvar, constraintVars)
-        val token = getOrSetFunToken(tokenId, id2FunToken, token2Cvar, constraintVars)
+        val token = getOrSetFunToken(tokenId, id2Token, token2Cvar, constraintVars)
         funInfo += token -> (argCvar, argCvar) // FIXME: For now same since always identity function
         constraints += NewConstraint(dstCvar, token)
       case CallInsn(res, fun, arg) =>
@@ -60,7 +59,7 @@ object ConstraintGenerator {
         constraints += CallConstraint(resCvar, funCvar, argCvar)
     }
 
-    ConstraintEnvironment(constraints, id2Cvar, id2ObjToken, id2FunToken, token2Cvar, funInfo, constraintVars)
+    ConstraintEnvironment(constraints, id2Cvar, id2Token, token2Cvar, funInfo, constraintVars)
   }
 
 
@@ -76,32 +75,47 @@ object ConstraintGenerator {
         cvar
   }
 
-  private def getOrSetObjToken(tokenId: Int, id2ObjToken: mutable.Map[Int, ObjToken], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
-    id2ObjToken.get(tokenId) match
-      case Some(value) => value
+  /**
+   * Adds the token to the tokenId map and generates field constraint variables for it
+   *
+   * @param t              the token
+   * @param tokenId        id of the token
+   * @param id2Token       map from id to the token
+   * @param token2Cvar     map from (token, field) to constraint var
+   * @param constraintVars list of constraint variables
+   */
+  private def bindNewToken(t: Token, tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Unit = {
+    id2Token += tokenId -> t
+    // TODO: Don't hardcode
+    for (f <- Array("f", "g"))
+      val tokenCvar = FieldConstraintVar(t, f)
+      token2Cvar += (t, f) -> tokenCvar
+      constraintVars.add(tokenCvar)
+  }
+
+  private def getOrSetObjToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Token = {
+    id2Token.get(tokenId) match
+      case Some(value) =>
+        value match
+          case a: ObjToken => a
+          case _ => throw Error("Expected an object token for value %s with id %d".format(value, tokenId))
       case None =>
         val token = ObjToken(tokenId)
-        id2ObjToken += tokenId -> token
-        // TODO: Don't hardcode
-        for (f <- Array("f", "g"))
-          val tokenCvar = FieldConstraintVar(token, f)
-          token2Cvar += (token, f) -> tokenCvar
-          constraintVars.add(tokenCvar)
+        id2Token += tokenId -> token
+        bindNewToken(token, tokenId, id2Token, token2Cvar, constraintVars)
         token
   }
 
-  // TODO: Duplicate...
-  private def getOrSetFunToken(tokenId: Int, id2FunToken: mutable.Map[Int, FunToken], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): FunToken = {
-    id2FunToken.get(tokenId) match
-      case Some(value) => value
+  private def getOrSetFunToken(tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): FunToken = {
+    id2Token.get(tokenId) match
+      case Some(value) =>
+        value match
+          case a: FunToken => a
+          case _ => throw Error("Expected a function token for value %s of id %d".format(value, tokenId))
+
       case None =>
         val token = FunToken(tokenId)
-        id2FunToken += tokenId -> token
-
-        for (f <- Array("f", "g"))
-          val tokenCvar = FieldConstraintVar(token, f)
-          token2Cvar += (token, f) -> tokenCvar
-          constraintVars.add(tokenCvar)
+        bindNewToken(token, tokenId, id2Token, token2Cvar, constraintVars)
         token
   }
 

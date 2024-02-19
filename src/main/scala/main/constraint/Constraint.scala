@@ -11,8 +11,6 @@ type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint | CallCons
  *
  * @param constraints    set of constraints
  * @param id2Cvar        mapping id's to constraint variables
- * @param id2ObjToken    mapping token id's to obj tokens
- * @param id2FunToken    mapping token id's to function tokens
  * @param tf2Cvar        mapping pairs of (token, field) to constraints variables
  * @param funInfo        mapping function tokens to constraint variables for arguments and return node
  * @param constraintVars list of all constraint variables
@@ -20,14 +18,13 @@ type ComplexConstraint = ForallLoadConstraint | ForallStoreConstraint | CallCons
 class ConstraintEnvironment(
                              var constraints: mutable.Set[Constraint],
                              var id2Cvar: mutable.Map[Int, ConstraintVar],
-                             var id2ObjToken: mutable.Map[Int, ObjToken],
-                             var id2FunToken: mutable.Map[Int, FunToken],
+                             var id2Token: mutable.Map[Int, Token],
                              var tf2Cvar: mutable.Map[(Token, String), ConstraintVar],
                              var funInfo: mutable.Map[FunToken, (ConstraintVar, ConstraintVar)],
                              var constraintVars: ConstraintVariables) {
 
   def this() = {
-    this(mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
+    this(mutable.Set(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Map(), mutable.Set())
   }
 
   def newConstraints: mutable.Set[NewConstraint] = {
