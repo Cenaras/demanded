@@ -10,7 +10,7 @@ class TestComparison extends AnyFunSuite {
 
   test("Demanded Simple") {
     val queryId = 1
-    val p = ProgramTemplates.demandedSimple
+    val p = ProgramTemplates.DemandedSimple
     val (e, d) = solveBoth(p, queryId)
     assert(compareSolutions(e, d, queryId))
     assert(SolverUtil.solutionSize(d) < SolverUtil.solutionSize(e))

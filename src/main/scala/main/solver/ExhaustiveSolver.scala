@@ -4,7 +4,7 @@ import main.constraint.*
 
 import scala.collection.mutable
 
-class ExhaustiveSolver extends BaseSolver {
+class ExhaustiveSolver extends BaseSolver, Exhaustive {
 
   def solve(constraints: ConstraintEnvironment): ConstraintVariables = {
     constraints.newConstraints.foreach(c => {

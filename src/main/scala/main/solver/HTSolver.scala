@@ -8,7 +8,7 @@ import scala.collection.mutable
  * or a field constraint variable (denoted by (tokenId, field)) */
 type QueryID = Int | (Int, String)
 
-class HTSolver extends BaseSolver {
+class HTSolver extends BaseSolver, Demanded {
 
   /** List of queried constraint variables. */
   private val Q: mutable.Set[ConstraintVar] = mutable.Set()

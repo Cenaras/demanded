@@ -43,7 +43,7 @@ object ProgramTemplates {
    * x3 = new t3
    * x1 = x2
    */
-  def demandedSimple: Program = {
+  def DemandedSimple: Program = {
     Program(
       ArrayBuffer[Instruction](
         NewInsn(1, 1),
