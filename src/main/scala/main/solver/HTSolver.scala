@@ -9,7 +9,7 @@ import scala.collection.mutable
 type QueryID = Int | (Int, String)
 
 class HTSolver extends BaseSolver {
-  
+
   /** List of queried constraint variables. */
   private val Q: mutable.Set[ConstraintVar] = mutable.Set()
   /** List of tracked tokens. Tracked tokens must be propagated regardless of demand. */
@@ -126,6 +126,26 @@ class HTSolver extends BaseSolver {
             changed |= addTracking(t, constraint)
           })
         }
+
+      // If result is demanded, demand call to retrieve every function and demand all return nodes.
+      // For now, since every function is identity, we also demand the argument <-- FIXME
+      case CallConstraint(res, callNode, arg) =>
+        if (Q.contains(res)) {
+          changed |= addDemand(callNode, Some(constraint))
+          callNode.solution.foreach {
+            case a: ObjToken =>
+            case b: FunToken =>
+              // FIXME: This might be a bit too naive
+              val (argNode, resNode) = constraints.funInfo(b)
+              changed |= addDemand(resNode, Some(constraint))
+              changed |= addDemand(arg, Some(constraint))
+
+              changed |= argNode.addTokens(arg.solution)
+              changed |= res.addTokens(resNode.solution)
+          }
+
+        }
+
     }
 
     changed

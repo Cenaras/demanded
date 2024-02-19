@@ -2,6 +2,7 @@ import main.constraint.ConstraintGenerator
 import main.program.*
 import main.solver.HTSolver
 import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar, isEmpty}
+import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 class TestHTSolver extends AnyFunSuite {
@@ -43,7 +44,7 @@ class TestHTSolver extends AnyFunSuite {
     val solver = HTSolver();
     val constraints = ConstraintGenerator.generate(p)
     val solution = solver.solve(constraints, 3)
-    containsExactly(getBaseCvar(solution, 3), Seq(1, 2))
+    assert(containsExactly(getBaseCvar(solution, 3), Seq(1, 2)))
   }
 
   test("Multiple Fields") {
@@ -58,4 +59,18 @@ class TestHTSolver extends AnyFunSuite {
     assert(isEmpty(getFieldCvar(solution, 3, "f")))
     assert(isEmpty(getFieldCvar(solution, 3, "g")))
   }
+
+  test("FunCall") {
+    val p = ProgramTemplates.FunCall
+    val solver = HTSolver()
+    val constraints = ConstraintGenerator.generate(p)
+    val solution = solver.solve(constraints, 8)
+
+
+    println(PrettyPrinter.stringifySolution(solution))
+    assert(containsExactly(solution, 8, Seq(1)))
+
+  }
+
+
 }
