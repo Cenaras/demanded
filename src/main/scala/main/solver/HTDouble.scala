@@ -33,60 +33,38 @@ class HTDouble extends Demanded {
       })
 
       constraints.copyConstraints.foreach(c => {
-        if (Q.contains(c.to)) {
-          changed |= addDemand(c.from, Some(c))
-          changed |= propagate(c.from, c.to)
-        }
+        changed |= handleDemandOfCopy(c.from, c.to, Some(c))
         changed |= cVar2Tracking(c.to).addTokens(cVar2Tracking(c.from).solution)
       })
 
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
-
-
     }
 
     constraints.constraintVars
 
   }
 
-  private def solveComplex(constraint: ComplexConstraint, environment: ConstraintEnvironment): Boolean = {
+  private def solveComplex(constraint: ComplexConstraint, constraints: ConstraintEnvironment): Boolean = {
     var changed = false
     constraint match
       case ForallLoadConstraint(dst, base, field) =>
-        if (Q.contains(dst)) {
-          changed |= addDemand(base, Some(constraint))
-          base.solution.foreach(t => {
-            changed |= addTracking(t, Some(constraint))
-          })
-
-          base.solution.foreach(t => {
-            val tf = environment.tf2Cvar((t, field))
-            changed |= addDemand(tf, Some(constraint))
-            changed |= dst.addTokens(tf.solution)
-          })
-        }
+        changed |= handleDemandOfLoad(dst, base, field, Some(constraint), constraints)
 
         base.solution.foreach(t => {
-          val trackedTf = cVar2Tracking(environment.tf2Cvar((environment.id2Token(t.id), field)))
+          val trackedTf = cVar2Tracking(constraints.tf2Cvar((constraints.id2Token(t.id), field)))
           val trackedDst = cVar2Tracking(dst)
           changed |= trackedDst.addTokens(trackedTf.solution)
         })
 
       case ForallStoreConstraint(base, field, src) =>
         base.solution.foreach(t => {
-          val tf = environment.tf2Cvar((t, field))
-          if (Q.contains(tf)) {
-            changed |= addDemand(src, Some(constraint))
-            changed |= tf.addTokens(src.solution)
-          }
+          val tf = constraints.tf2Cvar((t, field))
+          changed |= handleDemandOfStore(tf, src, Some(constraint), constraints)
           changed |= cVar2Tracking(tf).addTokens(cVar2Tracking(src).solution)
         })
 
         if (cVar2Tracking(src).solution.nonEmpty) {
-          changed |= addDemand(base, Some(constraint))
-          base.solution.foreach(t => {
-            changed |= addTracking(t, Some(constraint))
-          })
+          changed |= demandAndTrackAll(base, Some(constraint))
         }
 
 

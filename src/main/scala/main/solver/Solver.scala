@@ -50,6 +50,77 @@ trait Demanded extends BaseSolver {
   }
 
 
+  def handleDemandOfCopy(from: ConstraintVar, to: ConstraintVar, debug: Option[CopyConstraint]): Boolean = {
+    var changed = false
+    if (Q.contains(to)) {
+      changed |= addDemand(from, debug)
+      changed |= propagate(from, to)
+    }
+    changed
+  }
+
+  /**
+   * Handles the demanded part of a load operation. That is, for dst = base.f, checks if ⟦dst⟧ ∈ Q, and if so adds
+   * ⟦base⟧ to Q and ∀ t ∈ ⟦base⟧, add t to W, add ⟦t.f⟧ to Q and propagate ⟦t.f⟧ ⊆ ⟦dst⟧
+   *
+   * @param dst         destination of the read
+   * @param base        base of the read
+   * @param field       read field
+   * @param debug       optional constraint used for debugging
+   * @param constraints constraint environment
+   * @return if solution state was changed
+   */
+  def handleDemandOfLoad(dst: ConstraintVar, base: ConstraintVar, field: String, debug: Option[ComplexConstraint], constraints: ConstraintEnvironment): Boolean = {
+    var changed = false
+    if (Q.contains(dst)) {
+      changed |= addDemand(base, debug)
+      base.solution.foreach(t => {
+        changed |= addTracking(t, debug)
+        val tf = constraints.tf2Cvar((t, field))
+        changed |= addDemand(tf, debug)
+        changed |= dst.addTokens(tf.solution)
+      })
+    }
+    changed
+  }
+
+  /**
+   * Handles the demanded part of a store operation. That is, for some constraint variable ⟦t.f⟧, if ⟦t.f⟧ ∈ Q, then add
+   * ⟦src⟧ to Q and propagate ⟦src⟧ ⊆ ⟦t.f⟧
+   *
+   * @param tf          constraint variable t.f
+   * @param src         src constraint variable
+   * @param debug       Optional constraint used for debugging
+   * @param constraints constraint environment
+   * @return if solution state was changed
+   */
+  def handleDemandOfStore(tf: ConstraintVar, src: ConstraintVar, debug: Option[ComplexConstraint], constraints: ConstraintEnvironment): Boolean = {
+    var changed = false
+    if (Q.contains(tf)) {
+      changed |= addDemand(src, debug)
+      changed |= tf.addTokens(src.solution)
+    }
+    changed
+  }
+
+  /**
+   * Adds demand to a constraint and tracks all tokens in its solution
+   *
+   * @param cVar  the constraint variable to demand and track all tokens of
+   * @param debug Optional constraint for debugging
+   * @return if the solution state was changed
+   */
+  def demandAndTrackAll(cVar: ConstraintVar, debug: Option[ComplexConstraint]): Boolean = {
+    var changed = false
+    changed |= addDemand(cVar, debug)
+    // TODO: Implement method for this pattern
+    cVar.solution.foreach(t => {
+      changed |= addTracking(t, debug)
+    })
+    changed
+  }
+
+
   /**
    * Adds the queried constraint variable to demand. Call this as the first method in the solve method.
    *

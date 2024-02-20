@@ -31,10 +31,7 @@ class HTSolver extends Demanded {
 
       // Copy constraints
       constraints.copyConstraints.foreach(c => {
-        if (Q.contains(c.to)) {
-          changed |= addDemand(c.from, Some(c))
-          changed |= propagate(c.from, c.to)
-        }
+        changed |= handleDemandOfCopy(c.from, c.to, Some(c))
         val tracked = c.from.solution.intersect(W)
         changed |= c.to.addTokens(tracked)
       })
@@ -48,19 +45,8 @@ class HTSolver extends Demanded {
     var changed = false
     constraint match {
       case ForallLoadConstraint(dst, base, field) =>
-        if (Q.contains(dst)) {
-          changed |= addDemand(base, Some(constraint))
-          base.solution.foreach(t => {
-            changed |= addTracking(t, Some(constraint))
-          })
+        changed |= handleDemandOfLoad(dst, base, field, Some(constraint), constraints)
 
-          base.solution.foreach(t => {
-            val tf = constraints.tf2Cvar((t, field))
-            changed |= addDemand(tf, Some(constraint))
-            // NOTE: By adding a copy constraint we also treat adding tf to demanded if dst was, so for now try with this.
-            changed |= dst.addTokens(tf.solution)
-          })
-        }
         base.solution.foreach(t => {
           val token = constraints.id2Token(t.id)
           val cvar = constraints.tf2Cvar((token, field))
@@ -72,22 +58,15 @@ class HTSolver extends Demanded {
         base.solution.foreach(t => {
           debug("Processing token %s for store on %s.%s = %s".format(t, base, field, src.toString))
           val tf = constraints.tf2Cvar((t, field))
-          if (Q.contains(tf)) {
-            changed |= addDemand(src, Some(constraint))
-            // NOTE: Same applies here
-            changed |= tf.addTokens(src.solution)
-          }
+          changed |= handleDemandOfStore(tf, src, Some(constraint), constraints)
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
         })
 
         if (src.solution.intersect(W).nonEmpty) {
-          changed |= addDemand(base, Some(constraint))
-          // FIXME: Added this rule, unsure if it is correct for minimal solution
-          base.solution.foreach(t => {
-            changed |= addTracking(t, Some(constraint))
-          })
+          // TODO: Added this rule, unsure if it is correct for minimal solution
+          changed |= demandAndTrackAll(base, Some(constraint))
         }
 
       // If result is demanded, demand call to retrieve every function and demand all return nodes.
