@@ -152,6 +152,9 @@ x4 = x1(x5)
     Parser.ParseProgram(readTemplate("FunctionAndField"))
   }
 
+  def DoubleSingle: Program = {
+    Parser.ParseProgram(readTemplate("DoubleSingle"))
+  }
 
   /**
    * Reads a template from the templates folder

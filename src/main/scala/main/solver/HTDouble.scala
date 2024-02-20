@@ -68,7 +68,38 @@ class HTDouble extends Demanded {
         }
 
 
-      case _ => ???
+      case CallConstraint(res, callNode, arg) =>
+
+
+        def propArgAndReturn(funToken: FunToken, resNode: ConstraintVar, argNode: ConstraintVar): Boolean = {
+          var changed = false
+          // FIXME: This might be a bit too naive
+          val (argNode, resNode) = constraints.funInfo(funToken)
+          changed |= addDemand(resNode, Some(constraint))
+          changed |= addDemand(arg, Some(constraint))
+          changed |= argNode.addTokens(arg.solution)
+          changed |= res.addTokens(resNode.solution)
+          changed
+        }
+
+
+        if (Q.contains(res)) {
+          changed |= addDemand(callNode, Some(constraint))
+          callNode.solution.foreach {
+            case a: ObjToken =>
+            case b: FunToken =>
+              changed |= propArgAndReturn(b, res, arg)
+              changed |= addTracking(b, Some(constraint))
+          }
+        }
+
+        cVar2Tracking(callNode).solution.foreach {
+          case a: ObjToken =>
+          case b: FunToken =>
+            changed |= propArgAndReturn(b, res, arg)
+        }
+
+
     changed
   }
 
