@@ -50,6 +50,15 @@ trait Demanded extends BaseSolver {
   }
 
 
+  /**
+   * Handles the demand part of a copy operation. That is for to = from, if ⟦to⟧ ∈ Q then add ⟦from⟧ to Q and propagate
+   * tokens ⟦from⟧ ⊆ ⟦to⟧
+   *
+   * @param from  from constraint variable
+   * @param to    to constraint variable
+   * @param debug Optional constraint for debugging
+   * @return if the solution state changed
+   */
   def handleDemandOfCopy(from: ConstraintVar, to: ConstraintVar, debug: Option[CopyConstraint]): Boolean = {
     var changed = false
     if (Q.contains(to)) {
@@ -113,7 +122,6 @@ trait Demanded extends BaseSolver {
   def demandAndTrackAll(cVar: ConstraintVar, debug: Option[ComplexConstraint]): Boolean = {
     var changed = false
     changed |= addDemand(cVar, debug)
-    // TODO: Implement method for this pattern
     cVar.solution.foreach(t => {
       changed |= addTracking(t, debug)
     })
@@ -141,5 +149,13 @@ trait Demanded extends BaseSolver {
 
   }
 
+  /**
+   * Solve a set of constraints in a demanded manner, repeatedly iterating all constraints processing demanded, and
+   * adding new constraints to demanded and tracking to progress the solution. Applies until a fixpoint is reached.
+   *
+   * @param constraints the constraints environment to solve
+   * @param queryID     id for constraint variable to initially demand.
+   * @return list of solved constraint variables.
+   */
   def solve(constraints: ConstraintEnvironment, queryID: QueryID): ConstraintVariables
 }

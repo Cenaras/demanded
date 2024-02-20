@@ -12,7 +12,6 @@ class HTSolver extends Demanded {
     demandQuery(queryId, constraints)
 
     var changed = true
-    // We also must iterate the address constraints in the demanded version
     while (changed) {
       changed = false
 
@@ -48,8 +47,7 @@ class HTSolver extends Demanded {
         changed |= handleDemandOfLoad(dst, base, field, Some(constraint), constraints)
 
         base.solution.foreach(t => {
-          val token = constraints.id2Token(t.id)
-          val cvar = constraints.tf2Cvar((token, field))
+          val cvar = constraints.tf2Cvar((t, field))
           val tracked = cvar.solution.intersect(W)
           changed |= dst.addTokens(tracked)
         })
@@ -72,6 +70,11 @@ class HTSolver extends Demanded {
       // If result is demanded, demand call to retrieve every function and demand all return nodes.
       // For now, since every function is identity, we also demand the argument <-- FIXME
       case CallConstraint(res, callNode, arg) =>
+
+        // TODO: Right now, we are obeying the exhaustive solution, by merging all arguments for tracked functions.
+        //  However one could argue that maybe we can avoid doing that and thereby gain some form of precision, i.e.
+        //  for x = y(a), z = y(b) where x is demanded, if z is not demanded then we don't merge a, b, giving more
+        //  precision for x
 
         def propArgAndReturn(funToken: FunToken, resNode: ConstraintVar, argNode: ConstraintVar): Boolean = {
           var changed = false
