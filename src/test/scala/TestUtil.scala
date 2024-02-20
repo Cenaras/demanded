@@ -43,7 +43,16 @@ object TestUtil {
       }
       val sol1Size = SolverUtil.solutionSize(solution1)
       val sol2Size = SolverUtil.solutionSize(solution2)
-      assert(sol1Size == sol2Size)
+      //      assert(sol1Size == sol2Size)
+      if (sol1Size != sol2Size) {
+        println("Query: " + query)
+        println("Size of solution 1: " + sol1Size)
+        println(PrettyPrinter.stringifySolution(solution1))
+        println("Size of solution 2: " + sol2Size)
+        println(PrettyPrinter.stringifySolution(solution2))
+        println(PrettyPrinter.stringifyProgram(program))
+        assert(false)
+      }
     }
   }
 

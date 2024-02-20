@@ -134,6 +134,14 @@ case class TrackedBaseConstraintVar(id: Int, base: BaseConstraintVar) extends Co
   override def toString: String = {
     "⟦x%d⟧_tracked".format(id)
   }
+
+  /** The tracked constraint variables must always be a subset of their representatives */
+  override def addToken(token: Token): Boolean = {
+    var changed = false
+    changed |= solution.add(token)
+    changed |= base.addToken(token)
+    changed
+  }
 }
 
 case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
@@ -147,6 +155,7 @@ case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar
   def getToken: Token = token
 
   def getField: String = field
+
 }
 
 case class TrackedFieldConstraintVar(token: Token, field: String, base: FieldConstraintVar) extends ConstraintVar {
@@ -157,6 +166,14 @@ case class TrackedFieldConstraintVar(token: Token, field: String, base: FieldCon
   }
 
   def getField: String = field
+
+  /** The tracked constraint variables must always be a subset of their representatives */
+  override def addToken(token: Token): Boolean = {
+    var changed = false
+    changed |= solution.add(token)
+    changed |= base.addToken(token)
+    changed
+  }
 }
 
 
