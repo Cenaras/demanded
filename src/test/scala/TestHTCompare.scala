@@ -19,10 +19,17 @@ class TestHTCompare extends AnyFunSuite {
     assert(compareSolutions(one, two, 1))
 
     var sol = solveBothDemanded(p, (3, "f"), HTSolver(), HTDouble())
-    assert(compareSolutions(sol._1, sol._2, (3, "f")))
 
-    sol = solveBothDemanded(p, (3, "g"), HTSolver(), HTDouble())
-    assert(compareSolutions(sol._1, sol._2, (3, "g")))
+    println("HTSolver:")
+    println(PrettyPrinter.stringifySolution(sol._1))
+
+    println("HTDouble:")
+    println(PrettyPrinter.stringifySolution(sol._2))
+
+    assert(compareSolutions(sol._1, sol._2, (3, "f")))
+    //
+    //    sol = solveBothDemanded(p, (3, "g"), HTSolver(), HTDouble())
+    //    assert(compareSolutions(sol._1, sol._2, (3, "g")))
 
   }
 

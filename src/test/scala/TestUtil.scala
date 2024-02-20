@@ -1,7 +1,7 @@
 import main.constraint.{ConstraintGenerator, ConstraintVariables}
 import main.program.{Program, ProgramDistribution, ProgramGenerator}
-import main.solver.SolverUtil.compareSolutions
 import main.solver.*
+import main.solver.SolverUtil.compareSolutions
 import main.util.PrettyPrinter
 
 object TestUtil {
@@ -79,7 +79,7 @@ object TestUtil {
     val constraints2 = ConstraintGenerator.generate(p)
 
     val solution1 = sol1.solve(constraints1, queryID)
-    val solution2 = sol2.solve(constraints1, queryID)
+    val solution2 = sol2.solve(constraints2, queryID)
     (solution1, solution2)
   }
 
