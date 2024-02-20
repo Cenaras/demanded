@@ -3,7 +3,7 @@ package main.solver
 import main.constraint.{BaseConstraintVar, ConstraintVar, ConstraintVariables, FieldConstraintVar}
 
 class BaseSolver {
-  private val DEBUG = false
+  private val DEBUG = false 
 
   protected def propagate(from: ConstraintVar, to: ConstraintVar): Boolean = {
     var changed = false

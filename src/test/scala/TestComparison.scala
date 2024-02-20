@@ -1,8 +1,8 @@
-import main.constraint.{ConstraintGenerator, ConstraintVariables}
+import TestUtil.{newDist, newGenerator, repeatTest, solveBoth}
+import main.constraint.ConstraintVariables
 import main.program.*
+import main.solver.SolverUtil
 import main.solver.SolverUtil.compareSolutions
-import main.solver.{ExhaustiveSolver, HTSolver, QueryID, SolverUtil}
-import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -91,46 +91,4 @@ class TestComparison extends AnyFunSuite {
   test("Function call programs") {
     repeatTest(5000, newGenerator(7, 3, 250, newDist(15, 25, 10, 10, 20, 20)))
   }
-
-
-  def repeatTest(times: Int, generator: ProgramGenerator): Unit = {
-    for (i <- 0 until times) {
-      val program = generator.generate()
-      val query = program.getRandomVar
-
-      val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
-      if (!compareSolutions(exhaustiveSolution, demandedSolution, query)) {
-        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.stringifyProgram(program)))
-      }
-
-      val demandedSolutionSize = SolverUtil.solutionSize(demandedSolution)
-      val exhaustiveSolutionSize = SolverUtil.solutionSize(exhaustiveSolution)
-      assert(demandedSolutionSize <= exhaustiveSolutionSize)
-    }
-  }
-
-  def solveBoth(p: Program, queryId: QueryID): (ConstraintVariables, ConstraintVariables) = {
-    val eConstraints = ConstraintGenerator.generate(p)
-    val dConstraints = ConstraintGenerator.generate(p)
-
-    val exhaustive = ExhaustiveSolver()
-    val ht = new HTSolver()
-
-    val exhaustiveSolution = exhaustive.solve(eConstraints)
-    val demandedSolution = ht.solve(dConstraints, queryId)
-    (exhaustiveSolution, demandedSolution)
-  }
-
-  def newGenerator(varNumber: Int, tokenNum: Int, size: Int, dist: ProgramDistribution): ProgramGenerator = {
-    new ProgramGenerator(varNumber, tokenNum, size, dist)
-  }
-
-  def newDist(newObj: Int, assign: Int, load: Int, store: Int): ProgramDistribution = {
-    newDist(newObj, assign, load, store, 0, 0)
-  }
-
-  def newDist(newObj: Int, assign: Int, load: Int, store: Int, newFun: Int, call: Int): ProgramDistribution = {
-    new ProgramDistribution(newObj, assign, load, store, newFun, call)
-  }
-
 }

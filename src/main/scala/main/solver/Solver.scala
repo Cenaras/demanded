@@ -4,7 +4,7 @@ import main.constraint.*
 
 import scala.collection.mutable
 
-trait Exhaustive {
+trait Exhaustive extends BaseSolver {
 
 }
 
