@@ -1,7 +1,8 @@
 import TestUtil.*
+import main.constraint.ConstraintGenerator
 import main.program.ProgramTemplates
 import main.solver.SolverUtil.*
-import main.solver.{HTDouble, HTSolver, SolverUtil}
+import main.solver.{ExhaustiveSolver, HTDouble, HTSolver, SolverUtil}
 import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -30,6 +31,9 @@ class TestHTCompare extends AnyFunSuite {
 
     // MISMATCH ON THIS: x1 should have f6, f7 in it according to the exhaustive solver, it does only for HTSolver
 
+    println("Exhaustive solution:")
+    println(PrettyPrinter.stringifySolution(ExhaustiveSolver().solve(ConstraintGenerator.generate(p))))
+    
     assert(compareSolutions(sol._1, sol._2, q))
 
 

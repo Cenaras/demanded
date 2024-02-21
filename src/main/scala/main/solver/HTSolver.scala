@@ -4,11 +4,16 @@ import main.constraint.*
 
 import scala.collection.mutable
 
+// TODO: Disable the call stuff and make sure that all the rules for the load/store are needed
+//  Provide a reasoning for all the rules so we are sure that they are relevant.
+//  Then from there, reformulate the call stuff - it is basically a load and a store - remember the implication and do
+//  we actually need the tracked part in the second rule? I think that maybe the call stuff is a bit wrong...
 
 class HTSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
+    debug("Solving HTSolver instance on query %s\n".format(queryId))
     demandQuery(queryId, constraints)
 
     var changed = true
@@ -80,6 +85,7 @@ class HTSolver extends Demanded {
           var changed = false
           // FIXME: This might be a bit too naive
           val (argNode, resNode) = constraints.funInfo(funToken)
+          debug("Propagating argument %s into formal param %s and return node %s into dst %s".format(arg, argNode, resNode, res))
           changed |= addDemand(resNode, Some(constraint))
           changed |= addDemand(arg, Some(constraint))
           changed |= argNode.addTokens(arg.solution)

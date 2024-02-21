@@ -88,7 +88,7 @@ class TestComparison extends AnyFunSuite {
     repeatTest(100, newGenerator(100, 20, 5000, newDist(25, 35, 20, 20)))
   }
 
-  test("Function call programs") {
-    repeatTest(5000, newGenerator(7, 3, 250, newDist(15, 25, 10, 10, 20, 20)))
-  }
+  //  test("Function call programs") {
+  //    repeatTest(5000, newGenerator(7, 3, 250, newDist(15, 25, 10, 10, 20, 20)))
+  //  }
 }

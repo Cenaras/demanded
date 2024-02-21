@@ -14,6 +14,7 @@ class HTDouble extends Demanded {
   // We could make a strategy pattern where we have a strategy for demanded and a strategy for tracking
   // Then we reuse the demanded in both and only alter the tracking
   def solve(constraints: ConstraintEnvironment, queryID: QueryID): ConstraintVariables = {
+    debug("Solving HTDouble instance on query %s\n".format(queryID))
     generateTrackedConstraintVars(constraints.constraintVars)
     demandQuery(queryID, constraints)
 
@@ -75,6 +76,7 @@ class HTDouble extends Demanded {
           var changed = false
           // FIXME: This might be a bit too naive
           val (argNode, resNode) = constraints.funInfo(funToken)
+          debug("Propagating argument %s into formal param %s and return node %s into dst %s".format(arg, argNode, resNode, res))
           changed |= addDemand(resNode, Some(constraint))
           changed |= addDemand(arg, Some(constraint))
           changed |= argNode.addTokens(arg.solution)
@@ -93,6 +95,7 @@ class HTDouble extends Demanded {
           }
         }
 
+        // FIXME: If this is replaced back to the HTSolver style, it works. f7 is never added into Bar(callNode)
         cVar2Tracking(callNode).solution.foreach {
           case a: ObjToken =>
           case b: FunToken =>

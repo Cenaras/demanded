@@ -152,9 +152,39 @@ x4 = x1(x5)
     Parser.ParseProgram(readTemplate("FunctionAndField"))
   }
 
+  /**
+   * Translates to the following program (we query x3). All function calls are identity functions!
+   *
+   * f = (a) => a
+   * g = (b) => b
+   * x2 = f(g)
+   * x3 = x2(f)
+   * x4 = x3(f)
+   */
   def DoubleSingle: Program = {
     Parser.ParseProgram(readTemplate("DoubleSingle"))
   }
+
+  /*
+    The call x2 = f(g) calls function f
+      a contains g
+    
+    The call x3 = x2(f) calls function g
+      b contains f  
+  
+    The call x4 = x3(f) calls function f
+      a contains f
+
+  
+    Whenever f is called, the return will be f, g
+    Whenever g is called, the return will be f
+
+   */
+
+
+
+
+
 
   /**
    * Reads a template from the templates folder
