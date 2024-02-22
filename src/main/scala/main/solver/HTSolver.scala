@@ -50,7 +50,7 @@ class HTSolver extends Demanded {
       })
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
     }
-    println(W)
+    //    println(W)
     constraints.constraintVars
   }
 
