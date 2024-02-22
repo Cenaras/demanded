@@ -1,4 +1,3 @@
-import main.solver.SolverUtil
 import org.scalatest.funsuite.AnyFunSuite
 
 class TestHTCompare extends AnyFunSuite {
@@ -16,8 +15,8 @@ class TestHTCompare extends AnyFunSuite {
   //    repeatSolveBoth(10000, newGenerator(30, 10, 150, newDist(20, 40, 20, 20)), solveBothDemanded, HTSolver(), HTDouble())
   //  }
   //
-  //  test("DoubleSingle") {
-  //    val p = ProgramTemplates.DoubleSingle
+  //  test("MergeOfArguments") {
+  //    val p = ProgramTemplates.MergeOfArguments
   //    val q = 1
   //    val sol = solveBothDemanded(p, q, HTSolver(), HTDouble())
   //

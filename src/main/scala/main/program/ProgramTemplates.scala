@@ -172,30 +172,32 @@ x4 = x1(x5)
    * x4 = x3(f)
    */
   def MergeOfArguments: Program = {
-    Parser.ParseProgram(readTemplate("DoubleSingle"))
+    Parser.ParseProgram(readTemplate("MergeOfArguments"))
+  }
+
+  /**
+   *
+   * x1 = (x5) =>_f2 x4
+   * x2 = (x9) =>_f3 x0
+   * x3 = (x7) =>_f2 x2
+   * x0 = x2.f
+   * x4 = x1(x3)
+   * x4.f = x3
+   *
+   */
+  def Query0: Program = {
+    Parser.ParseProgram(readTemplate("Query0"))
   }
 
   /*
-    The call x2 = f(g) calls function f
-      a contains g
-
-    The call x3 = x2(f) calls function g
-      b contains f
-
-    The call x4 = x3(f) calls function f
-      a contains f
-
-
-    Whenever f is called, the return will be f, g
-    Whenever g is called, the return will be f
-
+  We initially query x0. This means that x2 is demanded
+  
+  
+  
    */
-
-
-
-
-
-
+  
+  
+  
   /**
    * Reads a template from the templates folder
    *

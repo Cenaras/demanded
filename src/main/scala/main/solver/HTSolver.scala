@@ -95,7 +95,7 @@ class HTSolver extends Demanded {
             case b: FunToken =>
               val (paramNode, retNode) = constraints.funInfo(b)
               changed |= addDemand(retNode, Some(constraint))
-              res.addTokens(retNode.solution)
+              changed |= res.addTokens(retNode.solution)
           }
         }
         // Tracked tokens in return node must be propagated as well.
@@ -118,6 +118,15 @@ class HTSolver extends Demanded {
             }
         }
 
+        // TODO: URGENT! There are some fixes we need to make. First of all, every function definition should have
+        //  a unique token - we should not allow two functions to have the same token, because that messes up the
+        //  bindings of formal parameters.
+        //  Also; every function parameter should be unique - but we should still allow the body to take that value
+        //  That is: If we have n variables, we should still generate function parameters from those n values, but
+        //  just say that whenever we generate a parameter it should be unique, and whenever we generate a random variable,
+        //  it should not be allowed to have the same id as an existing parameter. Then we can just let bodies be
+        //  completely random!
+
         // If the argument holds tracked tokens, we must find all possible functions and propagate the tracked tokens
         // into t.p
         if (W.intersect(arg.solution).nonEmpty) {
@@ -127,7 +136,7 @@ class HTSolver extends Demanded {
             case a: ObjToken =>
             case b: FunToken =>
               // FIXME: Is this needed?
-              changed |= addTracking(b, Some(constraint))
+            //              changed |= addTracking(b, Some(constraint))
           }
         }
         callNode.solution.foreach {

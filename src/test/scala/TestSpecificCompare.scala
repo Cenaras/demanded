@@ -85,4 +85,13 @@ class TestSpecificCompare extends AnyFunSuite {
     assert(compareSolutions(e, d, queryId))
   }
 
+  test("Query0") {
+    val queryId = 0
+    val p = ProgramTemplates.Query0
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
+
 }
