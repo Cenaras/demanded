@@ -171,7 +171,7 @@ x4 = x1(x5)
    * x3 = x2(f)
    * x4 = x3(f)
    */
-  def DoubleSingle: Program = {
+  def MergeOfArguments: Program = {
     Parser.ParseProgram(readTemplate("DoubleSingle"))
   }
 

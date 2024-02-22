@@ -77,4 +77,12 @@ class TestSpecificCompare extends AnyFunSuite {
     assert(compareSolutions(e, d, queryId))
   }
 
+  test("MergeOfArguments") {
+    val queryId = 1
+    val p = ProgramTemplates.MergeOfArguments
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
 }

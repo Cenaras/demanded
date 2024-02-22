@@ -17,6 +17,10 @@ class TestComparisonRandom extends AnyFunSuite {
     repeatTest(20000, newGenerator(10, 3, 25, newDist(20, 50, 20, 10)))
   }
 
+  test("Medium function call") {
+    repeatTest(20000, newGenerator(10, 3, 25, newDist(10, 30, 10, 10, 20, 20)))
+  }
+
   test("Random program") {
     repeatTest(2000, newGenerator(100, 30, 200, newDist(20, 50, 20, 10)))
   }
