@@ -50,6 +50,7 @@ class HTSolver extends Demanded {
       })
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
     }
+    println(W)
     constraints.constraintVars
   }
 
@@ -109,7 +110,6 @@ class HTSolver extends Demanded {
           case a: ObjToken =>
           case b: FunToken =>
             val (paramNode, retNode) = constraints.funInfo(b)
-            // TODO: Needed?
             changed |= res.addTokens(retNode.solution.intersect(W))
         }
 
@@ -125,25 +125,33 @@ class HTSolver extends Demanded {
             }
         }
 
-      // TODO: Add test cases that justify these rules - are they even needed?
+        // TODO: Add test cases that justify these rules - are they even needed?
 
-      //        // If the argument holds tracked tokens, we must find all possible functions and propagate the tracked tokens
-      //        // into t.p
-      //        if (W.intersect(arg.solution).nonEmpty) {
-      //          changed |= addDemand(callNode, Some(constraint))
-      //          // FIXME: Is this needed?
-      //          callNode.solution.foreach {
-      //            case a: ObjToken =>
-      //            case b: FunToken =>
-      //              changed |= addTracking(b, Some(constraint))
-      //          }
-      //        }
-      //        callNode.solution.foreach {
-      //          case a: ObjToken =>
-      //          case b: FunToken =>
-      //            val (paramNode, retNode) = constraints.funInfo(b)
-      //            changed |= paramNode.addTokens(arg.solution.intersect(W))
-      //        }
+        // If the argument holds tracked tokens, we must find all possible functions and propagate the tracked tokens
+        // into t.p
+        if (W.intersect(arg.solution).nonEmpty) {
+          changed |= addDemand(callNode, Some(constraint))
+
+          callNode.solution.foreach {
+            case a: ObjToken =>
+            case b: FunToken =>
+              // FIXME: Is this needed?
+              changed |= addTracking(b, Some(constraint))
+          }
+        }
+        callNode.solution.foreach {
+          case a: ObjToken =>
+          case b: FunToken =>
+            val (paramNode, retNode) = constraints.funInfo(b)
+            changed |= paramNode.addTokens(arg.solution.intersect(W))
+        }
+
+
+
+
+
+
+
 
 
       //        // TODO: Right now, we are obeying the exhaustive solution, by merging all arguments for tracked functions.

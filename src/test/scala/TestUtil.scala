@@ -79,6 +79,10 @@ object TestUtil {
 
     val exhaustiveSolution = exhaustive.solve(eConstraints)
     val demandedSolution = ht.solve(dConstraints, queryId)
+
+    println(PrettyPrinter.stringifySolution(exhaustiveSolution))
+    println(PrettyPrinter.stringifySolution(demandedSolution))
+
     (exhaustiveSolution, demandedSolution)
   }
 

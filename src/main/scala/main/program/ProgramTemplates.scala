@@ -126,8 +126,8 @@ object ProgramTemplates {
   }
 
 
-  def TrackBaseFunction: Program = {
-    Parser.ParseProgram(readTemplate("TrackBaseFunction"))
+  def TrackedArgumentsMustPropagate: Program = {
+    Parser.ParseProgram(readTemplate("TrackedArgumentsMustPropagate"))
   }
   
 
