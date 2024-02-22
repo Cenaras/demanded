@@ -129,7 +129,10 @@ object ProgramTemplates {
   def TrackedArgumentsMustPropagate: Program = {
     Parser.ParseProgram(readTemplate("TrackedArgumentsMustPropagate"))
   }
-  
+
+  def FunctionsAndReturns: Program = {
+    Parser.ParseProgram(readTemplate("FunctionsAndReturns"))
+  }
 
   /*
    Merge in arguments

@@ -46,11 +46,12 @@ object ConstraintGenerator {
         val base = getOrSetCvar(baseId, id2Cvar, constraintVars)
         val src = getOrSetCvar(srcId, id2Cvar, constraintVars)
         constraints += ForallStoreConstraint(base, field, src)
-      case NewFunInsn(varId, argId, tokenId) =>
+      case NewFunInsn(varId, argId, retVal, tokenId) =>
         val dstCvar = getOrSetCvar(varId, id2Cvar, constraintVars)
         val argCvar = getOrSetCvar(argId, id2Cvar, constraintVars)
+        val retValCVar = getOrSetCvar(retVal, id2Cvar, constraintVars)
         val token = getOrSetFunToken(tokenId, id2Token, token2Cvar, constraintVars)
-        funInfo += token -> (argCvar, argCvar) // FIXME: For now same since always identity function
+        funInfo += token -> (argCvar, retValCVar) 
         constraints += NewConstraint(dstCvar, token)
       case CallInsn(res, fun, arg) =>
         val resCvar = getOrSetCvar(res, id2Cvar, constraintVars)

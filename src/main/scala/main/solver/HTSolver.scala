@@ -75,20 +75,13 @@ class HTSolver extends Demanded {
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
-
-          // FIXME: This would be less restrictive than only tracking tokens from base, if src n W is non-empty
-          // changed |= addTracking(t, None)
         })
 
         if (src.solution.intersect(W).nonEmpty) {
-          // TODO: Added this rule, unsure if it is correct for minimal solution
           changed |= demandAndTrackAll(base, Some(constraint))
         }
 
-      // If result is demanded, demand call to retrieve every function and demand all return nodes.
-      // For now, since every function is identity, we also demand the argument <-- FIXME
       case CallConstraint(res, callNode, arg) =>
-
         // A call expression can be viewed as a combination of a load and a store. We load the result from t.ret into
         // x, and we store the value of z into t.param.
 
@@ -124,8 +117,6 @@ class HTSolver extends Demanded {
               changed |= paramNode.addTokens(arg.solution)
             }
         }
-
-        // TODO: Add test cases that justify these rules - are they even needed?
 
         // If the argument holds tracked tokens, we must find all possible functions and propagate the tracked tokens
         // into t.p

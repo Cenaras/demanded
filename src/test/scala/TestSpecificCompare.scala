@@ -69,5 +69,12 @@ class TestSpecificCompare extends AnyFunSuite {
 
     assert(compareSolutions(e, d, queryId))
   }
+  test("FunctionsAndReturns") {
+    val queryId = 7
+    val p = ProgramTemplates.TrackedArgumentsMustPropagate
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
 
 }

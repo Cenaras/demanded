@@ -30,6 +30,7 @@ class TestComparisonRandom extends AnyFunSuite {
   }
 
   test("Function call programs") {
-    repeatTest(1000, newGenerator(10, 5, 250, newDist(5, 10, 5, 5, 35, 40)))
+    repeatTest(10000, newGenerator(10, 5, 250, newDist(5, 10, 5, 5, 35, 40)))
+    repeatTest(1000, newGenerator(20, 15, 500, newDist(15, 20, 15, 15, 15, 20)))
   }
 }

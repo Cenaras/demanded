@@ -25,7 +25,7 @@ object Parser {
       case assignPattern(left, right) => p.addInstruction(AssignInsn(left.toInt, right.toInt))
       case loadPattern(left, right, field) => p.addInstruction(LoadInsn(left.toInt, right.toInt, field))
       case storePattern(left, field, right) => p.addInstruction(StoreInsn(left.toInt, field, right.toInt))
-      case newFunPattern(left, arg, funId, _) => p.addInstruction(NewFunInsn(left.toInt, arg.toInt, funId.toInt))
+      case newFunPattern(left, arg, funId, retVal) => p.addInstruction(NewFunInsn(left.toInt, arg.toInt, retVal.toInt, funId.toInt))
       case callPattern(res, cls, arg) => p.addInstruction(CallInsn(res.toInt, cls.toInt, arg.toInt))
       case e => throw Error("Error in parsing statement %s".format(e))
     }
@@ -142,7 +142,8 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
         val funId = generateRandomVar(None)
         val funToken = generateRandomFunToken()
         val param = generateRandomParameter()
-        NewFunInsn(funId, param, funToken)
+        val retVal = generateRandomVar(funId)
+        NewFunInsn(funId, param, retVal, funToken)
       case x if x <= dist.callProp =>
         val resNode = generateRandomVar(None)
         val callNode = generateRandomVar(resNode)
@@ -214,9 +215,9 @@ case class LoadInsn(left: VarId, right: VarId, field: String) extends Instructio
 case class StoreInsn(left: VarId, field: String, right: VarId) extends Instruction:
   override def print(): String = "x%d.%s = x%d".format(left, field, right)
 
-case class NewFunInsn(varId: VarId, argId: VarId, tokenId: TokenId) extends Instruction:
-  override def print(): String = "x%d = (x%d) =>_f%d x%d".format(varId, argId, tokenId, argId)
+// Functions take a random argument and return a random variable. 
+case class NewFunInsn(varId: VarId, argId: VarId, retVal: VarId, tokenId: TokenId) extends Instruction:
+  override def print(): String = "x%d = (x%d) =>_f%d x%d".format(varId, argId, tokenId, retVal)
 
-// FIXME: All functions are identity functions fow now
 case class CallInsn(res: VarId, fun: VarId, arg: VarId) extends Instruction:
   override def print(): String = "x%d = x%d(x%d)".format(res, fun, arg)

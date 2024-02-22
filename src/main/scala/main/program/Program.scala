@@ -28,8 +28,9 @@ class Program(instructions: ArrayBuffer[Instruction]) {
         varIds.add(left)
         varIds.add(right)
 
-      case NewFunInsn(varId, argId, tokenId) =>
+      case NewFunInsn(varId, argId, retVal, tokenId) =>
         varIds.add(varId)
+        varIds.add(retVal)
 
       case CallInsn(res, fun, arg) =>
         varIds.add(res)
