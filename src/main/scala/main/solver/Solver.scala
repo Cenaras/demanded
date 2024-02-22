@@ -122,6 +122,8 @@ trait Demanded extends BaseSolver {
   def demandAndTrackAll(cVar: ConstraintVar, debug: Option[ComplexConstraint]): Boolean = {
     var changed = false
     changed |= addDemand(cVar, debug)
+    // We cannot move this into handleDemandOfStore - TrackBaseInStore fails then. And it is more restrictive here, than
+    // always doing it.
     cVar.solution.foreach(t => {
       changed |= addTracking(t, debug)
     })

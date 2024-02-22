@@ -106,7 +106,10 @@ object ProgramTemplates {
    *
    * For this particular program with query x6, when processing x1.f = x3, we must track t1 since otherwise we never
    * realize that x5 holds t1, which means x0 = x5.f does not transfer ⟦t1.f⟧ to x0 (i.e., t2) and thereby we miss from
-   * x0.f = x1 and x6 = x3.f that x6 holds t1 (which we determine in an exhaustive setting)
+   * x0.f = x1 and x6 = x3.f that x6 holds t1 (which we determine in an exhaustive setting).
+   *
+   * I believe it suffices to track the tokens of x, only if y contains tracked tokens - thus we can restrict the
+   * tracking of x, to only happen if (y n W) is non-empty, which is more restrictive than always tracking all tokens...
    *
    * x1 = new t1
    * x5 = new t1
@@ -168,14 +171,14 @@ x4 = x1(x5)
   /*
     The call x2 = f(g) calls function f
       a contains g
-    
+
     The call x3 = x2(f) calls function g
-      b contains f  
-  
+      b contains f
+
     The call x4 = x3(f) calls function f
       a contains f
 
-  
+
     Whenever f is called, the return will be f, g
     Whenever g is called, the return will be f
 

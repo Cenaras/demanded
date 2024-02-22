@@ -9,6 +9,15 @@ import scala.collection.mutable
 //  Then from there, reformulate the call stuff - it is basically a load and a store - remember the implication and do
 //  we actually need the tracked part in the second rule? I think that maybe the call stuff is a bit wrong...
 
+
+// Checklist - are the constraints implemented as in the document + can we remove any of them?
+// (comment out stuff, try combinations, everytime we get a failure construct a small example from that case)
+// **************************************************
+// new constraints work as described in the document
+// assign constraints work as described in the document
+// load constraints work as described in the document
+// store constraints work as described in the document
+
 class HTSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
@@ -65,6 +74,9 @@ class HTSolver extends Demanded {
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
+
+          //          // FIXME: This would be less restrictive than only tracking tokens from base, if src n W is non-empty
+          //          changed |= addTracking(t, None)
         })
 
         if (src.solution.intersect(W).nonEmpty) {
