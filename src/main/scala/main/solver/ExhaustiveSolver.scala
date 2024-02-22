@@ -44,7 +44,7 @@ class ExhaustiveSolver extends BaseSolver, Exhaustive {
       case CallConstraint(res, call, arg) => call.solution.foreach {
         case f: FunToken =>
           val (param, ret) = constraints.funInfo(f)
-          changed |= param.addTokens(arg.solution)
+          changed |= param.addTokens(arg.solution) // Since identity function, arg --> ret as they are the same.
           changed |= res.addTokens(ret.solution)
         case _ =>
       }

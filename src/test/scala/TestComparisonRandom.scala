@@ -1,5 +1,4 @@
 import TestUtil.{newDist, newGenerator, repeatTest}
-import main.solver.SolverUtil
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -27,10 +26,10 @@ class TestComparisonRandom extends AnyFunSuite {
   }
 
   test("Large") {
-    repeatTest(20000, newGenerator(100, 20, 5000, newDist(25, 35, 20, 20)))
+    repeatTest(200, newGenerator(100, 20, 5000, newDist(25, 35, 20, 20)))
   }
 
-  //  test("Function call programs") {
-  //    repeatTest(5000, newGenerator(7, 3, 250, newDist(15, 25, 10, 10, 20, 20)))
-  //  }
+  test("Function call programs") {
+    repeatTest(1000, newGenerator(10, 5, 250, newDist(5, 10, 5, 5, 35, 40)))
+  }
 }

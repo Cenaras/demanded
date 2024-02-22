@@ -46,19 +46,28 @@ class TestSpecificCompare extends AnyFunSuite {
     assert(compareSolutions(e, d, queryId))
   }
 
-  //  test("FunctionAndField") {
-  //    val queryId = 4
-  //    val p = ProgramTemplates.FunctionAndField
-  //    val (e, d) = solveBoth(p, queryId)
-  //
-  //    assert(compareSolutions(e, d, queryId))
-  //  }
-  //
-  //  test("MergeInCall") {
-  //    val queryId = 4
-  //    val p = ProgramTemplates.MergeInCall
-  //    val (e, d) = solveBoth(p, queryId)
-  //
-  //    assert(compareSolutions(e, d, queryId))
-  //  }
+  test("FunctionAndField") {
+    val queryId = 4
+    val p = ProgramTemplates.FunctionAndField
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
+  test("MergeInCall") {
+    val queryId = 4
+    val p = ProgramTemplates.MergeInCall
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
+  test("TrackBaseFunction") {
+    val queryId = 1
+    val p = ProgramTemplates.TrackBaseFunction
+    val (e, d) = solveBoth(p, queryId)
+
+    assert(compareSolutions(e, d, queryId))
+  }
+
 }

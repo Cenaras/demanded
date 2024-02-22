@@ -126,6 +126,10 @@ object ProgramTemplates {
   }
 
 
+  def TrackBaseFunction: Program = {
+    Parser.ParseProgram(readTemplate("TrackBaseFunction"))
+  }
+  
 
   /*
    Merge in arguments
