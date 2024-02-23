@@ -31,6 +31,14 @@ class HTDouble extends Demanded {
           changed |= cVar2Tracking(c.to).addToken(c.token)
           if changed then debug("Processing tracking in address constraint %s in %s".format(c.token, c.to))
         }
+
+        c.token match
+          case a: ObjToken =>
+          case b: FunToken =>
+            val (paramNode, retNode) = constraints.funInfo(b)
+            if (cVar2Tracking(retNode).solution.nonEmpty) {
+              changed |= addTracking(c.token, Some(c))
+            }
       })
 
       constraints.copyConstraints.foreach(c => {
@@ -70,36 +78,45 @@ class HTDouble extends Demanded {
 
 
       case CallConstraint(res, callNode, arg) =>
-
-
-        def propArgAndReturn(funToken: FunToken, resNode: ConstraintVar, argNode: ConstraintVar): Boolean = {
-          var changed = false
-          // FIXME: This might be a bit too naive
-          val (argNode, resNode) = constraints.funInfo(funToken)
-          debug("Propagating argument %s into formal param %s and return node %s into dst %s".format(arg, argNode, resNode, res))
-          changed |= addDemand(resNode, Some(constraint))
-          changed |= addDemand(arg, Some(constraint))
-          changed |= argNode.addTokens(arg.solution)
-          changed |= res.addTokens(resNode.solution)
-          changed
-        }
-
-
+        // FIXME: Identical to HT
         if (Q.contains(res)) {
           changed |= addDemand(callNode, Some(constraint))
           callNode.solution.foreach {
             case a: ObjToken =>
             case b: FunToken =>
-              changed |= propArgAndReturn(b, res, arg)
-              changed |= addTracking(b, Some(constraint))
+              val (paramNode, retNode) = constraints.funInfo(b)
+              changed |= addDemand(retNode, Some(constraint))
+              changed |= res.addTokens(retNode.solution)
           }
         }
 
-        // FIXME: If this is replaced back to the HTSolver style, it works. f7 is never added into Bar(callNode)
-        cVar2Tracking(callNode).solution.foreach {
+        callNode.solution.foreach {
           case a: ObjToken =>
           case b: FunToken =>
-            changed |= propArgAndReturn(b, res, arg)
+            val (paramNode, retNode) = constraints.funInfo(b)
+            changed |= cVar2Tracking(res).addTokens(cVar2Tracking(retNode).solution)
+        }
+
+        // FIXME: Identical to HT
+        callNode.solution.foreach {
+          case a: ObjToken =>
+          case b: FunToken =>
+            val (paramNode, retNode) = constraints.funInfo(b)
+            if (Q.contains(paramNode)) {
+              changed |= addDemand(arg, Some(constraint))
+              changed |= paramNode.addTokens(arg.solution)
+            }
+        }
+
+        if (cVar2Tracking(arg).solution.nonEmpty) {
+          changed |= addDemand(callNode, Some(constraint))
+        }
+
+        callNode.solution.foreach {
+          case a: ObjToken =>
+          case b: FunToken =>
+            val (paramNode, retNode) = constraints.funInfo(b)
+            changed |= cVar2Tracking(paramNode).addTokens(cVar2Tracking(arg).solution)
         }
 
 

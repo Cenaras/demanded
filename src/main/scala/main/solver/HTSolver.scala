@@ -52,8 +52,6 @@ class HTSolver extends Demanded {
             if (W.intersect(ret.solution).nonEmpty) {
               changed |= addTracking(c.token, Some(c))
             }
-
-
       })
 
       // Copy constraints

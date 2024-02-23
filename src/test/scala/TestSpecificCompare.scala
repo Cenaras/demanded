@@ -56,11 +56,8 @@ class TestSpecificCompare extends AnyFunSuite {
     assertEqualSolution(ProgramTemplates.TrackedRetNodeImpliesTrackFunction, 0)
   }
 
-
   private def assertEqualSolution(p: Program, query: QueryID): Unit = {
     val (e, d) = solveBoth(p, query)
     assert(compareSolutions(e, d, query))
   }
-
-
 }
