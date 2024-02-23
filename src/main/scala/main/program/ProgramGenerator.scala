@@ -101,9 +101,12 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
 
   private val rng = new Random();
   private val fields = Array("f", "g")
+  private var currentToken = 0
+
 
   def generate(): Program = {
     val program: Program = Program()
+    currentToken = 0
 
     for (i <- 0 until insnNumber) {
       val number = rng.between(0, 100)
@@ -140,7 +143,7 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
         StoreInsn(leftId, field, rightId)
       case x if x <= dist.newFunProp =>
         val funId = generateRandomVar(None)
-        val funToken = generateRandomFunToken()
+        val funToken = generateRandomToken()
         val param = generateRandomParameter()
         val retVal = generateRandomVar(funId)
         NewFunInsn(funId, param, retVal, funToken)
@@ -177,18 +180,16 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
   }
 
   private def generateRandomToken(): Int = {
-    rng.between(0, tokenNum)
-  }
-
-  private def generateRandomFunToken(): Int = {
-    generateRandomToken() + tokenNum
+    val t = currentToken
+    currentToken += 1
+    t
   }
 
   private def generateRandomField(): String = {
     fields(rng.between(0, fields.length - 1))
   }
 
-  // FIXME: ...
+  // FIXME: Generate in a better range, so functions can actually return their arguments...
   private def generateRandomParameter(): Int = {
     rng.between(0, varNumber) + varNumber
   }
@@ -215,7 +216,7 @@ case class LoadInsn(left: VarId, right: VarId, field: String) extends Instructio
 case class StoreInsn(left: VarId, field: String, right: VarId) extends Instruction:
   override def print(): String = "x%d.%s = x%d".format(left, field, right)
 
-// Functions take a random argument and return a random variable. 
+// Functions take a random argument and return a random variable.
 case class NewFunInsn(varId: VarId, argId: VarId, retVal: VarId, tokenId: TokenId) extends Instruction:
   override def print(): String = "x%d = (x%d) =>_f%d x%d".format(varId, argId, tokenId, retVal)
 
