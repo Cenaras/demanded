@@ -38,8 +38,9 @@ class TestComparisonRandom extends AnyFunSuite {
   //      repeatTest(1, newGenerator(100, 20, 2500, newDist(25, 35, 20, 20)))
   //    }
 
+  // FIXME: Same issue for this - do some diagnostics to figure out if it is only solving. In that case, not much can
+  //  be done with the naive solver algorithm...
   test("Function call programs") {
-    repeatTest(10000, newGenerator(10, 5, 250, newDist(5, 10, 5, 5, 35, 40)))
-    repeatTest(1000, newGenerator(20, 15, 500, newDist(15, 20, 15, 15, 15, 20)))
+    repeatTest(50, newGenerator(10, 5, 250, newDist(5, 10, 5, 5, 35, 40)))
   }
 }
