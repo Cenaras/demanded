@@ -189,7 +189,12 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
     fields(rng.between(0, fields.length - 1))
   }
 
-  // FIXME: Generate in a better range, so functions can actually return their arguments...
+  // TODO: URGENT! There are some fixes we need to make. Every function parameter should be unique - 
+  //  but we should still allow the body to take that value
+  //  That is: If we have n variables, we should still generate function parameters from those n values, but
+  //  just say that whenever we generate a parameter it should be unique, and whenever we generate a random variable,
+  //  it should not be allowed to have the same id as an existing parameter. Then we can just let bodies be
+  //  completely random!
   private def generateRandomParameter(): Int = {
     rng.between(0, varNumber) + varNumber
   }

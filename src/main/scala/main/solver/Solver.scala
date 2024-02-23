@@ -69,6 +69,45 @@ trait Demanded extends BaseSolver {
   }
 
   /**
+   * If the destination of the new constraint is tracked, place the token in its constraint variable. Similarly, if the
+   * token is tracked, it must be placed in the constraint variable.
+   *
+   * @param c the new constraint
+   * @return if the solution state was changed.
+   */
+  def handleNewObj(c: NewConstraint): Boolean = {
+    var changed = false
+    if (Q.contains(c.to)) {
+      changed |= c.to.addToken(c.token)
+      if changed then debug("Processing address constraint %s in %s".format(c.token, c.to))
+    }
+    if (W.contains(c.token)) {
+      changed |= c.to.addToken(c.token)
+      if changed then debug("Processing tracking in address constraint %s in %s".format(c.token, c.to))
+    }
+    changed
+  }
+
+  /**
+   * If the function corresponding to funToken has tracked values in its return node, we must track funToken as well to
+   * ensure we know where this function is called such that we can correctly propagate the tracked token in the return
+   * node.
+   *
+   * @param funToken    the function token
+   * @param constraints constraint environment
+   * @param debug       optional debugging constraint
+   * @return if solution state was changed
+   */
+  def trackFunctionIfTrackedRetNode(funToken: FunToken, constraints: ConstraintEnvironment, debug: Option[NewConstraint]): Boolean = {
+    var changed = false
+    val (param, ret) = constraints.funInfo(funToken)
+    if (W.intersect(ret.solution).nonEmpty) {
+      changed |= addTracking(funToken, debug)
+    }
+    changed
+  }
+
+  /**
    * Handles the demanded part of a load operation. That is, for dst = base.f, checks if ⟦dst⟧ ∈ Q, and if so adds
    * ⟦base⟧ to Q and ∀ t ∈ ⟦base⟧, add t to W, add ⟦t.f⟧ to Q and propagate ⟦t.f⟧ ⊆ ⟦dst⟧
    *
@@ -90,6 +129,25 @@ trait Demanded extends BaseSolver {
         changed |= dst.addTokens(tf.solution)
       })
     }
+    changed
+  }
+
+  /**
+   * For each token t in the base solution set, compute the set of tracked tokens of t.f and propagate to dst.
+   *
+   * @param base        the base
+   * @param dst         the destination
+   * @param field       the field f
+   * @param constraints constraint environment
+   * @return if the solution state was changed
+   */
+  def propagateTrackedOfField(base: ConstraintVar, dst: ConstraintVar, field: String, constraints: ConstraintEnvironment): Boolean = {
+    var changed = false
+    base.solution.foreach(t => {
+      val tf = constraints.tf2Cvar((t, field))
+      val tracked = tf.solution.intersect(W)
+      changed |= dst.addTokens(tracked)
+    })
     changed
   }
 

@@ -33,9 +33,7 @@ class LMSolver extends Demanded {
 
       /** Identical to HTSolver */
       constraints.newConstraints.foreach(c => {
-        if (Q.contains(c.to) || W.contains(c.token)) {
-          changed |= c.to.addToken(c.token)
-        }
+        changed |= handleNewObj(c)
       })
 
       /** Identical to HTSolver */
@@ -67,11 +65,7 @@ class LMSolver extends Demanded {
           }
         })
 
-        base.solution.foreach(t => {
-          val tf = constraints.tf2Cvar((t, field))
-          val tracked = tf.solution.intersect(W)
-          changed |= dst.addTokens(tracked)
-        })
+        changed |= propagateTrackedOfField(base, dst, field, constraints)
 
         if (Q.contains(dst)) {
           changed |= addDemand(base, Some(constraint))
