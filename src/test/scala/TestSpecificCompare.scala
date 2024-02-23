@@ -1,7 +1,7 @@
 import TestUtil.solveBoth
-import main.program.ProgramTemplates
-import main.solver.SolverUtil
+import main.program.{Program, ProgramTemplates}
 import main.solver.SolverUtil.compareSolutions
+import main.solver.{QueryID, SolverUtil}
 import org.scalatest.funsuite.AnyFunSuite
 
 class TestSpecificCompare extends AnyFunSuite {
@@ -16,81 +16,50 @@ class TestSpecificCompare extends AnyFunSuite {
 
 
   test("Transitive Token Tracking") {
-    val queryId = 3
-    val p = ProgramTemplates.TransitiveTokenTracking
-    val (e, d) = solveBoth(p, queryId)
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.TransitiveTokenTracking, 3)
   }
 
   test("Unconditional tracking in store") {
-    val queryId = 4
-    val p = ProgramTemplates.UnconditionalTokenTrackingInStore
-    val (e, d) = solveBoth(p, queryId)
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.UnconditionalTokenTrackingInStore, 4)
   }
 
   // Shows the need for tracking tokens of the base for x.f = y, if y has tracked tokens.
   test("TrackBaseInStore") {
-    val queryId = 6
-    val p = ProgramTemplates.TrackBaseInStore
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.TrackBaseInStore, 6)
   }
 
   test("MultipleFields") {
-    val queryId = (1, "f")
-    val p = ProgramTemplates.MultipleFields
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.MultipleFields, (1, "f"))
   }
 
   test("FunctionAndField") {
-    val queryId = 4
-    val p = ProgramTemplates.FunctionAndField
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.FunctionAndField, 4)
   }
 
   test("MergeInCall") {
-    val queryId = 4
-    val p = ProgramTemplates.MergeInCall
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.MergeInCall, 4)
   }
 
   test("TrackedArgumentsMustPropagate") {
-    val queryId = 4
-    val p = ProgramTemplates.TrackedArgumentsMustPropagate
-    val (e, d) = solveBoth(p, queryId)
+    assertEqualSolution(ProgramTemplates.TrackedArgumentsMustPropagate, 4)
 
-    assert(compareSolutions(e, d, queryId))
   }
   test("FunctionsAndReturns") {
-    val queryId = 7
-    val p = ProgramTemplates.TrackedArgumentsMustPropagate
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.FunctionsAndReturns, 7)
   }
 
   test("MergeOfArguments") {
-    val queryId = 1
-    val p = ProgramTemplates.MergeOfArguments
-    val (e, d) = solveBoth(p, queryId)
-
-    assert(compareSolutions(e, d, queryId))
+    assertEqualSolution(ProgramTemplates.MergeOfArguments, 1)
   }
 
-  test("Query0") {
-    val queryId = 0
-    val p = ProgramTemplates.Query0
-    val (e, d) = solveBoth(p, queryId)
+  test("TrackedRetNodeImpliesTrackFunction") {
+    assertEqualSolution(ProgramTemplates.TrackedRetNodeImpliesTrackFunction, 0)
+  }
 
-    assert(compareSolutions(e, d, queryId))
+
+  private def assertEqualSolution(p: Program, query: QueryID): Unit = {
+    val (e, d) = solveBoth(p, query)
+    assert(compareSolutions(e, d, query))
   }
 
 

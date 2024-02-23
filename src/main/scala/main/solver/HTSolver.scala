@@ -42,6 +42,18 @@ class HTSolver extends Demanded {
           changed |= c.to.addToken(c.token)
           if changed then debug("Processing tracking in address constraint %s in %s".format(c.token, c.to))
         }
+
+        // If some function definition has a return node which contains tracked tokens, we must track the function
+        // to know where it ends up such that we can propagate the tracked return tokens.
+        c.token match
+          case a: ObjToken =>
+          case b: FunToken =>
+            val (param, ret) = constraints.funInfo(b)
+            if (W.intersect(ret.solution).nonEmpty) {
+              changed |= addTracking(c.token, Some(c))
+            }
+
+
       })
 
       // Copy constraints
@@ -92,7 +104,6 @@ class HTSolver extends Demanded {
         // Handling explicit demand
         if (Q.contains(res)) {
           changed |= addDemand(callNode, Some(constraint))
-          // TODO: Track y?
           callNode.solution.foreach {
             case a: ObjToken =>
             case b: FunToken =>
@@ -121,10 +132,8 @@ class HTSolver extends Demanded {
             }
         }
 
-        // TODO: URGENT! There are some fixes we need to make. First of all, every function definition should have
-        //  a unique token - we should not allow two functions to have the same token, because that messes up the
-        //  bindings of formal parameters.
-        //  Also; every function parameter should be unique - but we should still allow the body to take that value
+        // TODO: URGENT! There are some fixes we need to make. Every function parameter should be unique - 
+        //  but we should still allow the body to take that value
         //  That is: If we have n variables, we should still generate function parameters from those n values, but
         //  just say that whenever we generate a parameter it should be unique, and whenever we generate a random variable,
         //  it should not be allowed to have the same id as an existing parameter. Then we can just let bodies be
@@ -135,12 +144,6 @@ class HTSolver extends Demanded {
         if (W.intersect(arg.solution).nonEmpty) {
           changed |= addDemand(callNode, Some(constraint))
 
-          callNode.solution.foreach {
-            case a: ObjToken =>
-            case b: FunToken =>
-              // FIXME: Is this needed?
-            //              changed |= addTracking(b, Some(constraint))
-          }
         }
         callNode.solution.foreach {
           case a: ObjToken =>
@@ -148,50 +151,6 @@ class HTSolver extends Demanded {
             val (paramNode, retNode) = constraints.funInfo(b)
             changed |= paramNode.addTokens(arg.solution.intersect(W))
         }
-
-
-
-
-
-
-
-
-
-      //        // TODO: Right now, we are obeying the exhaustive solution, by merging all arguments for tracked functions.
-      //        //  However one could argue that maybe we can avoid doing that and thereby gain some form of precision, i.e.
-      //        //  for x = y(a), z = y(b) where x is demanded, if z is not demanded then we don't merge a, b, giving more
-      //        //  precision for x
-      //
-      //        def propArgAndReturn(funToken: FunToken, resNode: ConstraintVar, argNode: ConstraintVar): Boolean = {
-      //          var changed = false
-      //          // FIXME: This might be a bit too naive
-      //          val (argNode, resNode) = constraints.funInfo(funToken)
-      //          debug("Propagating argument %s into formal param %s and return node %s into dst %s".format(arg, argNode, resNode, res))
-      //          changed |= addDemand(resNode, Some(constraint))
-      //          changed |= addDemand(arg, Some(constraint))
-      //          changed |= argNode.addTokens(arg.solution)
-      //          changed |= res.addTokens(resNode.solution)
-      //          changed
-      //        }
-      //
-      //        if (Q.contains(res)) {
-      //          changed |= addDemand(callNode, Some(constraint))
-      //          callNode.solution.foreach {
-      //            case a: ObjToken =>
-      //            case b: FunToken =>
-      //              changed |= propArgAndReturn(b, res, arg)
-      //              // Since arguments are merged, we must track all function tokens we see, to ensure their arguments
-      //              // flow to the parameters in other call instances
-      //              changed |= addTracking(b, Some(constraint))
-      //          }
-      //        }
-      //
-      //        // If a call is tracked, we must copy the call site argument to the formal parameter
-      //        callNode.solution.intersect(W).foreach {
-      //          case a: ObjToken =>
-      //          case b: FunToken =>
-      //            changed |= propArgAndReturn(b, res, arg)
-      //        }
     }
     changed
   }

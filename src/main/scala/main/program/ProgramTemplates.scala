@@ -134,20 +134,6 @@ object ProgramTemplates {
     Parser.ParseProgram(readTemplate("FunctionsAndReturns"))
   }
 
-  /*
-   Merge in arguments
-    x0 holds t1
-    x1 holds f2
-    the function calls to x1 merges x0 and x5 in x2
-    Thus both methods return t1, meaning that x4 should hold t1
-  
-x0 = new t1
-x1 = (x2) =>_f2 x2
-x3 = x1(x0)
-x4 = x1(x5)
-
-   */
-
 
   def MergeInCall: Program = {
     Parser.ParseProgram(readTemplate("MergeInCall"))
@@ -184,22 +170,14 @@ x4 = x1(x5)
    * x2 = x3(x0)
    *
    * The issue for this program is, that while x4 might be demanded and t1 tracked, we have no way of realizing that
-   * the function call x2 = x3(x0) returns that tracked value, since we don't know that x3 is f2. Due to the free 
-   * variable, we would have to start tracking f2 from the new function instruction - I guess even if x4 was non-demanded,
+   * the function call x2 = x3(x0) returns that tracked value, since we don't know that x3 is f2. Due to the free
+   * variable, we would have to start tracking f2 from the new function instruction - even if x4 was non-demanded,
    * but held a tracked variable, i.e. x4 intersect W is non-empty then we must track f2
    *
    */
-  def Query0: Program = {
-    Parser.ParseProgram(readTemplate("Query0"))
+  def TrackedRetNodeImpliesTrackFunction: Program = {
+    Parser.ParseProgram(readTemplate("TrackedRetNodeImpliesTrackFunction"))
   }
-
-  /*
-  We initially query x0. This means that x4 is demanded and thus t1 is tracked
-  We then also demand t1.f, and know that x4 contains t1
-
-  The issue is that x2 = x3(x0) returns x4, and thus since x4 contains t1 and t1 is tracked, this should flow to
-  x2, but it doesn't.
-   */
 
 
   /**
