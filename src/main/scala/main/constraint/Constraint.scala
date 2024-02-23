@@ -108,6 +108,7 @@ trait ConstraintVar {
     solution.add(token)
   }
 
+
   def addTokens(tokens: mutable.Set[Token]): Boolean = {
     var added = false
     tokens.foreach(t => {

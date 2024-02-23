@@ -84,7 +84,7 @@ class HTSolver extends Demanded {
         base.solution.foreach(t => {
           debug("Processing token %s for store on %s.%s = %s".format(t, base, field, src.toString))
           val tf = constraints.tf2Cvar((t, field))
-          changed |= handleDemandOfStore(tf, src, Some(constraint), constraints)
+          changed |= demandAndPropagate(tf, src, Some(constraint), constraints)
 
           // I think this is supposed to be here - we cannot guard the rule satisfying the invariant, it must always hold!
           changed |= tf.addTokens(src.solution.intersect(W))
@@ -100,16 +100,8 @@ class HTSolver extends Demanded {
 
         /** Load part of the call expression - loading the result value into x. */
         // Handling explicit demand
-        if (Q.contains(res)) {
-          changed |= addDemand(callNode, Some(constraint))
-          callNode.solution.foreach {
-            case a: ObjToken =>
-            case b: FunToken =>
-              val (paramNode, retNode) = constraints.funInfo(b)
-              changed |= addDemand(retNode, Some(constraint))
-              changed |= res.addTokens(retNode.solution)
-          }
-        }
+        changed |= demandCallAndPropagate(res, callNode, Some(constraint), constraints)
+
         // Tracked tokens in return node must be propagated as well.
         callNode.solution.foreach {
           case a: ObjToken =>
@@ -120,15 +112,7 @@ class HTSolver extends Demanded {
 
         /** Store part of the call expression - storing the argument into the parameter */
         // If the parameter is demanded, we must propagate the argument into it.
-        callNode.solution.foreach {
-          case a: ObjToken =>
-          case b: FunToken =>
-            val (paramNode, retNode) = constraints.funInfo(b)
-            if (Q.contains(paramNode)) {
-              changed |= addDemand(arg, Some(constraint))
-              changed |= paramNode.addTokens(arg.solution)
-            }
-        }
+        changed |= demandArgAndPropagate(callNode, arg, Some(constraint), constraints)
 
         // TODO: URGENT! There are some fixes we need to make. Every function parameter should be unique - 
         //  but we should still allow the body to take that value

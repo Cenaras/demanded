@@ -68,7 +68,7 @@ class HTDouble extends Demanded {
       case ForallStoreConstraint(base, field, src) =>
         base.solution.foreach(t => {
           val tf = constraints.tf2Cvar((t, field))
-          changed |= handleDemandOfStore(tf, src, Some(constraint), constraints)
+          changed |= demandAndPropagate(tf, src, Some(constraint), constraints)
           changed |= cVar2Tracking(tf).addTokens(cVar2Tracking(src).solution)
         })
 
@@ -78,17 +78,7 @@ class HTDouble extends Demanded {
 
 
       case CallConstraint(res, callNode, arg) =>
-        // FIXME: Identical to HT
-        if (Q.contains(res)) {
-          changed |= addDemand(callNode, Some(constraint))
-          callNode.solution.foreach {
-            case a: ObjToken =>
-            case b: FunToken =>
-              val (paramNode, retNode) = constraints.funInfo(b)
-              changed |= addDemand(retNode, Some(constraint))
-              changed |= res.addTokens(retNode.solution)
-          }
-        }
+        changed |= demandCallAndPropagate(res, callNode, Some(constraint), constraints)
 
         callNode.solution.foreach {
           case a: ObjToken =>
@@ -97,20 +87,13 @@ class HTDouble extends Demanded {
             changed |= cVar2Tracking(res).addTokens(cVar2Tracking(retNode).solution)
         }
 
-        // FIXME: Identical to HT
-        callNode.solution.foreach {
-          case a: ObjToken =>
-          case b: FunToken =>
-            val (paramNode, retNode) = constraints.funInfo(b)
-            if (Q.contains(paramNode)) {
-              changed |= addDemand(arg, Some(constraint))
-              changed |= paramNode.addTokens(arg.solution)
-            }
-        }
+        changed |= demandArgAndPropagate(callNode, arg, Some(constraint), constraints)
+
 
         if (cVar2Tracking(arg).solution.nonEmpty) {
           changed |= addDemand(callNode, Some(constraint))
         }
+
 
         callNode.solution.foreach {
           case a: ObjToken =>

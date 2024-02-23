@@ -94,20 +94,57 @@ trait Demanded extends BaseSolver {
   }
 
   /**
-   * Handles the demanded part of a store operation. That is, for some constraint variable ⟦t.f⟧, if ⟦t.f⟧ ∈ Q, then add
-   * ⟦src⟧ to Q and propagate ⟦src⟧ ⊆ ⟦t.f⟧
+   * If dst is demanded, demand src and propagate all tokens from src to dst
    *
-   * @param tf          constraint variable t.f
-   * @param src         src constraint variable
-   * @param debug       Optional constraint used for debugging
+   * @param dst   destination constraint variable
+   * @param src   source constraint variable
+   * @param debug debug information
    * @param constraints constraint environment
    * @return if solution state was changed
    */
-  def handleDemandOfStore(tf: ConstraintVar, src: ConstraintVar, debug: Option[ComplexConstraint], constraints: ConstraintEnvironment): Boolean = {
+  def demandAndPropagate(dst: ConstraintVar, src: ConstraintVar, debug: Option[Constraint], constraints: ConstraintEnvironment): Boolean = {
     var changed = false
-    if (Q.contains(tf)) {
+    if (Q.contains(dst)) {
       changed |= addDemand(src, debug)
-      changed |= tf.addTokens(src.solution)
+      changed |= dst.addTokens(src.solution)
+    }
+    changed
+  }
+
+  /**
+   *
+   * @param res
+   * @param callNode
+   * @param debug
+   * @param constraints
+   * @return
+   */
+  def demandCallAndPropagate(res: ConstraintVar, callNode: ConstraintVar, debug: Option[ComplexConstraint], constraints: ConstraintEnvironment): Boolean = {
+    var changed = false
+    if (Q.contains(res)) {
+      changed |= addDemand(callNode, debug)
+
+
+      callNode.solution.foreach {
+        case a: ObjToken =>
+        case b: FunToken =>
+          val (paramNode, retNode) = constraints.funInfo(b)
+          changed |= addDemand(retNode, debug)
+          changed |= res.addTokens(retNode.solution)
+      }
+    }
+    changed
+  }
+
+
+  def demandArgAndPropagate(callNode: ConstraintVar, arg: ConstraintVar, debug: Option[ComplexConstraint], constraints: ConstraintEnvironment): Boolean = {
+    var changed = false
+
+    callNode.solution.foreach {
+      case a: ObjToken =>
+      case b: FunToken =>
+        val (paramNode, retNode) = constraints.funInfo(b)
+        changed |= demandAndPropagate(paramNode, arg, debug, constraints)
     }
     changed
   }
