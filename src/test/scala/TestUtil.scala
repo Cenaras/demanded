@@ -80,8 +80,8 @@ object TestUtil {
     val exhaustiveSolution = exhaustive.solve(eConstraints)
     val demandedSolution = ht.solve(dConstraints, queryId)
 
-    //    println(PrettyPrinter.stringifySolution(exhaustiveSolution))
-    //    println(PrettyPrinter.stringifySolution(demandedSolution))
+    println(PrettyPrinter.stringifySolution(exhaustiveSolution))
+    println(PrettyPrinter.stringifySolution(demandedSolution))
 
     (exhaustiveSolution, demandedSolution)
   }
@@ -94,5 +94,21 @@ object TestUtil {
     val solution2 = sol2.solve(constraints2, queryID)
     (solution1, solution2)
   }
+
+
+  def compareOptimality(p: Program, queryID: QueryID, sol1: Demanded, sol2: Demanded): ((Int, Int, Int), (Int, Int, Int)) = {
+    val c1 = ConstraintGenerator.generate(p)
+    val c2 = ConstraintGenerator.generate(p)
+
+    val s1 = sol1.solve(c1, queryID)
+    val s2 = sol2.solve(c2, queryID)
+
+    val res1 = (sol1.Q.size, sol1.W.size, SolverUtil.solutionSize(s1))
+    val res2 = (sol2.Q.size, sol2.W.size, SolverUtil.solutionSize(s2))
+
+    (res1, res2)
+
+  }
+
 
 }

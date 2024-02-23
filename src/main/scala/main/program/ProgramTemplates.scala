@@ -177,12 +177,16 @@ x4 = x1(x5)
 
   /**
    *
-   * x1 = (x5) =>_f2 x4
-   * x2 = (x9) =>_f3 x0
-   * x3 = (x7) =>_f2 x2
-   * x0 = x2.f
-   * x4 = x1(x3)
-   * x4.f = x3
+   * x3 = (x7) =>_f2 x4
+   * x4 = new t1
+   * x0 = x4.f
+   * x2.f = x3
+   * x2 = x3(x0)
+   *
+   * The issue for this program is, that while x4 might be demanded and t1 tracked, we have no way of realizing that
+   * the function call x2 = x3(x0) returns that tracked value, since we don't know that x3 is f2. Due to the free 
+   * variable, we would have to start tracking f2 from the new function instruction - I guess even if x4 was non-demanded,
+   * but held a tracked variable, i.e. x4 intersect W is non-empty then we must track f2
    *
    */
   def Query0: Program = {
@@ -190,14 +194,14 @@ x4 = x1(x5)
   }
 
   /*
-  We initially query x0. This means that x2 is demanded
-  
-  
-  
+  We initially query x0. This means that x4 is demanded and thus t1 is tracked
+  We then also demand t1.f, and know that x4 contains t1
+
+  The issue is that x2 = x3(x0) returns x4, and thus since x4 contains t1 and t1 is tracked, this should flow to
+  x2, but it doesn't.
    */
-  
-  
-  
+
+
   /**
    * Reads a template from the templates folder
    *

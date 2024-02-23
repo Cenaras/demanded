@@ -22,11 +22,13 @@ class HTSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
+    var iterations = 0
     debug("Solving HTSolver instance on query %s\n".format(queryId))
     demandQuery(queryId, constraints)
 
     var changed = true
     while (changed) {
+      iterations += 1
       changed = false
 
       // Address constraints are only processed if the constraint variable is queried or the token is tracked
@@ -50,7 +52,8 @@ class HTSolver extends Demanded {
       })
       constraints.complexConstraints.foreach(c => changed |= solveComplex(c, constraints))
     }
-    //    println(W)
+
+    debug("HT Iterations: " + iterations)
     constraints.constraintVars
   }
 
