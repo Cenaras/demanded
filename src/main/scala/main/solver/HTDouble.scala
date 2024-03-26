@@ -4,16 +4,13 @@ import main.constraint.*
 
 import scala.collection.mutable
 
-// TODO: Reuse code from HTSolver?
 class HTDouble extends Demanded {
   private val cVar2Tracking: mutable.Map[ConstraintVar, ConstraintVar] = mutable.Map()
 
-  // TODO: There might end up being some code duplication that we can refactor between HTSolve and this, since
-  //  the rules are basically the same
-
-  // We could make a strategy pattern where we have a strategy for demanded and a strategy for tracking
-  // Then we reuse the demanded in both and only alter the tracking
   def solve(constraints: ConstraintEnvironment, queryID: QueryID): ConstraintVariables = {
+    Q.clear()
+    W.clear()
+
     debug("Solving HTDouble instance on query %s\n".format(queryID))
     generateTrackedConstraintVars(constraints.constraintVars)
     demandQuery(queryID, constraints)

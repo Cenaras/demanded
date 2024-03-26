@@ -154,9 +154,9 @@ trait Demanded extends BaseSolver {
   /**
    * If dst is demanded, demand src and propagate all tokens from src to dst
    *
-   * @param dst   destination constraint variable
-   * @param src   source constraint variable
-   * @param debug debug information
+   * @param dst         destination constraint variable
+   * @param src         source constraint variable
+   * @param debug       debug information
    * @param constraints constraint environment
    * @return if solution state was changed
    */
@@ -181,7 +181,6 @@ trait Demanded extends BaseSolver {
     var changed = false
     if (Q.contains(res)) {
       changed |= addDemand(callNode, debug)
-
 
       callNode.solution.foreach {
         case a: ObjToken =>
@@ -219,9 +218,8 @@ trait Demanded extends BaseSolver {
     changed |= addDemand(cVar, debug)
     // We cannot move this into handleDemandOfStore - TrackBaseInStore fails then. And it is more restrictive here, than
     // always doing it.
-    cVar.solution.foreach(t => {
-      changed |= addTracking(t, debug)
-    })
+    
+    changed |= trackAll(cVar, debug)
     changed
   }
 
@@ -244,6 +242,21 @@ trait Demanded extends BaseSolver {
       case None => throw Error("Queried constraint variable %s does not exist".format(queryID))
       case Some(v) => addDemand(v, None)
 
+  }
+
+  /**
+   * Tracks all tokens in the given constraint variable
+   *
+   * @param cvar the constraint variable
+   * @return if the solution state was changed
+   */
+  def trackAll(cvar: ConstraintVar, debug: Option[Constraint]): Boolean = {
+    var changed = false
+    cvar.solution.foreach(t => {
+      changed |= addTracking(t, debug)
+    })
+    changed
+    
   }
 
   /**

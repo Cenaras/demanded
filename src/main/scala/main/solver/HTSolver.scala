@@ -8,6 +8,11 @@ class HTSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
+    // TODO: Use a new solver instance for each solution instead of resetting it since it uses state.
+    
+    Q.clear()
+    W.clear()
+    
     var iterations = 0
     debug("Solving HTSolver instance on query %s\n".format(queryId))
     demandQuery(queryId, constraints)
@@ -68,12 +73,13 @@ class HTSolver extends Demanded {
         // Handling explicit demand
         changed |= demandCallAndPropagate(res, callNode, Some(constraint), constraints)
 
-        // Tracked tokens in return node must be propagated as well.
+        // Tracked tokens in return and arg node must be propagated as well.
         callNode.solution.foreach {
           case a: ObjToken =>
           case b: FunToken =>
             val (paramNode, retNode) = constraints.funInfo(b)
             changed |= res.addTokens(retNode.solution.intersect(W))
+            changed |= paramNode.addTokens(arg.solution.intersect(W))
         }
 
         /** Store part of the call expression - storing the argument into the parameter */
@@ -84,14 +90,8 @@ class HTSolver extends Demanded {
         // into t.p
         if (W.intersect(arg.solution).nonEmpty) {
           changed |= addDemand(callNode, Some(constraint))
+        }
 
-        }
-        callNode.solution.foreach {
-          case a: ObjToken =>
-          case b: FunToken =>
-            val (paramNode, retNode) = constraints.funInfo(b)
-            changed |= paramNode.addTokens(arg.solution.intersect(W))
-        }
     }
     changed
   }

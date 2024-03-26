@@ -7,6 +7,9 @@ class LMSolver extends Demanded {
 
   override def solve(constraints: ConstraintEnvironment, queryID: QueryID): ConstraintVariables = {
     debug("Solving LMSolver instance on query %s\n".format(queryID))
+
+    Q.clear()
+    W.clear()
     demandQuery(queryID, constraints)
 
     var iterations = 0

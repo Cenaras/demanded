@@ -179,6 +179,9 @@ object ProgramTemplates {
     Parser.ParseProgram(readTemplate("TrackedRetNodeImpliesTrackFunction"))
   }
 
+  def Query3: Program = {
+    Parser.ParseProgram(readTemplate("Query3"))
+  }
 
   /**
    * Reads a template from the templates folder
@@ -187,7 +190,7 @@ object ProgramTemplates {
    * @return contents of filename
    */
   private def readTemplate(name: String): String = {
-    val source = scala.io.Source.fromFile("src/main/scala/main/program/templates/" + name)
+    val source = scala.io.Source.fromFile("untitled/src/main/scala/main/program/templates/" + name)
     val lines = try source.getLines().map(_.trim).mkString("\n") finally source.close()
     lines
   }

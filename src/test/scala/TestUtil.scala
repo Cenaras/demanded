@@ -50,8 +50,8 @@ object TestUtil {
         println(PrettyPrinter.stringifySolution(solution2))
         println("Program (query " + query + "): ")
         println(PrettyPrinter.stringifyProgram(program))
+        assert(false)
       }
-      assert(sol1Size <= sol2Size)
     }
   }
 
