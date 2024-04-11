@@ -36,4 +36,5 @@ pointsTo(x, v) :- load(x, y, f), pointsTo(y, z), pointsToField(z, f, v).
 pointsToField(t, f, v) :- store(r, f, s), pointsTo(r, t), pointsTo(s, v).
 
 .decl query(t: token)
-query(t) :- pointsTo("e", t).
+// This line is automatically changed by the transform_program script
+query(t) :- pointsTo("x1", t).
