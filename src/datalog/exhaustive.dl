@@ -2,7 +2,10 @@
 .type token <: symbol
 .type field <: symbol
 
-.output pointsTo
+//.output pointsTo
+//.output pointsToField
+.output query
+
 
 // x = new t
 .decl new(x: var, t: token)
@@ -31,3 +34,6 @@ pointsTo(x, y) :- new(x, y).
 pointsTo(x, z) :- assign(x, y), pointsTo(y, z).
 pointsTo(x, v) :- load(x, y, f), pointsTo(y, z), pointsToField(z, f, v).
 pointsToField(t, f, v) :- store(r, f, s), pointsTo(r, t), pointsTo(s, v).
+
+.decl query(t: token)
+query(t) :- pointsTo("e", t).

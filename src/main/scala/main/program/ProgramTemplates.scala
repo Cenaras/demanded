@@ -179,10 +179,16 @@ object ProgramTemplates {
     Parser.ParseProgram(readTemplate("TrackedRetNodeImpliesTrackFunction"))
   }
 
-  def Query3: Program = {
-    Parser.ParseProgram(readTemplate("Query3"))
-  }
 
+  def HTAMNotSame: Program = {
+    Parser.ParseProgram(readTemplate("HTAMNotSame"))
+  }
+  
+  def qwe: Program = {
+    Parser.ParseProgram(readTemplate("qwe"))
+  }
+  
+  
   /**
    * Reads a template from the templates folder
    *

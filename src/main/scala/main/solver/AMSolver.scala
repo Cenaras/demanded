@@ -3,7 +3,6 @@ package main.solver
 import main.constraint.{CallConstraint, ComplexConstraint, ConstraintEnvironment, ConstraintVariables, ForallLoadConstraint, ForallStoreConstraint, FunToken, ObjToken}
 
 /** Slight alteration of formulation by Anders. */
-// TODO: Try and add the missing thing for function definitions, and check if these formulations are "as minimal" as HT.
 class AMSolver extends Demanded {
 
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
@@ -18,6 +17,12 @@ class AMSolver extends Demanded {
       // TODO: Implement a one-set solver and a two-set solver and place this inside those. A strategy pattern
       constraints.newConstraints.foreach(c => {
         changed |= handleNewObj(c)
+        
+        c.token match
+          case a: ObjToken =>
+          case b: FunToken => 
+            changed |= trackFunctionIfTrackedRetNode(b, constraints, Some(c))
+        
       })
 
       constraints.copyConstraints.foreach(c => {
@@ -72,7 +77,8 @@ class AMSolver extends Demanded {
 
         changed |= demandCallAndPropagate(res, callNode, Some(constraint), constraints)
 
-        // Anders change
+        // Anders change - I think this might not be minimal. We do not need to track y, since it does not have
+        // actual accessible fields, it has a formal parameter (I think?)
         if (Q.contains(res)) {
           changed |= trackAll(callNode, Some(constraint))
         }

@@ -2,6 +2,7 @@ import TestUtil.solveBoth
 import main.program.{Program, ProgramTemplates}
 import main.solver.SolverUtil.compareSolutions
 import main.solver.{QueryID, SolverUtil}
+import main.util.PrettyPrinter
 import org.scalatest.funsuite.AnyFunSuite
 
 class TestSpecificCompare extends AnyFunSuite {

@@ -1,9 +1,19 @@
 .type var <: symbol
 
+.output pointsTo
+
 .decl addrOf(X: var, Y: var)
+.input new
+
 .decl assign(X: var, Y: var)
+.input assign
+
 .decl load(X: var, Y: var)
+.input load
+
 .decl store(X: var, Y: var)
+.input store
+
 
 .decl pointsTo(X: var, Y: var)
 

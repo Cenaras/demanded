@@ -1,4 +1,4 @@
-import TestUtil.{newDist, newGenerator, repeatSolveBoth, solveBothDemanded}
+import TestUtil.{newDist, newGenerator, repeatSolveBoth, solveBoth, solveBothDemanded}
 import main.program.ProgramTemplates
 import main.solver.SolverUtil.{compareSolutions, solutionSize}
 import main.solver.{AMSolver, HTDouble, HTSolver, SolverUtil}
@@ -52,11 +52,25 @@ class TestHTCompare extends AnyFunSuite {
     val p = ProgramTemplates.TrackedRetNodeImpliesTrackFunction
     val q = 0
     val sol = solveBothDemanded(p, q, HTSolver(), AMSolver())
-    println("HT Solution")
-    println(PrettyPrinter.stringifySolution(sol._1))
-    println("AM Solution")
-    println(PrettyPrinter.stringifySolution(sol._2))
     assert(compareSolutions(sol._1, sol._2, q))
   }
+
+  test("HT vs AM not same") {
+    val p = ProgramTemplates.HTAMNotSame
+    val q = 5
+    val sol = solveBothDemanded(p, q, HTSolver(), AMSolver())
+    assert(compareSolutions(sol._1, sol._2, q))
+    assert(SolverUtil.solutionSize(sol._1) == SolverUtil.solutionSize(sol._2))
+  }
+
+
+  test("qwe") {
+    val p = ProgramTemplates.qwe
+    val q = 6
+    val sol = solveBothDemanded(p, q, HTSolver(), AMSolver())
+    println(PrettyPrinter.stringifySolution(sol._1))
+    println(PrettyPrinter.stringifySolution(sol._2))
+  }
+
 
 }
