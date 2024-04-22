@@ -29,7 +29,7 @@ object Parser {
       case callPattern(res, cls, arg) => p.addInstruction(CallInsn(res.toInt, cls.toInt, arg.toInt))
       case e => throw Error("Error in parsing statement %s".format(e))
     }
-    p
+    Desugar.desugar(p)
   }
 
   /**
@@ -88,6 +88,23 @@ class ProgramDistribution(newObj: Int, assign: Int, load: Int, store: Int, newFu
   def callProp: Int = newFunProp + call
 }
 
+/** Desugar programs, modelling function definitions and returns as a sequence of load/store. */
+object Desugar {
+  def desugar(p :Program): Program = {
+    val desugar = Program()
+    p.getInstructions.foreach {
+      case NewFunInsn(funId, param, retVal, funToken) =>
+        desugar.addInstruction(NewFunInsn(funId, param, retVal, funToken))
+        desugar.addInstruction(LoadInsn(param, funId, "arg"))
+        desugar.addInstruction(StoreInsn(funId, "ret", retVal))
+      case CallInsn(res, fun, arg) =>
+        desugar.addInstruction(StoreInsn(fun, "arg", arg))
+        desugar.addInstruction(LoadInsn(res, fun, "ret"))
+      case x => desugar.addInstruction(x)
+    }
+    desugar
+  }
+}
 
 /**
  * Generates random programs. Seeded with number of variables and number of instructions in the program.
@@ -112,8 +129,11 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
       val number = rng.between(0, 100)
       program.addInstruction(genInstruction(number))
     }
-    program
+    Desugar.desugar(program)
   }
+
+
+
 
   /**
    * Generate a random instruction based on the seed
@@ -146,6 +166,10 @@ class ProgramGenerator(var varNumber: Int, var tokenNum: Int, var insnNumber: In
         val funToken = generateRandomToken()
         val param = generateRandomParameter()
         val retVal = generateRandomVar(funId)
+
+        // Use load/store to model function arguments and returns
+
+
         NewFunInsn(funId, param, retVal, funToken)
       case x if x <= dist.callProp =>
         val resNode = generateRandomVar(None)

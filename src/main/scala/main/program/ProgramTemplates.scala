@@ -59,6 +59,9 @@ object ProgramTemplates {
   def FunCall: Program = {
     Parser.ParseProgram(readTemplate("FunCall"))
   }
+  
+  def qwe: Program =
+    Parser.ParseProgram(readTemplate("qwe"))
 
   /**
    * This program previously gave us problems. Since we are reading from x3.f, we must track all tokens from x3, which

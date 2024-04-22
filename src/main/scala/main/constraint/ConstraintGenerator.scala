@@ -13,7 +13,6 @@ object ConstraintGenerator {
 
   def generate(program: Program): ConstraintEnvironment = {
 
-    // TODO: Merge into a single, let the solvers apply a .filter when solving
     val constraints: mutable.Set[Constraint] = mutable.Set()
 
 
@@ -88,7 +87,7 @@ object ConstraintGenerator {
   private def bindNewToken(t: Token, tokenId: Int, id2Token: mutable.Map[Int, Token], token2Cvar: mutable.Map[(Token, String), ConstraintVar], constraintVars: ConstraintVariables): Unit = {
     id2Token += tokenId -> t
     // TODO: Don't hardcode
-    for (f <- Array("f", "g"))
+    for (f <- Array("f", "g", "ret", "arg"))
       val tokenCvar = FieldConstraintVar(t, f)
       token2Cvar += (t, f) -> tokenCvar
       constraintVars.add(tokenCvar)

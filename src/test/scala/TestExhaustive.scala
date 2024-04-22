@@ -2,6 +2,7 @@ import main.constraint.{ConstraintGenerator, ConstraintVariables, FunToken}
 import main.program.{Program, ProgramTemplates}
 import main.solver.ExhaustiveSolver
 import main.solver.SolverUtil.{containsExactly, getBaseCvar, getFieldCvar}
+import main.util.PrettyPrinter
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 
