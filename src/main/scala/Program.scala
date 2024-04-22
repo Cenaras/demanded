@@ -1,7 +1,19 @@
-
 type Var = Int
 type Token = Int
-type Field = Int // TODO: Reserve special fields for .arg and .res
+type Field = Int
+
+class Program(instructions: List[Instruction]) {
+
+  def this() = {
+    this(List())
+  }
+
+  def print(): Unit =
+    instructions.foreach(println)
+
+  def getInstructions: List[Instruction] = instructions
+
+}
 
 sealed trait Instruction:
   override def toString: String
@@ -17,17 +29,3 @@ case class Load(res: Var, base: Var, field: Field) extends Instruction:
 
 case class Store(base: Var, field: Field, value: Var) extends Instruction:
   override def toString: String = s"x$base.f$field = x$value"
-
-
-class Program(instructions: List[Instruction]) {
-
-  def this() = {
-    this(List())
-  }
-
-  def print(): Unit =
-    instructions.foreach(println)
-
-  def getInstructions: List[Instruction] = instructions
-  
-}
