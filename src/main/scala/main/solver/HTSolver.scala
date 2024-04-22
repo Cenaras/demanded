@@ -9,10 +9,10 @@ class HTSolver extends Demanded {
   def solve(constraints: ConstraintEnvironment, queryId: QueryID): ConstraintVariables = {
 
     // TODO: Use a new solver instance for each solution instead of resetting it since it uses state.
-    
+
     Q.clear()
     W.clear()
-    
+
     var iterations = 0
     debug("Solving HTSolver instance on query %s\n".format(queryId))
     demandQuery(queryId, constraints)
@@ -24,11 +24,6 @@ class HTSolver extends Demanded {
 
       constraints.newConstraints.foreach(c => {
         changed |= handleNewObj(c)
-
-        c.token match
-          case a: ObjToken =>
-          case b: FunToken =>
-            changed |= trackFunctionIfTrackedRetNode(b, constraints, Some(c))
       })
 
       constraints.copyConstraints.foreach(c => {
