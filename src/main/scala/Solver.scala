@@ -26,9 +26,9 @@ trait Solver {
 
   protected def addToken(x: Cell, t: Token): Unit = {
     // Initialise solution for x, if not present
-    val xSol = sol.getOrElseUpdate(x, mutable.Set())
+    sol.getOrElseUpdate(x, mutable.Set())
 
-    changed = xSol.add(t)
+    changed = changed | sol(x).add(t)
   }
 
   protected def propagate(to: Cell, from: Cell): Unit = {
