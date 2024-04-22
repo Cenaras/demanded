@@ -1,5 +1,7 @@
 package main.program
 
+import main.util.FileManager
+
 import scala.collection.mutable.ArrayBuffer
 
 object ProgramTemplates {
@@ -184,8 +186,8 @@ object ProgramTemplates {
     Parser.ParseProgram(readTemplate("HTAMNotSame"))
   }
   
-  def qwe: Program = {
-    Parser.ParseProgram(readTemplate("qwe"))
+  def MagicLoadNoStoreNonOptimal: Program = {
+    Parser.ParseProgram(readTemplate("MagicLoadNoStoreNonOptimal"))
   }
   
   
@@ -196,8 +198,6 @@ object ProgramTemplates {
    * @return contents of filename
    */
   private def readTemplate(name: String): String = {
-    val source = scala.io.Source.fromFile("untitled/src/main/scala/main/program/templates/" + name)
-    val lines = try source.getLines().map(_.trim).mkString("\n") finally source.close()
-    lines
+    FileManager.readFile("untitled/src/main/scala/main/program/templates/" + name)
   }
 }

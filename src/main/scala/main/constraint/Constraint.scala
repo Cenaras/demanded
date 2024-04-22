@@ -98,7 +98,9 @@ case class CallConstraint(res: ConstraintVar, callNode: ConstraintVar, arg: Cons
  * A constraint variable, either a base constraint for a variable, or a field constraint for (token, field)
  */
 trait ConstraintVar {
-  override def toString: String
+  override def toString: String = "⟦%s⟧".format(name)
+
+  def name: String
 
   def getId: Int
 
@@ -123,9 +125,7 @@ case class BaseConstraintVar(id: Int) extends ConstraintVar {
 
   override def getId: Int = id
 
-  override def toString: String = {
-    "⟦x%d⟧".format(id)
-  }
+  override def name: String = "x%d".format(id)
 }
 
 case class TrackedBaseConstraintVar(id: Int, base: BaseConstraintVar) extends ConstraintVar {
@@ -143,28 +143,23 @@ case class TrackedBaseConstraintVar(id: Int, base: BaseConstraintVar) extends Co
     changed |= base.addToken(token)
     changed
   }
+
+  override def name: String = "x%d_tracked".format(id)
 }
 
 case class FieldConstraintVar(token: Token, field: String) extends ConstraintVar {
 
   override def getId: Int = token.id
 
-  override def toString: String = {
-    "⟦t%d.%s⟧".format(token.id, field)
-  }
-
   def getToken: Token = token
 
   def getField: String = field
 
+  override def name: String = "t%d.%s".format(token.id, field)
 }
 
 case class TrackedFieldConstraintVar(token: Token, field: String, base: FieldConstraintVar) extends ConstraintVar {
   override def getId: Int = token.id
-
-  override def toString: String = {
-    "⟦t%d.%s⟧_tracked".format(token.id, field)
-  }
 
   def getField: String = field
 
@@ -175,11 +170,14 @@ case class TrackedFieldConstraintVar(token: Token, field: String, base: FieldCon
     changed |= base.addToken(token)
     changed
   }
+
+  override def name: String =     "t%d.%s_tracked".format(token.id, field)
 }
 
 
 trait Token(val id: Int) {
-
+  def name: String = "t"+id
+  
 }
 
 

@@ -28,7 +28,7 @@ class HTSolver extends Demanded {
         c.token match
           case a: ObjToken =>
           case b: FunToken =>
-//            changed |= trackFunctionIfTrackedRetNode(b, constraints, Some(c))
+            changed |= trackFunctionIfTrackedRetNode(b, constraints, Some(c))
       })
 
       constraints.copyConstraints.foreach(c => {
