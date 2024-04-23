@@ -24,40 +24,35 @@ class HeintzeTardieu extends DemandedSolver {
         if r(t) then
           addToken(x, t)
 
-      case Assign(left, right) =>
-        if d(left) then
-          addDemand(right)
-          propagate(left, right)
-        addTokens(left, sol(right).intersect(r))
+      case Assign(x, y) =>
+        if d(x) then
+          addDemand(y)
+          propagate(x, y)
+        addTokens(x, sol(y).intersect(r))
 
-      case Load(res, base, field) =>
-        if d(res) then
-          addDemand(base)
-          for t <- sol(base) do
-            addDemand((t, field))
-            propagate(res, (t, field))
-        for t <- sol(base) do
-          addTokens(res, sol(base).intersect(r))
+      case Load(x, y, f) =>
+        if d(x) then
+          addDemand(y)
+          for t <- sol(y) do
+            addDemand((t, f))
+            propagate(x, (t, f))
+        for t <- sol(y) do
+          addTokens(x, sol(y).intersect(r))
 
-      case Store(base, field, value) =>
-        for t <- sol(base) do
-          if d(t, field) then
-            addDemand(value)
-            propagate((t, field), value)
-          addTokens((t, field), sol(value).intersect(r))
-        if (sol(value).intersect(r).nonEmpty) then
-          addDemand(base)
-          trackTokens(sol(base))
+      case Store(x, f, y) =>
+        for t <- sol(x) do
+          if d(t, f) then
+            addDemand(y)
+            propagate((t, f), y)
+          addTokens((t, f), sol(y).intersect(r))
+        if (sol(y).intersect(r).nonEmpty) then
+          addDemand(x)
+          trackTokens(sol(x))
   }
 
   override def solve(p: Program, query: Cell): Solution = {
     addDemand(query)
-    while (changed) {
-      changed = false
-      p.getInstructions.foreach(i => {
-        process(i)
-      })
-    }
-    sol
-  }
+    super.naiveSolve(p)
+  } 
+  
 }

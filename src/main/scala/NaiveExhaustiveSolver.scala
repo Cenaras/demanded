@@ -18,14 +18,7 @@ class NaiveExhaustiveSolver extends ExhaustiveSolver {
   }
 
   override def solve(p: Program): Solution = {
-    while (changed) {
-      changed = false
-
-      p.getInstructions.foreach(i => {
-        process(i)
-      })
-    }
-    sol
+    super.naiveSolve(p)
   }
-  
+
 }

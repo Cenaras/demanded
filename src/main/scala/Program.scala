@@ -21,11 +21,11 @@ sealed trait Instruction:
 case class New(x: Var, t: Token) extends Instruction:
   override def toString: String = s"x$x = new t$t"
 
-case class Assign(left: Var, right: Var) extends Instruction:
-  override def toString: String = s"x$left = x$right"
+case class Assign(x: Var, y: Var) extends Instruction:
+  override def toString: String = s"x$x = x$y"
 
-case class Load(res: Var, base: Var, field: Field) extends Instruction:
-  override def toString: String = s"x$res = x$base.f$field"
+case class Load(x: Var, y: Var, f: Field) extends Instruction:
+  override def toString: String = s"x$x = x$y.f$f"
 
-case class Store(base: Var, field: Field, value: Var) extends Instruction:
-  override def toString: String = s"x$base.f$field = x$value"
+case class Store(x: Var, f: Field, y: Var) extends Instruction:
+  override def toString: String = s"x$x.f$f = x$y"

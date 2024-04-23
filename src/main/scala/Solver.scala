@@ -2,7 +2,7 @@ import scala.collection.mutable
 
 type Cell = Var | (Token, Field)
 type Solution = mutable.Map[Cell, mutable.Set[Token]]
-
+// TODO: Make a "naive solver" which uses this solver impl
 trait Solver {
 
   var changed = true
@@ -34,6 +34,17 @@ trait Solver {
           println(f._2)
     })
   }
+  
+  def naiveSolve(p: Program): Solution = {
+    while (changed) {
+      changed = false
+      p.getInstructions.foreach(i => {
+        process(i)
+      })
+    }
+    sol
+  }
+  
 }
 
 trait ExhaustiveSolver extends Solver {
@@ -41,7 +52,7 @@ trait ExhaustiveSolver extends Solver {
 }
 
 trait DemandedSolver extends Solver {
-  def solve(p: Program, query: Cell): Solution
+   def solve(p: Program, query: Cell): Solution
 }
 
 
