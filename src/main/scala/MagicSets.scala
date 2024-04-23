@@ -96,7 +96,7 @@ class MagicSets extends DemandedSolver {
 
         for (t <- sol_bb(x)) {
           for (v <- sol_bb(y)) {
-            if r((t,f), v) then addToken_bb((t,f), v) // (18)
+            if r((t, f), v) then addToken_bb((t, f), v) // (18)
           }
         }
   }
@@ -109,19 +109,40 @@ class MagicSets extends DemandedSolver {
         process(i)
       })
     }
-    //    println("Demanded by Magic Sets")
-    //
-    //    d.foreach {
-    //      case a: Var => println(s"x$a")
-    //      case b: (Token, Field) => println(s"t${b._1}\tf${b._2}")
-    //    }
-    //
-    //    println("Tracked by Magic Sets")
-    //    r.foreach((c, t) => {
-    //      println("TODO TRACKED")
-    //    })
+    println("Demanded by Magic Sets")
+
+    d.foreach {
+      case a: Var => println(s"x$a")
+      case b: (Token, Field) => println(s"t${b._1}\tf${b._2}")
+    }
+
+    println("Tracked by Magic Sets")
+    r.foreach((c, t) => {
+      c match
+        case a: Var => println(s"x$a\tt$t")
+        case b: (Token, Field) => println(s"t${b._1}\tf${b._2}\tt$t")
+    })
+    println()
 
     // output both types of points-to sets
-    sol ++ sol_bb
+    mergeMaps(sol, sol_bb)
+  }
+
+  private def mergeMaps(m1: mutable.Map[Cell, mutable.Set[Token]], m2: mutable.Map[Cell, mutable.Set[Token]]): mutable.Map[Cell, mutable.Set[Token]] = {
+    val seq1 = m1.toSeq
+    val seq2 = m2.toSeq
+
+    val res = mutable.Map[Cell, mutable.Set[Token]]()
+    seq1.map((c, s) => {
+      res += c -> s
+    })
+
+    seq2.map((c, s) => {
+      if res.contains(c) then
+        res(c).addAll(s)
+      else
+        res += c -> s
+    })
+    res
   }
 }

@@ -100,7 +100,7 @@ object DatalogCompiler {
     builder.append(FileManager.readFile(magic_ptfbbb)).append("\n")
 
     // Only keep the token from the relation and de-duplicate
-    val deduplicated = builder.toString().linesIterator.toList.map(s => s.substring(s.lastIndexOf("\t") + 1)).mkString("\n").linesIterator.toSet.mkString("\n")
+    val deduplicated = builder.toString().linesIterator.toList.mkString("\n").linesIterator.toSet.mkString("\n")
     deduplicated.linesIterator.toList.sorted.mkString("\n")
   }
 
