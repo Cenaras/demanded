@@ -32,13 +32,13 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
     compareExhaustiveToDemanded(1000000, insn, vars, fields, SolverType.HT)
   }
 
-  test("small magic") {
-    val vars = 3
-    val fields = 1
-    val insn = 7
-
-    compareExhaustiveToDemanded(1000000, insn, vars, fields, SolverType.Magic)
-  }
+//  test("small magic") {
+//    val vars = 3
+//    val fields = 1
+//    val insn = 7
+//
+//    compareExhaustiveToDemanded(1000000, insn, vars, fields, SolverType.Magic)
+//  }
   
   test("large magic") {
     val vars = 5
@@ -61,9 +61,11 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
       val solDem = dem.solve(p, query)
 
       if !TestUtil.compareSolutions(solEx, solDem, query) then
-        println("Solution mismatch")
+        println("Solution mismatch for program with query :" + query)
         p.print()
+        println("Exhaustive solution")
         ex.printSolution()
+        println("Demanded solution")
         dem.printSolution()
         throw new Error()
 

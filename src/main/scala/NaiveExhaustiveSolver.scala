@@ -5,15 +5,15 @@ class NaiveExhaustiveSolver extends ExhaustiveSolver {
     i match
       case New(x, t) =>
         addToken(x, t)
-      case Assign(left, right) =>
-        propagate(left, right)
-      case Load(res, base, field) =>
-        sol(base).foreach(t => {
-          propagate(res, (base, field))
+      case Assign(x, y) =>
+        propagate(x, y)
+      case Load(x, y, f) =>
+        sol(y).foreach(t => {
+          propagate(x, (t, f))
         })
-      case Store(base, field, value) =>
-        sol(base).foreach(t => {
-          propagate((t, field), value)
+      case Store(x, f, y) =>
+        sol(x).foreach(t => {
+          propagate((t, f), y)
         })
   }
 

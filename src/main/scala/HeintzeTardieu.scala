@@ -34,18 +34,19 @@ class HeintzeTardieu extends DemandedSolver {
         if d(x) then
           addDemand(y)
           for t <- sol(y) do
+            trackToken(t)
             addDemand((t, f))
             propagate(x, (t, f))
         for t <- sol(y) do
-          addTokens(x, sol(y).intersect(r))
+          addTokens(x, sol((t, f)).intersect(r))
 
       case Store(x, f, y) =>
-        for t <- sol(x) do
+        for t <- List.from(sol(x)) do
           if d(t, f) then
             addDemand(y)
             propagate((t, f), y)
           addTokens((t, f), sol(y).intersect(r))
-        if (sol(y).intersect(r).nonEmpty) then
+        if sol(y).intersect(r).nonEmpty then
           addDemand(x)
           trackTokens(sol(x))
   }
