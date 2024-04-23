@@ -66,6 +66,7 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
         ex.printSolution()
         dem.printSolution()
         throw new Error()
+
   }
 
 

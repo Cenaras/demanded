@@ -13,6 +13,8 @@ class TestInputProgram extends AnyFunSuite {
     TestUtil.assertSolution(3, List(1), solution)
     TestUtil.assertSolution(4, List(3), solution)
     TestUtil.assertSolution(5, List(2, 3), solution)
+
+    compare(p, 1)
   }
 
 
@@ -24,6 +26,8 @@ class TestInputProgram extends AnyFunSuite {
     TestUtil.assertSolution(1, List(1, 2), solution)
     TestUtil.assertSolution(2, List(2), solution)
     TestUtil.assertSolution((1,1), List(2), solution)
+
+    compare(p, 1)
 
   }
 
@@ -37,6 +41,8 @@ class TestInputProgram extends AnyFunSuite {
     TestUtil.assertSolution((2,2), List(1), solution)
     TestUtil.assertSolution((3, 1), List(4), solution)
     TestUtil.assertSolution((3,2), List(4), solution)
+
+    compare(p, 1)
   }
 
   
@@ -59,7 +65,7 @@ class TestInputProgram extends AnyFunSuite {
     val ht = HeintzeTardieu()
     val exSol = ex.solve(p)
     val htSol = ht.solve(p, q)
-    TestUtil.compareSolutions(exSol, htSol, q)
+    assert(TestUtil.compareSolutions(exSol, htSol, q))
 
   }
   

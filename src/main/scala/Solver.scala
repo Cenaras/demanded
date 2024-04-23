@@ -2,15 +2,21 @@ import scala.collection.mutable
 
 type Cell = Var | (Token, Field)
 type Solution = mutable.Map[Cell, mutable.Set[Token]]
+
 // TODO: Make a "naive solver" which uses this solver impl
 trait Solver {
 
   var changed = true
-  val sol: Solution = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set())
+  val sol: Solution = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
 
   protected def process(i: Instruction): Unit
 
   protected def addToken(x: Cell, t: Token): Unit = {
+    // Create solution set if not seen before
+    if !sol.contains(x) then
+      val fresh = mutable.Set[Token]()
+      sol += x -> fresh
+
     changed = changed | sol(x).add(t)
   }
 
@@ -34,17 +40,6 @@ trait Solver {
           println(f._2)
     })
   }
-  
-  def naiveSolve(p: Program): Solution = {
-    while (changed) {
-      changed = false
-      p.getInstructions.foreach(i => {
-        process(i)
-      })
-    }
-    sol
-  }
-  
 }
 
 trait ExhaustiveSolver extends Solver {
@@ -52,7 +47,7 @@ trait ExhaustiveSolver extends Solver {
 }
 
 trait DemandedSolver extends Solver {
-   def solve(p: Program, query: Cell): Solution
+  def solve(p: Program, query: Cell): Solution
 }
 
 
