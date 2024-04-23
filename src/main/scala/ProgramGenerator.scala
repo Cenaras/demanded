@@ -20,9 +20,9 @@ class ProgramGenerator(seed: Int, vars: Int, instructions: Int, fields: Int, dis
   private val rng = new Random(seed)
   private var tokens = 0
 
+  def genQuery: Int = rng.nextInt(vars)
 
   def generate(): Program = {
-
     val p: List[Instruction] = (0 to instructions).foldLeft(List[Instruction]())((p, _) => genInsn() :: p)
     Program(p)
   }

@@ -1,4 +1,4 @@
-class NaiveExhaustiveSolver extends Solver {
+class NaiveExhaustiveSolver extends ExhaustiveSolver {
 
 
   override protected def process(i: Instruction): Unit = {
@@ -16,4 +16,16 @@ class NaiveExhaustiveSolver extends Solver {
           propagate((t, field), value)
         })
   }
+
+  override def solve(p: Program): Solution = {
+    while (changed) {
+      changed = false
+
+      p.getInstructions.foreach(i => {
+        process(i)
+      })
+    }
+    sol
+  }
+  
 }
