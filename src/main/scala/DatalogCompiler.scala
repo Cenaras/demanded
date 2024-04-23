@@ -24,7 +24,7 @@ object DatalogCompiler {
       case New(x, t) => newWriter.write("x%s\tt%s\n".format(x, t))
       case Assign(x, y) => assignWriter.write("x%s\tx%s\n".format(x, y))
       case Load(x, y, f) => loadWriter.write("x%s\tx%s\tf%s\n".format(x, y, f))
-      case Store(x, f, y) => storeWriter.write("x%s\t%s\txf%s\n".format(x, f, y))
+      case Store(x, f, y) => storeWriter.write("x%s\tf%s\tx%s\n".format(x, f, y))
       case _ => throw new Error("Functions are unsupported in the logic analysis")
     }
 

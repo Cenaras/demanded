@@ -10,21 +10,30 @@ class TestMagic extends AnyFunSuite {
     val vars = 3
     val fields = 1
 
-    repeat(100, size, vars, fields)
+    repeat(1000, size, vars, fields)
 
+  }
+
+
+  test("slides") {
+    val p = Parser.ParseTemplate("slides")
+    val q = 5
+    single(p, q)
   }
 
   test("QWE") {
     val p = Parser.ParseTemplate("qwe")
     val q = 2
 
+    val demand = DatalogCompiler.collectDemand()
+    val tracked = DatalogCompiler.collectTracked()
 
-    val ht = HeintzeTardieu()
-    ht.solve(p, q)
-    ht.printSolution()
+    println("Demanded by Souffle")
+    println(demand)
+    println("Tracked by Souffle")
+    println(tracked)
 
-
-//    single(p, q)
+    single(p, q)
   }
 
 
@@ -52,16 +61,6 @@ class TestMagic extends AnyFunSuite {
       single(p, q)
 
   }
-
-
-  private def stringifyDemand(): String = {
-    ""
-  }
-
-  private def stringifyTracked(): String = {
-    ""
-  }
-
 
   private def writeSolutionToDisk(sol: Solution, path: String = "untitled/magicSol.tsv"): Unit = {
     val builder = new StringBuilder()
