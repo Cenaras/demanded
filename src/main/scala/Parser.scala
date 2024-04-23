@@ -16,6 +16,7 @@ object Parser {
         case assignPattern(left, right) => Assign(left.toInt, right.toInt) :: acc
         case loadPattern(left, right, field) => Load(left.toInt, right.toInt, field.toInt) :: acc
         case storePattern(left, field, right) => Store(left.toInt, field.toInt, right.toInt) :: acc
+        case _ => throw Error(s"Could not parse $line")
 
     })
     Program(insn)

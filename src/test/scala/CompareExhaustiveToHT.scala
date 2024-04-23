@@ -25,6 +25,14 @@ class CompareExhaustiveToHT extends AnyFunSuite {
     repeatSolveAndCompare(100000, insn, vars, fields)
   }
 
+  test("a million") {
+    val vars = 4
+    val fields = 2
+    val insn = 15
+
+    repeatSolveAndCompare(1000000, insn, vars, fields)
+  }
+  
   def repeatSolveAndCompare(times: Int, size: Int, vars: Int, fields: Int): Unit = {
     for i <- 0 to times do
       val seed = scala.util.Random.nextInt()

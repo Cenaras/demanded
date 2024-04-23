@@ -37,8 +37,31 @@ class TestInputProgram extends AnyFunSuite {
     TestUtil.assertSolution((2,2), List(1), solution)
     TestUtil.assertSolution((3, 1), List(4), solution)
     TestUtil.assertSolution((3,2), List(4), solution)
-
-
   }
 
+  
+  test("Track base in store") {
+    compare(Parser.ParseTemplate("track_base_in_store"), 6)
+  }
+  
+  test("Unconditional tracking in store") {
+    compare(Parser.ParseTemplate("unconditional_track_store"), 4)
+  }
+  
+  test("Transitive token tracking") {
+    compare(Parser.ParseTemplate("transitive_token_tracking"), 3)
+  }
+  
+  
+  
+  private def compare(p: Program, q: Cell) = {
+    val ex = NaiveExhaustiveSolver()
+    val ht = HeintzeTardieu()
+    val exSol = ex.solve(p)
+    val htSol = ht.solve(p, q)
+    TestUtil.compareSolutions(exSol, htSol, q)
+
+  }
+  
+  
 }

@@ -1,0 +1,7 @@
+x4 = new t1
+x5 = new t2
+x4 = x3
+x3 = x4.f1
+x5.f1 = x4
+x1.f1 = x5
+x1 = x5.f1
