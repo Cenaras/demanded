@@ -14,6 +14,33 @@ class TestMagic extends AnyFunSuite {
 
   }
 
+  test("QWE") {
+    val p = Parser.ParseTemplate("qwe")
+    val q = 2
+
+
+    val ht = HeintzeTardieu()
+    ht.solve(p, q)
+    ht.printSolution()
+
+
+//    single(p, q)
+  }
+
+
+  private def single(p: Program, q: Cell): Unit = {
+
+    DatalogCompiler.compileAndAnalyze(p, q)
+    DatalogCompiler.solutionToSingleTSV("untitled/souffleSol.tsv")
+
+    val solver = MagicSets()
+    val solution = solver.solve(p, q)
+
+    writeSolutionToDisk(solution)
+    if !compareSouffleToMagic() then
+      p.print()
+      throw Error("Mismatch for program with query " + q)
+  }
 
 
   private def repeat(times: Int, size: Int, vars: Int, fields: Int): Unit = {
@@ -22,19 +49,7 @@ class TestMagic extends AnyFunSuite {
       val g = ProgramGenerator(seed, vars, size, fields)
       val p = g.generate()
       val q = g.genQuery
-
-      DatalogCompiler.compileAndAnalyze(p, q)
-      DatalogCompiler.solutionToSingleTSV("untitled/souffleSol.tsv")
-
-
-      val solver = MagicSets()
-      val solution = solver.solve(p, q)
-
-
-      writeSolutionToDisk(solution)
-      if !compareSouffleToMagic() then
-        p.print()
-        throw Error("Mismatch for program with query " + q)
+      single(p, q)
 
   }
 
@@ -56,7 +71,7 @@ class TestMagic extends AnyFunSuite {
       solution.foreach(t => {
         cell match
           case a: Var => writer.write(s"x$a\tt$t\n")
-          case b: (Token, Field) => writer.write(s"t${b._1}\t${b._2}\tt$t\n")
+          case b: (Token, Field) => writer.write(s"t${b._1}\tf${b._2}\tt$t\n")
 
       })
     })

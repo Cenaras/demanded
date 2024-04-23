@@ -23,8 +23,8 @@ object DatalogCompiler {
     program.getInstructions.foreach {
       case New(x, t) => newWriter.write("x%s\tt%s\n".format(x, t))
       case Assign(x, y) => assignWriter.write("x%s\tx%s\n".format(x, y))
-      case Load(x, y, f) => loadWriter.write("x%s\tx%s\t%s\n".format(x, y, f))
-      case Store(x, f, y) => storeWriter.write("x%s\t%s\tx%s\n".format(x, f, y))
+      case Load(x, y, f) => loadWriter.write("x%s\tx%s\tf%s\n".format(x, y, f))
+      case Store(x, f, y) => storeWriter.write("x%s\t%s\txf%s\n".format(x, f, y))
       case _ => throw new Error("Functions are unsupported in the logic analysis")
     }
 
@@ -40,7 +40,7 @@ object DatalogCompiler {
    * Output is written to the src/datalog directory, which is also where the .input directives expect input files to
    * reside.
    * */
-  def compileAndAnalyze(p: Program, query: Int): Unit = {
+  def compileAndAnalyze(p: Program, query: Cell): Unit = {
     compile(p)
 
     val datalogDir = "./untitled/src/datalog/"
