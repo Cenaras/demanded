@@ -6,31 +6,35 @@ class TestMagic extends AnyFunSuite {
 
 
   test("Souffle vs implementation") {
-    val seed = 1
     val size = 7
     val vars = 3
     val fields = 1
 
+    repeat(100, size, vars, fields)
 
-    val g = ProgramGenerator(seed, vars, size, fields)
-    val p = g.generate()
-    val q = g.genQuery
-    p.print()
-
-    println("Query " + q)
-    DatalogCompiler.compileAndAnalyze(p, q)
-    val demanded = DatalogCompiler.collectDemand()
-    val tracked = DatalogCompiler.collectTracked()
-
-    println(demanded)
-    println(tracked)
-
-    val solver = HeintzeTardieu()
-    val solution = solver.solve(p, q)
+  }
 
 
-    writeSolutionToDisk(solution)
 
+  private def repeat(times: Int, size: Int, vars: Int, fields: Int): Unit = {
+    for i <- 0 to times do
+      val seed = scala.util.Random.nextInt()
+      val g = ProgramGenerator(seed, vars, size, fields)
+      val p = g.generate()
+      val q = g.genQuery
+
+      DatalogCompiler.compileAndAnalyze(p, q)
+      DatalogCompiler.solutionToSingleTSV("untitled/souffleSol.tsv")
+
+
+      val solver = MagicSets()
+      val solution = solver.solve(p, q)
+
+
+      writeSolutionToDisk(solution)
+      if !compareSouffleToMagic() then
+        p.print()
+        throw Error("Mismatch for program with query " + q)
 
   }
 
@@ -48,14 +52,22 @@ class TestMagic extends AnyFunSuite {
     val builder = new StringBuilder()
     val writer = FileWriter(path)
 
-    println("QWEQWE")
-
     sol.foreach((cell, solution) => {
-      println(cell)
-      println(solution)
-    })
+      solution.foreach(t => {
+        cell match
+          case a: Var => writer.write(s"x$a\tt$t\n")
+          case b: (Token, Field) => writer.write(s"t${b._1}\t${b._2}\tt$t\n")
 
+      })
+    })
+    writer.close()
   }
 
+
+  private def compareSouffleToMagic(soufflePath: String = "untitled/souffleSol.tsv", magicPath: String = "untitled/magicSol.tsv"): Boolean = {
+    val souffle = FileManager.readFile(soufflePath).sorted
+    val magic = FileManager.readFile(magicPath).sorted
+    magic == souffle
+  }
 
 }

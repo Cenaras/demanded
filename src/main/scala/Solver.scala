@@ -36,7 +36,7 @@ trait Solver {
           print(s"x$x: ")
           println(f._2)
         case y: (Token, Field) =>
-          print(s"t${y._1}.f${y._2}: ")
+          print(s"${y._1}.f${y._2}: ")
           println(f._2)
     })
   }
