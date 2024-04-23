@@ -24,15 +24,7 @@ object Parser {
 
 
   def ParseTemplate(name: String): Program = {
-
-    def readFile(path: String): String = {
-      val source = scala.io.Source.fromFile(path)
-      val lines = try source.getLines().map(_.trim).mkString("\n")
-      finally source.close()
-      lines
-    }
-
-    ParseProgram(readFile("untitled/src/main/scala/programs/" + name))
+    ParseProgram(FileManager.readFile("untitled/src/main/scala/programs/" + name))
   }
 
 }
