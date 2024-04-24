@@ -10,7 +10,7 @@ class TestMagic extends AnyFunSuite {
     val vars = 3
     val fields = 1
 
-    repeat(1000, size, vars, fields)
+    repeat(10000, size, vars, fields)
 
   }
 
@@ -23,7 +23,7 @@ class TestMagic extends AnyFunSuite {
 
   test("QWE") {
     val p = Parser.ParseTemplate("qwe")
-    val q = 2
+    val q = 0
     single(p, q)
   }
 
