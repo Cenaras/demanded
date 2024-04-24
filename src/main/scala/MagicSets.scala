@@ -120,7 +120,7 @@ class MagicSets extends DemandedSolver {
     d.foldLeft(builder)((acc, c) => {
       c match
         case a: Var => acc.append(s"x$a\n")
-        case b: (Token, Field) => acc.append(s"t${b._1}\tf${b._2}")
+        case b: (Token, Field) => acc.append(s"t${b._1}\tf${b._2}\n")
     })
     val res = builder.toString()
     res.linesIterator.toList.sorted.mkString("\n")

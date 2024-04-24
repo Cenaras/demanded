@@ -50,6 +50,7 @@ class TestMagic extends AnyFunSuite {
     val magicTracked = solver.collectTracked
 
     if souffleDemanded != magicDemanded then
+      p.print()
       println("Difference in magic vs souffle demanded\nSouffle:")
       println(souffleDemanded)
       println("Magic:")
@@ -57,6 +58,7 @@ class TestMagic extends AnyFunSuite {
       throw Error("Mismatch in demand for program with query " + q)
 
     if souffleTracked != magicTracked then
+      p.print()
       println("Difference in magic vs souffle tracked\nSouffle:")
       println(souffleDemanded)
       println("Magic:")
