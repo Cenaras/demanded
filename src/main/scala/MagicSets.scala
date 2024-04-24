@@ -39,7 +39,7 @@ class MagicSets extends DemandedSolver {
         for ((c, t) <- List.from(r)) {
           if c == x then addTracking(y, t) // (1)
         }
-        for (t <- sol(y)) {
+        for (t <- sol_bb(y)) {
           if r(x, t) then addToken_bb(x, t) // (13)
         }
 
