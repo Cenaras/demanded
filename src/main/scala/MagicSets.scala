@@ -110,23 +110,33 @@ class MagicSets extends DemandedSolver {
         process(i)
       })
     }
-    println("Demanded by Magic Sets")
-
-    d.foreach {
-      case a: Var => println(s"x$a")
-      case b: (Token, Field) => println(s"t${b._1}\tf${b._2}")
-    }
-
-    println("Tracked by Magic Sets")
-    r.foreach((c, t) => {
-      c match
-        case a: Var => println(s"x$a\tt$t")
-        case b: (Token, Field) => println(s"t${b._1}\tf${b._2}\tt$t")
-    })
-    println()
 
     // output both types of points-to sets
     mergeMaps(sol, sol_bb)
+  }
+
+  def collectDemand: String = {
+    val builder = new StringBuilder()
+    d.foldLeft(builder)((acc, c) => {
+      c match
+        case a: Var => acc.append(s"x$a\n")
+        case b: (Token, Field) => acc.append(s"t${b._1}\tf${b._2}")
+    })
+    val res = builder.toString()
+    res.linesIterator.toList.sorted.mkString("\n")
+
+  }
+
+  def collectTracked: String = {
+    val builder = new StringBuilder()
+    r.foreach((c, t) => {
+      c match
+        case a: Var => builder.append(s"x$a\tt$t\n")
+        case b: (Token, Field) => builder.append(s"t${b._1}\tf${b._2}\tt$t\n")
+    })
+
+    val res = builder.toString()
+    res.linesIterator.toList.sorted.mkString("\n")
   }
 
   private def mergeMaps(m1: mutable.Map[Cell, mutable.Set[Token]], m2: mutable.Map[Cell, mutable.Set[Token]]): mutable.Map[Cell, mutable.Set[Token]] = {

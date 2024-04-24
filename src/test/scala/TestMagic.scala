@@ -24,15 +24,6 @@ class TestMagic extends AnyFunSuite {
   test("QWE") {
     val p = Parser.ParseTemplate("qwe")
     val q = 2
-
-    val demand = DatalogCompiler.collectDemand()
-    val tracked = DatalogCompiler.collectTracked()
-
-    println("Demanded by Souffle")
-    println(demand)
-    println("Tracked by Souffle")
-    println(tracked)
-
     single(p, q)
   }
 
@@ -45,10 +36,32 @@ class TestMagic extends AnyFunSuite {
     val solver = MagicSets()
     val solution = solver.solve(p, q)
 
+    // Write the solution to the disk and read the contents of the files to compare pointsTo relations
     writeSolutionToDisk(solution)
     if !compareSouffleToMagic() then
       p.print()
       throw Error("Mismatch for program with query " + q)
+
+    // Obtain demanded and tracked tokens to compare
+    val souffleDemanded = DatalogCompiler.collectDemand()
+    val souffleTracked = DatalogCompiler.collectTracked()
+
+    val magicDemanded = solver.collectDemand
+    val magicTracked = solver.collectTracked
+
+    if souffleDemanded != magicDemanded then
+      println("Difference in magic vs souffle demanded\nSouffle:")
+      println(souffleDemanded)
+      println("Magic:")
+      println(magicDemanded)
+      throw Error("Mismatch in demand for program with query " + q)
+
+    if souffleTracked != magicTracked then
+      println("Difference in magic vs souffle tracked\nSouffle:")
+      println(souffleDemanded)
+      println("Magic:")
+      println(magicDemanded)
+      throw Error("Mismatch in tracked for program with query " + q)
   }
 
 
