@@ -2,8 +2,8 @@ import scala.collection.mutable
 
 class MagicSets extends DemandedSolver {
   val d: mutable.Set[Cell] = mutable.Set[Cell]()
-  // TODO: Is this just a two-set variant?
-  val r: mutable.Set[(Cell, Token)] = mutable.Set[(Cell, Token)]()
+  // Tracked tokens for a constraint variable
+  val r: mutable.Map[Cell, mutable.Set[Token]] = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
 
   // The Magic Sets formulation has two pointsTo predicates. TODO: Compare with HT to see if we can see similarity (mebe 2set)
   private val sol_bb = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
@@ -13,7 +13,13 @@ class MagicSets extends DemandedSolver {
       val fresh = mutable.Set[Token]()
       sol_bb += x -> fresh
 
-    changed = changed | sol_bb(x).add(t)
+    changed |= sol_bb(x).add(t)
+  }
+
+
+  private def addTokens_bb(c: Cell, tokens: mutable.Set[Token]): Unit = {
+    for t <- tokens do
+      addToken_bb(c, t)
   }
 
   private def addDemand(c: Cell): Unit = {
@@ -21,14 +27,18 @@ class MagicSets extends DemandedSolver {
   }
 
   private def addTracking(c: Cell, t: Token): Unit = {
-    changed |= r.add(c, t)
+    if !r.contains(c) then
+      val fresh = mutable.Set[Token]()
+      r += c -> fresh
+
+    changed |= r(c).add(t)
   }
 
   override def process(i: Instruction): Unit = {
     i match
       case New(x, t) =>
         if d(x) then addToken(x, t) // (15)
-        if r(x, t) then addToken_bb(x, t) // (12)
+        if r(x).contains(t) then addToken_bb(x, t) // (12)
 
       case Assign(x, y) =>
         if (d(x)) {
@@ -36,12 +46,11 @@ class MagicSets extends DemandedSolver {
           propagate(x, y) // (16)
         }
 
-        for ((c, t) <- List.from(r)) {
-          if c == x then addTracking(y, t) // (1)
+        for (t <- r(x)) {
+          addTracking(y, t) // (1)
         }
-        for (t <- sol_bb(y)) {
-          if r(x, t) then addToken_bb(x, t) // (13)
-        }
+
+        addTokens_bb(x, r(x).intersect(sol_bb(y))) // (13)
 
       case Load(x, y, f) =>
         if (d(x)) {
@@ -52,20 +61,19 @@ class MagicSets extends DemandedSolver {
           }
         }
 
-        for ((c, t) <- List.from(r)) {
-          if x == c then addDemand(y) // (5)
+        if (r(x).nonEmpty) {
+          addDemand(y) // (5)
         }
+
         for (t <- sol(y)) {
-          for ((c, v) <- List.from(r)) {
-            if x == c then addTracking((t, f), v) // (10)
-          }
-        }
-        for (t <- sol(y)) {
-          for (v <- sol_bb(t, f)) {
-            if r(x, v) then addToken_bb(x, v) // (14)
+          for (v <- r(x)) {
+            addTracking((t, f), v) // (10)
           }
         }
 
+        for (t <- sol(y)) {
+          addTokens_bb(x, r(x).intersect(sol_bb(t, f))) // (14)
+        }
 
       case Store(x, f, y) =>
         for (t <- sol_bb(x)) {
@@ -82,10 +90,8 @@ class MagicSets extends DemandedSolver {
         }
 
         for (t <- sol_bb(x)) {
-          for ((c, v) <- List.from(r)) {
-            c match
-              case a: Var =>
-              case b: (Token, Field) => if t == b._1 && f == b._2 then addTracking(y, v) // (3)
+          for (v <- r(t, f)) {
+            addTracking(y, v) // (3)
           }
         }
 
@@ -96,9 +102,7 @@ class MagicSets extends DemandedSolver {
         }
 
         for (t <- sol_bb(x)) {
-          for (v <- sol_bb(y)) {
-            if r((t, f), v) then addToken_bb((t, f), v) // (18)
-          }
+          addTokens_bb((t, f), r(t, f).intersect(sol_bb(y))) // (18)
         }
   }
 
@@ -129,14 +133,22 @@ class MagicSets extends DemandedSolver {
 
   def collectTracked: String = {
     val builder = new StringBuilder()
-    r.foreach((c, t) => {
-      c match
-        case a: Var => builder.append(s"x$a\tt$t\n")
-        case b: (Token, Field) => builder.append(s"t${b._1}\tf${b._2}\tt$t\n")
+
+    r.keySet.foreach(k => {
+      val t = r(k)
+      k match
+        case a: Var =>
+          t.foreach(v => {
+            builder.append(s"x$k\tt$v\n")
+          })
+        case b: (Token, Field) =>
+          t.foreach(v => {
+            builder.append(s"t${b._1}\tf${b._2}\tt$v\n")
+          })
     })
 
     val res = builder.toString()
-    res.linesIterator.toList.sorted.mkString("\n")
+    res.linesIterator.toList.filter(p => p != "\n").sorted.mkString("\n")
   }
 
   private def mergeMaps(m1: mutable.Map[Cell, mutable.Set[Token]], m2: mutable.Map[Cell, mutable.Set[Token]]): mutable.Map[Cell, mutable.Set[Token]] = {

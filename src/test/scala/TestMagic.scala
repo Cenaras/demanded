@@ -63,6 +63,7 @@ class TestMagic extends AnyFunSuite {
       println(souffleDemanded)
       println("Magic:")
       println(magicDemanded)
+      assert(souffleTracked == magicTracked)
       throw Error("Mismatch in tracked for program with query " + q)
   }
 
@@ -74,6 +75,7 @@ class TestMagic extends AnyFunSuite {
       val p = g.generate()
       val q = g.genQuery
       single(p, q)
+      if i % 100 == 0 then println(s"Finished $i tests")
 
   }
 
