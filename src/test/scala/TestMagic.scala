@@ -23,7 +23,7 @@ class TestMagic extends AnyFunSuite {
 
   test("QWE") {
     val p = Parser.ParseTemplate("qwe")
-    val q = 0
+    val q = 1
     single(p, q)
   }
 

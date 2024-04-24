@@ -34,6 +34,11 @@ class MagicSets extends DemandedSolver {
     changed |= r(c).add(t)
   }
 
+  private def trackAll(c: Cell, tokens: mutable.Set[Token]): Unit = {
+    for t <- tokens do
+      addTracking(c, t)
+  }
+
   override def process(i: Instruction): Unit = {
     i match
       case New(x, t) =>
@@ -46,10 +51,7 @@ class MagicSets extends DemandedSolver {
           propagate(x, y) // (16)
         }
 
-        for (t <- r(x)) {
-          addTracking(y, t) // (1)
-        }
-
+        trackAll(y, r(x)) // (1)
         addTokens_bb(x, r(x).intersect(sol_bb(y))) // (13)
 
       case Load(x, y, f) =>
@@ -66,9 +68,7 @@ class MagicSets extends DemandedSolver {
         }
 
         for (t <- sol(y)) {
-          for (v <- r(x)) {
-            addTracking((t, f), v) // (10)
-          }
+          trackAll((t, f), r(x)) // (10)
         }
 
         for (t <- sol(y)) {
@@ -90,9 +90,7 @@ class MagicSets extends DemandedSolver {
         }
 
         for (t <- sol_bb(x)) {
-          for (v <- r(t, f)) {
-            addTracking(y, v) // (3)
-          }
+          trackAll(y, r(t, f)) // (3)
         }
 
         for (c <- d) {
