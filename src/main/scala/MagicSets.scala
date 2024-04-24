@@ -2,6 +2,7 @@ import scala.collection.mutable
 
 class MagicSets extends DemandedSolver {
   val d: mutable.Set[Cell] = mutable.Set[Cell]()
+  // TODO: Is this just a two-set variant?
   val r: mutable.Set[(Cell, Token)] = mutable.Set[(Cell, Token)]()
 
   // The Magic Sets formulation has two pointsTo predicates. TODO: Compare with HT to see if we can see similarity (mebe 2set)
@@ -27,7 +28,7 @@ class MagicSets extends DemandedSolver {
     i match
       case New(x, t) =>
         if d(x) then addToken(x, t) // (15)
-        if r(x, t) then addToken(x, t) // (12)
+        if r(x, t) then addToken_bb(x, t) // (12)
 
       case Assign(x, y) =>
         if (d(x)) {
