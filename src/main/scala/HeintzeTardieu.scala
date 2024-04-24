@@ -53,13 +53,7 @@ class HeintzeTardieu extends DemandedSolver {
 
   override def solve(p: Program, query: Cell): Solution = {
     addDemand(query)
-    while (changed) {
-      changed = false
-      p.getInstructions.foreach(i => {
-        process(i)
-      })
-    }
-    sol
+    naiveSolve(p)
   }
 
 }

@@ -108,15 +108,9 @@ class MagicSets extends DemandedSolver {
 
   override def solve(p: Program, query: Cell): Solution = {
     addDemand(query)
-    while (changed) {
-      changed = false
-      p.getInstructions.foreach(i => {
-        process(i)
-      })
-    }
 
     // output both types of points-to sets
-    mergeMaps(sol, sol_bb)
+    mergeMaps(naiveSolve(p), sol_bb)
   }
 
   def collectDemand: String = {

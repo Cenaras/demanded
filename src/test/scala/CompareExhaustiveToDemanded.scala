@@ -69,7 +69,7 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
         dem.printSolution()
         throw new Error()
     
-      if i % 1000 == 0 then println(s"Finished $i tests")
+      if i != 0 && i % 10000 == 0 then println(s"Completed $i tests")
     
   }
 

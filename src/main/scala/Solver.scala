@@ -40,6 +40,17 @@ trait Solver {
           println(f._2)
     })
   }
+  
+  def naiveSolve(p: Program): Solution = {
+    while (changed) {
+      changed = false
+      p.getInstructions.foreach(i => {
+        process(i)
+      })
+    }
+    sol
+  }
+  
 }
 
 trait ExhaustiveSolver extends Solver {

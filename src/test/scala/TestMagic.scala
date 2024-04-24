@@ -75,7 +75,7 @@ class TestMagic extends AnyFunSuite {
       val p = g.generate()
       val q = g.genQuery
       single(p, q)
-      if i % 100 == 0 then println(s"Finished $i tests")
+      if i != 0 && i % 100 == 0 then println(s"Completed $i tests")
 
   }
 
