@@ -39,13 +39,20 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
 
     compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
   }
-  
+
+  test("medium magic") {
+      val vars = 5
+      val fields = 2
+      val insn = 12
+      compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
+    }
+
   test("large magic") {
     val vars = 5
     val fields = 2
     val insn = 25
 
-    compareExhaustiveToDemanded(10000, insn, vars, fields, SolverType.HT)
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
   }
   
   private def compareExhaustiveToDemanded(times: Int, size: Int, vars: Int, fields: Int, st: SolverType): Unit = {
