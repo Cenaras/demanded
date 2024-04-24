@@ -147,7 +147,8 @@ class MagicSets extends DemandedSolver {
     val seq1 = m1.toSeq
     val seq2 = m2.toSeq
 
-    val res = mutable.Map[Cell, mutable.Set[Token]]()
+    // Construct merged solution set and obey default values as empty to remain consistent with other implementations.
+    val res = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
     seq1.map((c, s) => {
       res += c -> s
     })

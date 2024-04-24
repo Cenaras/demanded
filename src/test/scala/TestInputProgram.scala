@@ -59,7 +59,7 @@ class TestInputProgram extends AnyFunSuite {
   }
   
   
-  
+
   private def compare(p: Program, q: Cell) = {
     val ex = NaiveExhaustiveSolver()
     val ht = HeintzeTardieu()

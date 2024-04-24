@@ -32,13 +32,13 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
     compareExhaustiveToDemanded(1000000, insn, vars, fields, SolverType.HT)
   }
 
-//  test("small magic") {
-//    val vars = 3
-//    val fields = 1
-//    val insn = 7
-//
-//    compareExhaustiveToDemanded(1000000, insn, vars, fields, SolverType.Magic)
-//  }
+  test("small magic") {
+    val vars = 3
+    val fields = 1
+    val insn = 7
+
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
+  }
   
   test("large magic") {
     val vars = 5
@@ -68,9 +68,9 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
         println("Demanded solution")
         dem.printSolution()
         throw new Error()
-    
+
       if i != 0 && i % 10000 == 0 then println(s"Completed $i tests")
-    
+
   }
 
 
