@@ -3,22 +3,29 @@
 
 @main
 def main(): Unit = {
+    difference()
+//    compareMagicToHeintzeTardieu(100, 7, 3, 1)
+}
+
+
+private def difference(): Unit = {
 
   // Difference for query 1
-  val p = Parser.ParseTemplate("ht_magic_diff_mebe")
+  val q = 5
+  val p = Parser.ParseTemplate("slides")
   val ex = NaiveExhaustiveSolver()
   val exSol = ex.solve(p)
   println("Exhaustive")
   ex.printSolution()
 
   val ht = HeintzeTardieu()
-  val htSol = ht.solve(p, 1)
+  val htSol = ht.solve(p, q)
 
   println("HeintzeTardieu")
   ht.printSolution()
 
   val magic = MagicSets()
-  val mSol = magic.solve(p, 1)
+  val mSol = magic.solve(p, q)
 
   println("MagicSets")
   magic.printSolution()
@@ -26,13 +33,14 @@ def main(): Unit = {
   println("Are MagicSets and HeintzeTardieu solutions identical for all variables?")
   println(s"\t${equalSolutions(htSol, mSol)}")
 
-//  compareMagicToHeintzeTardieu(100, 7, 3, 1)
 
   DatalogCompiler.compileAndAnalyze(p, 1)
   DatalogCompiler.solutionToSingleTSV("untitled/diff_mebe")
 
 
 }
+
+
 
 
 private def compareMagicToHeintzeTardieu(times: Int, size: Int, vars: Int, fields: Int): Unit = {
