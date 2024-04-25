@@ -40,7 +40,7 @@ trait Solver {
           println(f._2)
     })
   }
-  
+
   def naiveSolve(p: Program): Solution = {
     while (changed) {
       changed = false
@@ -50,7 +50,7 @@ trait Solver {
     }
     sol
   }
-  
+
 }
 
 trait ExhaustiveSolver extends Solver {

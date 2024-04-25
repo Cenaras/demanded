@@ -68,7 +68,7 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
       val solDem = dem.solve(p, query)
 
       if !TestUtil.compareSolutions(solEx, solDem, query) then
-        println("Solution mismatch for program with query :" + query)
+        println("Solution mismatch for program with query: " + query)
         p.print()
         println("Exhaustive solution")
         ex.printSolution()
