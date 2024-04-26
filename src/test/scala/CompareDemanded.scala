@@ -8,7 +8,7 @@ class CompareDemanded extends AnyFunSuite {
 
   // Concrete test case showing that Heintze-Tardieu and MagicSets do no compute the same results
   test("Both non-optimal compared to MagicSets") {
-    val p = Parser.ParseTemplate("ht_magic_diff_mebe")
+    val p = Parser.ParseTemplate("ht_magic_diff")
     val q = 1
     val htSol = HeintzeTardieu().solve(p, q)
     val fsSol = FullFS().solve(p, q)

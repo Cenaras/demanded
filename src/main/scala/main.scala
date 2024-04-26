@@ -12,7 +12,7 @@ private def difference(): Unit = {
 
   // Difference for query 1
   val q = 1
-  val p = Parser.ParseTemplate("ht_magic_diff_mebe")
+  val p = Parser.ParseTemplate("ht_magic_diff")
   val ex = NaiveExhaustiveSolver()
   val exSol = ex.solve(p)
   println("Exhaustive")
