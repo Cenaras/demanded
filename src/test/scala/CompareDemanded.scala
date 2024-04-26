@@ -6,6 +6,7 @@ class CompareDemanded extends AnyFunSuite {
     TestUtil.compareDemandedSolvers(100000, TestUtil.SolverType.HT, TestUtil.SolverType.Magic)
   }
 
+  // Concrete test case showing that Heintze-Tardieu and MagicSets do no compute the same results
   test("Both non-optimal compared to MagicSets") {
     val p = Parser.ParseTemplate("ht_magic_diff_mebe")
     val q = 1
@@ -17,6 +18,8 @@ class CompareDemanded extends AnyFunSuite {
     val magicSol = MagicSets().solve(p, q)
     assert(!(htSol == magicSol))
     assert(!(fsSol == magicSol))
+
+    assert(magicSol.size < Math.min(htSol.size, fsSol.size))
 
 
   }
