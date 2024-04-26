@@ -1,11 +1,25 @@
 import scala.collection.mutable
 
+
+/** Magic sets implementation in a constraint-based approach. The solver differs from Heintze-Tardieu in a couple of ways.
+ *  It stores points-to information in two separate sets, and returns the union of these. The extra solution set is used
+ *  to track tokens which are used in store operations. Furthermore, the notion of token tracking is slightly different.
+ *  A token is tracked relative to a variable, and intuitively this can be seen as a query asking "if t can reach x".
+ *
+ *  More specifically, whenever a write operation x.f = y occurs, we track t in x, for all demanded t.f. This intuitively
+ *  means, that a read occured over t.f, and any alias might affect this, so we must know if t can reach x.
+ *  This information is "propagated backwards" via reverse-assignments, until a new instruction is encountered. Then the
+ *  bb-solution set is populated, indicating that this token did indeed reach the write operation. It can then be
+ *  propagated forwards.
+ *
+ * */
 class MagicSets extends DemandedSolver {
   val d: mutable.Set[Cell] = mutable.Set[Cell]()
-  // Tracked tokens for a constraint variable
+
+  // Queries representing the question "Can token t reach this constraint variable?".
   val r: mutable.Map[Cell, mutable.Set[Token]] = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
 
-  // The Magic Sets formulation has two pointsTo predicates. TODO: Compare with HT to see if we can see similarity (mebe 2set)
+  // Points-to set for tokens used in write operations
   private val sol_bb = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
 
   protected def addToken_bb(x: Cell, t: Token): Unit = {
