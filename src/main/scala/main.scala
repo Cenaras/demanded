@@ -11,8 +11,8 @@ def main(): Unit = {
 private def difference(): Unit = {
 
   // Difference for query 1
-  val q = 5
-  val p = Parser.ParseTemplate("slides")
+  val q = 1
+  val p = Parser.ParseTemplate("ht_magic_diff_mebe")
   val ex = NaiveExhaustiveSolver()
   val exSol = ex.solve(p)
   println("Exhaustive")
@@ -23,6 +23,13 @@ private def difference(): Unit = {
 
   println("HeintzeTardieu")
   ht.printSolution()
+
+
+  val fullfs = FullFS()
+  val fullfsSol = fullfs.solve(p, q)
+
+  println("FullFS")
+  fullfs.printSolution()
 
   val magic = MagicSets()
   val mSol = magic.solve(p, q)

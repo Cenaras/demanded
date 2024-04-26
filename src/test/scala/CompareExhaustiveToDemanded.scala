@@ -1,3 +1,4 @@
+import TestUtil.{SolverType, demandedSolver}
 import org.scalatest.funsuite.AnyFunSuite
 
 class CompareExhaustiveToDemanded extends AnyFunSuite {
@@ -54,7 +55,31 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
 
     compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
   }
-  
+
+  test("small fullfs") {
+    val vars = 3
+    val fields = 1
+    val insn = 7
+
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.FullFS)
+  }
+
+  test("medium fullfs") {
+    val vars = 5
+    val fields = 2
+    val insn = 12
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.FullFS)
+  }
+
+  test("large fullfs") {
+    val vars = 5
+    val fields = 2
+    val insn = 25
+
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
+  }
+
+
   private def compareExhaustiveToDemanded(times: Int, size: Int, vars: Int, fields: Int, st: SolverType): Unit = {
     for i <- 0 to times do
       val seed = scala.util.Random.nextInt()
@@ -81,14 +106,5 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
   }
 
 
-  private enum SolverType:
-    case HT, Magic
-
-
-  private def demandedSolver(st: SolverType): DemandedSolver = {
-    st match
-      case SolverType.HT => HeintzeTardieu()
-      case SolverType.Magic => MagicSets()
-  }
 
 }

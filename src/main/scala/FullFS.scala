@@ -40,9 +40,29 @@ class FullFS extends DemandedSolver {
         addTokens(x, sol(y).intersect(r_any)) // (5)
       
       case Load(x, y, f) =>
-
+        if d(x) then 
+          addDemand(y) // (6)
+          for (t <- sol(y)) do 
+            addTrackWrite(t) // (7)
+            propagate(x, (t, f)) // (8)
+        
+        for (t <- sol(y)) do 
+          if r_read(t) then
+            addTokens(x, sol(t, f).intersect(r_any)) // (9)
+      
       
       case Store(x, f, y) =>
+        for (t <- sol(x)) do 
+          if r_write(t) then 
+            addDemand(y) // (10)
+            propagate((t, f), y) // (11)
+          
+        if sol(y).intersect(r_any).nonEmpty then
+          addDemand(x) // (12)
+          for (t <- sol(x)) do 
+            propagate((t,f), y) // (13)
+            addTrackRead(t) // (13)
+          
   }
 
   override def solve(p: Program, query: Cell): Solution = {
