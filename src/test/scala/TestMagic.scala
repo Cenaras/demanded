@@ -30,7 +30,7 @@ class TestMagic extends AnyFunSuite {
 
   test("Various exhaustive formulations") {
     // Testing that MagicSets behaves similarly to Alt1 w.r.t. solutions
-    repeat(100, 7, 3, 1, Alt1(), false)
+    repeat(1000, 7, 3, 1, Alt1(), false)
   }
 
 

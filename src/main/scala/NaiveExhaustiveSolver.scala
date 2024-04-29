@@ -21,4 +21,10 @@ class NaiveExhaustiveSolver extends ExhaustiveSolver {
     naiveSolve(p)
   }
 
+  override def cost: Int =
+    var cost = 0
+    for (cell, solSet) <- sol do
+      cost += solSet.size
+    cost
+
 }

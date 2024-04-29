@@ -6,10 +6,11 @@ def main(): Unit = {
 //    difference()
 //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
   datalogAnalysisCost()
+
 }
 
 private def datalogAnalysisCost(): Unit = {
-  val times = 100
+  val times = 1000
   val size = 7
   val vars = 3
   val fields = 1
@@ -24,17 +25,31 @@ private def datalogAnalysisCost(): Unit = {
     val q = g.genQuery
 
     val standard = Standard()
+    val standardOutPath = "untitled/stdOut.tsv"
     standard.compileAndAnalyze(p, q)
-    val standardCost = standard.cost
+    standard.outputSolution(standardOutPath)
+    val standardCost = standard.cost(standardOutPath)
 
     val alt1 = Alt1()
+    val alt1OutPath = "untitled/alt1Out.tsv"
     alt1.compileAndAnalyze(p, q)
-    val alt1Cost = alt1.cost
+    alt1.outputSolution(alt1OutPath)
+    val alt1Cost = alt1.cost(alt1OutPath)
+
+
+    val magicSets = MagicSets()
+    magicSets.solve(p, q)
+    val msCost = magicSets.cost
+
+    // MagicSets and Standard should be the same formulation
+    assert(msCost == standardCost)
 
     if standardCost < alt1Cost then
       standardCheaper+=1
     if alt1Cost < standardCost then
       alt1Cheaper+=1
+
+
 
   println(s"Standard was cheapest $standardCheaper times")
   println(s"Alt1 was cheapest $alt1Cheaper times")

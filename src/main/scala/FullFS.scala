@@ -69,4 +69,7 @@ class FullFS extends DemandedSolver {
     addDemand(query)
     naiveSolve(p)
   }
+  
+  override def cost: Int = 0
+  
 }

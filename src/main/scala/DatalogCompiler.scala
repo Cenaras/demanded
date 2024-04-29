@@ -80,11 +80,18 @@ trait DatalogAnalysis {
     val deduplicated = builder.toString().linesIterator.toList.mkString("\n").linesIterator.toSet.mkString("\n")
     deduplicated.linesIterator.toList.sorted.mkString("\n")
   }
+  
+  private def readSolution(path: String): String = {
+    FileManager.readFile(path)
+  }
 
-  def cost: Int = {
+  def cost(path: String): Int = {
     val demand = collectDemand()
     val tracked = collectTracked()
-    demand.linesIterator.size + tracked.linesIterator.size
+    val solution = readSolution(path)
+    
+    
+    demand.linesIterator.size + tracked.linesIterator.size + solution.linesIterator.size
   }
 
 }

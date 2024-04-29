@@ -175,4 +175,22 @@ class MagicSets extends DemandedSolver {
     })
     res
   }
+  
+  override def cost: Int =
+    var cost = 0
+    // Points-to facts
+    val solMap = mergeMaps(sol, sol_bb)
+    for (cell, solSet) <- solMap do
+      cost += solSet.size
+      
+    // Demanded variables
+    cost += d.size
+      
+    for (cell, trackSet) <- r do
+      cost += trackSet.size
+      
+    cost
+    
+  
+  
 }

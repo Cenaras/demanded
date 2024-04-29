@@ -55,5 +55,7 @@ class HeintzeTardieu extends DemandedSolver {
     addDemand(query)
     naiveSolve(p)
   }
+  
+  override def cost: Int = 0
 
 }

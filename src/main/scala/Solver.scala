@@ -50,6 +50,9 @@ trait Solver {
     }
     sol
   }
+  
+  def cost: Int
+  
 
 }
 

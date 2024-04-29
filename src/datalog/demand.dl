@@ -48,7 +48,7 @@ magic_pointsTo_bf(s) :-
    store(r,f,s),
    pointsTo_bb(r,t).
 
-magic_pointsTo_bf("x0").
+magic_pointsTo_bf("x2").
 
 magic_pointsToField_bbb(z,f,v) :- 
    magic_pointsTo_bb(x,v),
@@ -104,7 +104,7 @@ pointsToField_bbf(t,f,v) :-
 
 query(t) :- 
    pointsTo_bf(abdul0,t),
-   abdul0 = "x0".
+   abdul0 = "x2".
 .input new
 .input assign
 .input load
