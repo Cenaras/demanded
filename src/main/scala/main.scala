@@ -17,6 +17,7 @@ private def datalogAnalysisCost(): Unit = {
 
   var standardCheaper = 0
   var alt1Cheaper = 0
+  var htCheaper = 0
 
   for i <- 0 until times do
     val seed = scala.util.Random.nextInt()
@@ -44,15 +45,24 @@ private def datalogAnalysisCost(): Unit = {
     // MagicSets and Standard should be the same formulation
     assert(msCost == standardCost)
 
-    if standardCost < alt1Cost then
+    val ht = HeintzeTardieu()
+    ht.solve(p, q)
+    val htCost = ht.cost
+
+    // Good code :)
+    if standardCost < alt1Cost && standardCost < htCost then
       standardCheaper+=1
-    if alt1Cost < standardCost then
+    if alt1Cost < standardCost && alt1Cost < htCost then
       alt1Cheaper+=1
+    if htCost < alt1Cost && htCost < standardCost then
+      htCheaper += 1
+
 
 
 
   println(s"Standard was cheapest $standardCheaper times")
   println(s"Alt1 was cheapest $alt1Cheaper times")
+  println(s"Heintze-Tardieu was cheapest $htCheaper times")
 }
 
 

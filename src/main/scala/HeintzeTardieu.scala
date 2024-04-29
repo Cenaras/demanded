@@ -56,6 +56,15 @@ class HeintzeTardieu extends DemandedSolver {
     naiveSolve(p)
   }
   
-  override def cost: Int = 0
+  override def cost: Int = {
+    var cost = 0
+    for (cell, solSet) <- sol do
+      cost += solSet.size
+    
+    cost += d.size
+    cost += r.size
+    
+    cost
+  }
 
 }
