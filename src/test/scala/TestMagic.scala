@@ -1,3 +1,5 @@
+import DatalogCompiler.AnalysisType
+import DatalogCompiler.AnalysisType.{Alt1, Standard}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.FileWriter
@@ -28,7 +30,6 @@ class TestMagic extends AnyFunSuite {
   }
 
 
-
   test("Various exhaustive formulations") {
     val p = Parser.ParseTemplate("slides")
     val q = 5
@@ -37,21 +38,21 @@ class TestMagic extends AnyFunSuite {
     val standardOut = DatalogCompiler.datalogDir + "demand.dl"
     val standardSol = "untitled/sol.tsv"
 
-    single(p, q, standard, standardOut, standardSol)
+    single(p, q, standard, standardOut, standardSol, Standard)
 
 
     val alt1 = DatalogCompiler.datalogDir + "exhaustive1.dl"
     val alt1Out = DatalogCompiler.datalogDir + "demand1.dl"
     val alt1Sol = "untitled/sol1.tsv"
 
-    single(p, q, alt1, alt1Out, alt1Sol)
+    single(p, q, alt1, alt1Out, alt1Sol, Alt1)
 
   }
 
 
-  private def single(p: Program, q: Cell, exhaustivePath: String, transformedOutput: String, solOutput: String): Unit = {
+  private def single(p: Program, q: Cell, exhaustivePath: String, transformedOutput: String, solOutput: String, analysisType: AnalysisType): Unit = {
     DatalogCompiler.compileAndAnalyze(p, q, exhaustivePath, transformedOutput)
-    DatalogCompiler.solutionToSingleTSV(solOutput)
+    DatalogCompiler.solutionToSingleTSV(solOutput, analysisType)
   }
 
 

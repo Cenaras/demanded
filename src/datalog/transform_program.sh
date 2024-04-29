@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ### Takes as input a variable, transform the exhaustive.dl to query that variable and performs magic sets transformation
 ### and stores the transformed program as demand.dl. Also fixes syntax errors and adds output directives for all
 ### intermediate computations.
@@ -33,9 +35,9 @@ echo ".output magic_pointsToField_bbf" >> "$pathDemand"
 echo ".output pointsTo_bb" >> "$pathDemand"
 echo ".output pointsTo_bf" >> "$pathDemand"
 
+if [[ "$pathExhaustive" == *exhaustive1.dl ]]; then
+  echo ".output pointsTo_fb" >> "$pathDemand"
+fi
+
 echo ".output pointsToField_bbb" >> "$pathDemand"
 echo ".output pointsToField_bbf" >> "$pathDemand"
-
-# TODO: We still need to transform the query and and magic fact generation for this to work properly.
-#   We must be able to control that from the Scala code, since that is what's going to construct the query.
-#   I suggest just passing it as argument to this file.

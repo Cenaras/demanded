@@ -1,3 +1,5 @@
+import DatalogCompiler.AnalysisType.Standard
+
 import java.io.File
 import scala.language.{existentials, postfixOps}
 import sys.process.*
@@ -5,6 +7,9 @@ import java.io.{File, FileWriter, PrintWriter}
 
 object DatalogCompiler {
   var datalogDir: String = "untitled/src/datalog/"
+
+  enum AnalysisType:
+    case Standard, Alt1
 
   /**
    * Compiles a program into the expected datalog format. The compiled output is directly written to the src/datalog/
@@ -45,12 +50,11 @@ object DatalogCompiler {
     val demandPath = datalogDir + "demand.dl"
 
     compileAndAnalyze(p, query, exhaustivePath, demandPath)
-    
   }
 
   def compileAndAnalyze(p: Program, query: Cell, exhaustivePath: String, outpath: String): Unit = {
     compile(p)
-    
+
     val datalogDir = "./untitled/src/datalog/"
     val scriptPath = datalogDir + "transform_program.sh"
 
@@ -59,26 +63,38 @@ object DatalogCompiler {
 
     val analysisCmd = "souffle -F %s -D %s %s".format(datalogDir, datalogDir, outpath)
     analysisCmd !!
-    
-    
   }
-  
+
   /**
    * Reads the solution from the datalog files and concatenates and de-dupliucates entries and outputs a single file.
    *
    * @param outfile de-duplicated file containing all relations
    */
-  def solutionToSingleTSV(outfile: String): Unit = {
+  def solutionToSingleTSV(outfile: String, analysisType: AnalysisType): Unit = {
     val ptbb = datalogDir + "pointsTo_bb.csv"
     val ptbf = datalogDir + "pointsTo_bf.csv"
     val ptfbbb = datalogDir + "pointsToField_bbb.csv"
     val ptfbbf = datalogDir + "pointsToField_bbf.csv"
+    val ptfb = datalogDir + "pointsTo_fb.csv"
 
-    {
-      ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
-    }
+    // The standard adornment does not contain a pt_fb predicate
+    if analysisType == AnalysisType.Standard then 
+      {
+        ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
+      }
+    else 
+      {
+        ("sort -u %s %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf, ptfb) #> new File(outfile)).!
+      }
   }
 
+  def solutionToSingleTSV(outfile: String): Unit = {
+    solutionToSingleTSV(outfile, Standard)
+  }
+
+  
+  // TODO: Collect demand and collect tracked should also compute data for Alt1
+  
   /**
    * Collects the contents of all files that contains demanded magic sets
    */
@@ -95,8 +111,9 @@ object DatalogCompiler {
     builder.toString().linesIterator.toSet.mkString("\n").linesIterator.toList.sorted.mkString("\n")
   }
 
-  /***
+  /** *
    * Collects the contents of all files that contain tracked tokens
+   *
    * @return newline separated string of all tracked information
    */
   def collectTracked(): String = {

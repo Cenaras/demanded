@@ -144,5 +144,6 @@ query(t) :-
 .output magic_pointsToField_bbf
 .output pointsTo_bb
 .output pointsTo_bf
+.output pointsTo_fb
 .output pointsToField_bbb
 .output pointsToField_bbf
