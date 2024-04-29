@@ -1,15 +1,18 @@
-import DatalogCompiler.AnalysisType.Standard
-
 import java.io.File
 import scala.language.{existentials, postfixOps}
 import sys.process.*
 import java.io.{File, FileWriter, PrintWriter}
 
-object DatalogCompiler {
-  var datalogDir: String = "untitled/src/datalog/"
 
-  enum AnalysisType:
-    case Standard, Alt1
+trait DatalogAnalysis {
+
+  val datalogDir: String = "untitled/src/datalog/"
+
+  val scriptPath: String = datalogDir + "transform_program.sh"
+  val ptbb = datalogDir + "pointsTo_bb.csv"
+  val ptbf = datalogDir + "pointsTo_bf.csv"
+  val ptfbbb = datalogDir + "pointsToField_bbb.csv"
+  val ptfbbf = datalogDir + "pointsToField_bbf.csv"
 
   /**
    * Compiles a program into the expected datalog format. The compiled output is directly written to the src/datalog/
@@ -39,94 +42,75 @@ object DatalogCompiler {
     storeWriter.close()
   }
 
-  /**
-   * Compiles the given input program into a datalog variant, transforms the analysis into a demanded version according
-   * to the provided query and runs the Soufflé datalog solver.
-   * Output is written to the src/datalog directory, which is also where the .input directives expect input files to
-   * reside.
-   * */
-  def compileAndAnalyze(p: Program, query: Cell): Unit = {
-    val exhaustivePath = datalogDir + "exhaustive.dl"
-    val demandPath = datalogDir + "demand.dl"
-
-    compileAndAnalyze(p, query, exhaustivePath, demandPath)
-  }
-
-  def compileAndAnalyze(p: Program, query: Cell, exhaustivePath: String, outpath: String): Unit = {
-    compile(p)
-
-    val datalogDir = "./untitled/src/datalog/"
-    val scriptPath = datalogDir + "transform_program.sh"
-
-    val cmd = "%s x%s %s %s".format(scriptPath, query, exhaustivePath, outpath)
+  private def analyze(query: Cell): Unit = {
+    val cmd = "%s x%s %s %s".format(scriptPath, query, exhaustivePath(), demandedPath())
     cmd !!
 
-    val analysisCmd = "souffle -F %s -D %s %s".format(datalogDir, datalogDir, outpath)
+    val analysisCmd = "souffle -F %s -D %s %s".format(datalogDir, datalogDir, demandedPath())
     analysisCmd !!
   }
 
-  /**
-   * Reads the solution from the datalog files and concatenates and de-dupliucates entries and outputs a single file.
-   *
-   * @param outfile de-duplicated file containing all relations
-   */
-  def solutionToSingleTSV(outfile: String, analysisType: AnalysisType): Unit = {
-    val ptbb = datalogDir + "pointsTo_bb.csv"
-    val ptbf = datalogDir + "pointsTo_bf.csv"
-    val ptfbbb = datalogDir + "pointsToField_bbb.csv"
-    val ptfbbf = datalogDir + "pointsToField_bbf.csv"
-    val ptfb = datalogDir + "pointsTo_fb.csv"
-
-    // The standard adornment does not contain a pt_fb predicate
-    if analysisType == AnalysisType.Standard then 
-      {
-        ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
-      }
-    else 
-      {
-        ("sort -u %s %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf, ptfb) #> new File(outfile)).!
-      }
+  def compileAndAnalyze(p: Program, query: Cell): Unit = {
+    compile(p)
+    analyze(query)
   }
 
-  def solutionToSingleTSV(outfile: String): Unit = {
-    solutionToSingleTSV(outfile, Standard)
-  }
 
-  
-  // TODO: Collect demand and collect tracked should also compute data for Alt1
-  
-  /**
-   * Collects the contents of all files that contains demanded magic sets
-   */
+  // Configurations
+  def exhaustivePath(): String
+  def demandedPath(): String
+
+  def demandFiles(): List[String]
+  def trackFiles(): List[String]
+
+  def outputSolution(outfile: String): Unit
+
   def collectDemand(): String = {
-    val builder = new StringBuilder()
+    val builder = StringBuilder()
+    for f <- demandFiles() do
+      builder.append(FileManager.readFile(f)).append("\n")
 
-    val magic_ptbf = datalogDir + "magic_pointsTo_bf.csv"
-    val magic_ptfbbf = datalogDir + "magic_pointsToField_bbf.csv"
-
-    builder.append(FileManager.readFile(magic_ptbf)).append("\n")
-    builder.append(FileManager.readFile(magic_ptfbbf))
-
-    // De-duplicate entries if needed and sort
     builder.toString().linesIterator.toSet.mkString("\n").linesIterator.toList.sorted.mkString("\n")
   }
-
-  /** *
-   * Collects the contents of all files that contain tracked tokens
-   *
-   * @return newline separated string of all tracked information
-   */
   def collectTracked(): String = {
-    val builder = new StringBuilder()
+    val builder = StringBuilder()
+    for f <- trackFiles() do
+      builder.append(FileManager.readFile(f)).append("\n")
 
-    val magic_ptbb = datalogDir + "magic_pointsTo_bb.csv"
-    val magic_ptfbbb = datalogDir + "magic_pointsToField_bbb.csv"
-    builder.append(FileManager.readFile(magic_ptbb)).append("\n")
-    builder.append(FileManager.readFile(magic_ptfbbb)).append("\n")
-
-    // Only keep the token from the relation and de-duplicate
     val deduplicated = builder.toString().linesIterator.toList.mkString("\n").linesIterator.toSet.mkString("\n")
     deduplicated.linesIterator.toList.sorted.mkString("\n")
   }
+  
+  def cost: Int = {
+    val demand = collectDemand()
+    val tracked = collectTracked()
+    demand.linesIterator.size + tracked.linesIterator.size
+  }
 
+}
+
+class Standard extends DatalogAnalysis {
+  override def exhaustivePath(): String = datalogDir + "exhaustive.dl"
+  override def demandedPath(): String = datalogDir + "demand.dl"
+
+  override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+  override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv")
+
+  override def outputSolution(outfile: String): Unit = {
+    ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
+  }
+
+}
+class Alt1 extends DatalogAnalysis {
+  override def exhaustivePath(): String = datalogDir + "exhaustive1.dl"
+  override def demandedPath(): String = datalogDir + "demand1.dl"
+
+  override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+  override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv, magic_pointsTo_fb.csv")
+
+  override def outputSolution(outfile: String): Unit = {
+    val ptfb = datalogDir + "pointsTo_fb.csv"
+
+    ("sort -u %s %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf, ptfb) #> new File(outfile)).!
+  }
 }

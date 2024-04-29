@@ -1,5 +1,3 @@
-import DatalogCompiler.AnalysisType
-import DatalogCompiler.AnalysisType.{Alt1, Standard}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.FileWriter
@@ -20,59 +18,41 @@ class TestMagic extends AnyFunSuite {
   test("slides") {
     val p = Parser.ParseTemplate("slides")
     val q = 5
-    single(p, q)
+    compareToMagicSets(p, q, Standard())
   }
 
   test("QWE") {
     val p = Parser.ParseTemplate("qwe")
     val q = 1
-    single(p, q)
+    compareToMagicSets(p, q, Standard())
   }
 
 
   test("Various exhaustive formulations") {
-    val p = Parser.ParseTemplate("slides")
-    val q = 5
-
-    val standard = DatalogCompiler.datalogDir + "exhaustive.dl"
-    val standardOut = DatalogCompiler.datalogDir + "demand.dl"
-    val standardSol = "untitled/sol.tsv"
-
-    single(p, q, standard, standardOut, standardSol, Standard)
-
-
-    val alt1 = DatalogCompiler.datalogDir + "exhaustive1.dl"
-    val alt1Out = DatalogCompiler.datalogDir + "demand1.dl"
-    val alt1Sol = "untitled/sol1.tsv"
-
-    single(p, q, alt1, alt1Out, alt1Sol, Alt1)
-
+    repeat(100, 7, 3, 1, Alt1(), false)
   }
 
 
-  private def single(p: Program, q: Cell, exhaustivePath: String, transformedOutput: String, solOutput: String, analysisType: AnalysisType): Unit = {
-    DatalogCompiler.compileAndAnalyze(p, q, exhaustivePath, transformedOutput)
-    DatalogCompiler.solutionToSingleTSV(solOutput, analysisType)
-  }
-
-
-  private def single(p: Program, q: Cell): Unit = {
-
-    DatalogCompiler.compileAndAnalyze(p, q)
-    DatalogCompiler.solutionToSingleTSV("untitled/souffleSol.tsv")
+  private def compareToMagicSets(p: Program, q: Cell, analysis: DatalogAnalysis, outputPath: String = "untitled/souffleSol.tsv", assertRelationSize: Boolean = true): Unit = {
+    analysis.compileAndAnalyze(p, q)
+    analysis.outputSolution(outputPath)
 
     val solver = MagicSets()
     val solution = solver.solve(p, q)
 
     // Write the solution to the disk and read the contents of the files to compare pointsTo relations
-    writeSolutionToDisk(solution)
+    writeSolutionToDisk(solution, outputPath)
     if !compareSouffleToMagic() then
       p.print()
       throw Error("Mismatch for program with query " + q)
 
+    if !assertRelationSize then
+      println("Skipping comparison of sizes of computed relations")
+      return
+
     // Obtain demanded and tracked tokens to compare
-    val souffleDemanded = DatalogCompiler.collectDemand()
-    val souffleTracked = DatalogCompiler.collectTracked()
+    val souffleDemanded = analysis.collectDemand()
+    val souffleTracked = analysis.collectTracked()
 
     val magicDemanded = solver.collectDemand
     val magicTracked = solver.collectTracked
@@ -88,21 +68,21 @@ class TestMagic extends AnyFunSuite {
     if souffleTracked != magicTracked then
       p.print()
       println("Difference in magic vs souffle tracked\nSouffle:")
-      println(souffleDemanded)
+      println(souffleTracked)
       println("Magic:")
-      println(magicDemanded)
+      println(magicTracked)
       assert(souffleTracked == magicTracked)
       throw Error("Mismatch in tracked for program with query " + q)
+
   }
 
-
-  private def repeat(times: Int, size: Int, vars: Int, fields: Int): Unit = {
+  private def repeat(times: Int, size: Int, vars: Int, fields: Int, analysis: DatalogAnalysis = Standard(), compareRelations: Boolean = true): Unit = {
     for i <- 0 to times do
       val seed = scala.util.Random.nextInt()
       val g = ProgramGenerator(seed, vars, size, fields)
       val p = g.generate()
       val q = g.genQuery
-      single(p, q)
+      compareToMagicSets(p, q, analysis, "untitled/sol.tsv", compareRelations)
       if i != 0 && i % 100 == 0 then println(s"Completed $i tests")
 
   }

@@ -41,10 +41,9 @@ private def difference(): Unit = {
   println(s"\t${equalSolutions(htSol, mSol)}")
 
 
-  DatalogCompiler.compileAndAnalyze(p, 1)
-  DatalogCompiler.solutionToSingleTSV("untitled/diff_mebe")
-
-
+  val datalogAnalysis = Standard()
+  datalogAnalysis.compileAndAnalyze(p, 1)
+  datalogAnalysis.outputSolution("untitled/diff_mebe")
 }
 
 
