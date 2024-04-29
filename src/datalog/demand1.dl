@@ -3,6 +3,7 @@
 .type field <: symbol
 .decl magic_pointsTo_bb(x:var, t:token) 
 .decl magic_pointsTo_bf(x:var) 
+.decl magic_pointsTo_fb(t:token) 
 .decl magic_pointsToField_bbb(t:token, f:field, v:token) 
 .decl magic_pointsToField_bbf(t:token, f:field) 
 .decl assign(x:var, y:var) 
@@ -10,6 +11,7 @@
 .decl new(x:var, t:token) 
 .decl pointsTo_bb(x:var, t:token) 
 .decl pointsTo_bf(x:var, t:token) 
+.decl pointsTo_fb(x:var, t:token) 
 .decl pointsToField_bbb(t:token, f:field, v:token) 
 .decl pointsToField_bbf(t:token, f:field, v:token) 
 .decl query(t:token) 
@@ -18,18 +20,14 @@ magic_pointsTo_bb(y,z) :-
    magic_pointsTo_bb(x,z),
    assign(x,y).
 
-magic_pointsTo_bb(r,t) :- 
-   magic_pointsToField_bbb(t,f,_),
-   store(r,f,_).
+magic_pointsTo_bb(y,z) :- 
+   magic_pointsTo_fb(z),
+   assign(_,y).
 
 magic_pointsTo_bb(s,v) :- 
    magic_pointsToField_bbb(t,f,v),
-   store(r,f,s),
-   pointsTo_bb(r,t).
-
-magic_pointsTo_bb(r,t) :- 
-   magic_pointsToField_bbf(t,f),
-   store(r,f,_).
+   pointsTo_fb(r,t),
+   store(r,f,s).
 
 magic_pointsTo_bf(y) :- 
    magic_pointsTo_bb(x,_),
@@ -43,16 +41,31 @@ magic_pointsTo_bf(y) :-
    magic_pointsTo_bf(x),
    load(x,y,_).
 
+magic_pointsTo_bf(y) :- 
+   magic_pointsTo_fb(_),
+   load(_,y,_).
+
 magic_pointsTo_bf(s) :- 
    magic_pointsToField_bbf(t,f),
-   store(r,f,s),
-   pointsTo_bb(r,t).
+   pointsTo_fb(r,t),
+   store(r,f,s).
 
 magic_pointsTo_bf("x5").
+
+magic_pointsTo_fb(t) :- 
+   magic_pointsToField_bbb(t,_,_).
+
+magic_pointsTo_fb(t) :- 
+   magic_pointsToField_bbf(t,_).
 
 magic_pointsToField_bbb(z,f,v) :- 
    magic_pointsTo_bb(x,v),
    load(x,y,f),
+   pointsTo_bf(y,z).
+
+magic_pointsToField_bbb(z,f,v) :- 
+   magic_pointsTo_fb(v),
+   load(_,y,f),
    pointsTo_bf(y,z).
 
 magic_pointsToField_bbf(z,f) :- 
@@ -90,16 +103,31 @@ pointsTo_bf(x,v) :-
    pointsTo_bf(y,z),
    pointsToField_bbf(z,f,v).
 
+pointsTo_fb(x,y) :- 
+   magic_pointsTo_fb(y),
+   new(x,y).
+
+pointsTo_fb(x,z) :- 
+   magic_pointsTo_fb(z),
+   assign(x,y),
+   pointsTo_bb(y,z).
+
+pointsTo_fb(x,v) :- 
+   magic_pointsTo_fb(v),
+   load(x,y,f),
+   pointsTo_bf(y,z),
+   pointsToField_bbb(z,f,v).
+
 pointsToField_bbb(t,f,v) :- 
    magic_pointsToField_bbb(t,f,v),
+   pointsTo_fb(r,t),
    store(r,f,s),
-   pointsTo_bb(r,t),
    pointsTo_bb(s,v).
 
 pointsToField_bbf(t,f,v) :- 
    magic_pointsToField_bbf(t,f),
+   pointsTo_fb(r,t),
    store(r,f,s),
-   pointsTo_bb(r,t),
    pointsTo_bf(s,v).
 
 query(t) :- 

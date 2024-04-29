@@ -28,6 +28,33 @@ class TestMagic extends AnyFunSuite {
   }
 
 
+
+  test("Various exhaustive formulations") {
+    val p = Parser.ParseTemplate("slides")
+    val q = 5
+
+    val standard = DatalogCompiler.datalogDir + "exhaustive.dl"
+    val standardOut = DatalogCompiler.datalogDir + "demand.dl"
+    val standardSol = "untitled/sol.tsv"
+
+    single(p, q, standard, standardOut, standardSol)
+
+
+    val alt1 = DatalogCompiler.datalogDir + "exhaustive1.dl"
+    val alt1Out = DatalogCompiler.datalogDir + "demand1.dl"
+    val alt1Sol = "untitled/sol1.tsv"
+
+    single(p, q, alt1, alt1Out, alt1Sol)
+
+  }
+
+
+  private def single(p: Program, q: Cell, exhaustivePath: String, transformedOutput: String, solOutput: String): Unit = {
+    DatalogCompiler.compileAndAnalyze(p, q, exhaustivePath, transformedOutput)
+    DatalogCompiler.solutionToSingleTSV(solOutput)
+  }
+
+
   private def single(p: Program, q: Cell): Unit = {
 
     DatalogCompiler.compileAndAnalyze(p, q)

@@ -41,20 +41,28 @@ object DatalogCompiler {
    * reside.
    * */
   def compileAndAnalyze(p: Program, query: Cell): Unit = {
-    compile(p)
-
-    val datalogDir = "./untitled/src/datalog/"
-    val scriptPath = datalogDir + "transform_program.sh"
     val exhaustivePath = datalogDir + "exhaustive.dl"
     val demandPath = datalogDir + "demand.dl"
 
-    val cmd = "%s x%s %s %s".format(scriptPath, query, exhaustivePath, demandPath)
-    cmd !!
-
-    val analysisCmd = "souffle -F %s -D %s %s".format(datalogDir, datalogDir, demandPath)
-    analysisCmd !!
+    compileAndAnalyze(p, query, exhaustivePath, demandPath)
+    
   }
 
+  def compileAndAnalyze(p: Program, query: Cell, exhaustivePath: String, outpath: String): Unit = {
+    compile(p)
+    
+    val datalogDir = "./untitled/src/datalog/"
+    val scriptPath = datalogDir + "transform_program.sh"
+
+    val cmd = "%s x%s %s %s".format(scriptPath, query, exhaustivePath, outpath)
+    cmd !!
+
+    val analysisCmd = "souffle -F %s -D %s %s".format(datalogDir, datalogDir, outpath)
+    analysisCmd !!
+    
+    
+  }
+  
   /**
    * Reads the solution from the datalog files and concatenates and de-dupliucates entries and outputs a single file.
    *
