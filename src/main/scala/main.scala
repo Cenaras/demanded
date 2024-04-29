@@ -3,8 +3,41 @@
 
 @main
 def main(): Unit = {
-    difference()
+//    difference()
 //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
+  datalogAnalysisCost()
+}
+
+private def datalogAnalysisCost(): Unit = {
+  val times = 100
+  val size = 7
+  val vars = 3
+  val fields = 1
+
+  var standardCheaper = 0
+  var alt1Cheaper = 0
+
+  for i <- 0 until times do
+    val seed = scala.util.Random.nextInt()
+    val g = ProgramGenerator(seed, vars, size, fields)
+    val p = g.generate()
+    val q = g.genQuery
+
+    val standard = Standard()
+    standard.compileAndAnalyze(p, q)
+    val standardCost = standard.cost
+
+    val alt1 = Alt1()
+    alt1.compileAndAnalyze(p, q)
+    val alt1Cost = alt1.cost
+
+    if standardCost < alt1Cost then
+      standardCheaper+=1
+    if alt1Cost < standardCost then
+      alt1Cheaper+=1
+
+  println(s"Standard was cheapest $standardCheaper times")
+  println(s"Alt1 was cheapest $alt1Cheaper times")
 }
 
 

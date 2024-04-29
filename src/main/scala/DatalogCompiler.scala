@@ -68,19 +68,19 @@ trait DatalogAnalysis {
   def collectDemand(): String = {
     val builder = StringBuilder()
     for f <- demandFiles() do
-      builder.append(FileManager.readFile(f)).append("\n")
+      builder.append(FileManager.readFile(datalogDir + f)).append("\n")
 
     builder.toString().linesIterator.toSet.mkString("\n").linesIterator.toList.sorted.mkString("\n")
   }
   def collectTracked(): String = {
     val builder = StringBuilder()
     for f <- trackFiles() do
-      builder.append(FileManager.readFile(f)).append("\n")
+      builder.append(FileManager.readFile(datalogDir + f)).append("\n")
 
     val deduplicated = builder.toString().linesIterator.toList.mkString("\n").linesIterator.toSet.mkString("\n")
     deduplicated.linesIterator.toList.sorted.mkString("\n")
   }
-  
+
   def cost: Int = {
     val demand = collectDemand()
     val tracked = collectTracked()
@@ -106,7 +106,7 @@ class Alt1 extends DatalogAnalysis {
   override def demandedPath(): String = datalogDir + "demand1.dl"
 
   override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
-  override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv, magic_pointsTo_fb.csv")
+  override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv", "magic_pointsTo_fb.csv")
 
   override def outputSolution(outfile: String): Unit = {
     val ptfb = datalogDir + "pointsTo_fb.csv"
