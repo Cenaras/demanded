@@ -37,4 +37,4 @@ pointsToField(t, f, v) :- store(r, f, s), pointsTo(r, t), pointsTo(s, v).
 
 .decl query(t: token)
 // This line is automatically changed by the transform_program script
-query(t) :- pointsTo("x0", t).
+query(t) :- pointsTo("x1", t).

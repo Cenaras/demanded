@@ -40,5 +40,12 @@ if [[ "$pathExhaustive" == *exhaustive1.dl ]]; then
   echo ".output magic_pointsTo_fb" >> "$pathDemand"
 fi
 
+if [[ "$pathExhaustive" == *exhaustive2.dl ]]; then
+  echo ".output pointsTo_fb" >> "$pathDemand"
+  echo ".output pointsTo_ff" >> "$pathDemand"
+  echo ".output magic_pointsTo_fb" >> "$pathDemand"
+  echo ".output magic_pointsTo_ff" >> "$pathDemand"
+fi
+
 echo ".output pointsToField_bbb" >> "$pathDemand"
 echo ".output pointsToField_bbf" >> "$pathDemand"

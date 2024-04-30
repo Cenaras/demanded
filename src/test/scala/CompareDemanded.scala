@@ -20,7 +20,32 @@ class CompareDemanded extends AnyFunSuite {
     assert(!(fsSol == magicSol))
 
     assert(magicSol.size < Math.min(htSol.size, fsSol.size))
+  }
 
+  test("Compare solution sizes") {
+    var htSmallest = 0
+    var magicSmallest = 0
+    for i <- 0 until 100000 do
+      if i != 0 && i % 10000 == 0 then println(s"Completed $i solution comparison tests")
+      val g = ProgramGenerator(scala.util.Random.nextInt(), 5, 15, 2)
+      val p = g.generate()
+      val q = g.genQuery
+
+      val ht = HeintzeTardieu()
+      val magic = MagicSets()
+
+      val htSol = ht.solve(p, q)
+      val magicSol = magic.solve(p, q)
+
+      val htSolSize = htSol.foldLeft(0)((a, b) => a+b.size)
+      val magicSolSize = magicSol.foldLeft(0)((a, b) => a + b.size)
+
+      if htSolSize < magicSolSize then htSmallest += 1
+      if magicSolSize < htSolSize then magicSmallest += 1
+
+    println("Solution comparison results:")
+    println(s"\tHeintze-Tardieu smallest: $htSmallest times")
+    println(s"\tMagic sets smallest: $magicSmallest times")
 
   }
 

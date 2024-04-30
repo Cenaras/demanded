@@ -5,7 +5,7 @@
 def main(): Unit = {
 //    difference()
 //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
-//  datalogAnalysisCost()
+  datalogAnalysisCost()
 
 Alt2().compileAndAnalyze(Parser.ParseTemplate("slides"), 5)
 
@@ -43,37 +43,28 @@ private def datalogAnalysisCost(): Unit = {
     alt1.outputSolution(alt1OutPath)
     val alt1Cost = alt1.cost(alt1OutPath)
 
-
-    val magicSets = MagicSets()
-    magicSets.solve(p, q)
-    val msCost = magicSets.cost
-
-    // MagicSets and Standard should be the same formulation
-    assert(msCost == standardCost)
-
     val ht = HeintzeTardieu()
     val htSol = ht.solve(p, q)
     val htCost = ht.cost
 
-    // Good code :)
-    if standardCost < alt1Cost && standardCost < htCost then
-      standardCheaper+=1
-    if alt1Cost < standardCost && alt1Cost < htCost then
-      alt1Cheaper+=1
-    if htCost < alt1Cost && htCost < standardCost then
-      htCheaper += 1
+    val (unique1, smallest1) = uniqueSmallest(List(standardCost, alt1Cost, htCost))
+    if unique1 then
+      if smallest1 == standardCost then standardCheaper += 1
+      if smallest1 == alt1Cost then alt1Cheaper += 1
+      if smallest1 == htCost then htCheaper += 1
+
+
+
 
     val htSolSize = htSol.foldLeft(0)((a, sol) => {a + sol.size})
     val standardSolSize = standard.readSolution(standardOutPath).linesIterator.size
     val alt1SolSize = alt1.readSolution(alt1OutPath).linesIterator.size
 
-    if htSolSize < standardSolSize && htSolSize < alt1SolSize then
-      htSolSizeSmallest += 1
-    if standardSolSize < htSolSize && standardSolSize < alt1SolSize then
-      standardSolSizeSmallest += 1
-    if alt1SolSize < htSolSize && alt1SolSize < standardSolSize then
-      al1SolSizeSmallest += 1
-
+     val (unique2, smallest2) = uniqueSmallest(List(htSolSize, standardSolSize, alt1SolSize))
+    if unique2 then
+      if smallest2 == htSolSize then htSolSizeSmallest += 1
+      if smallest2 == standardSolSize then standardSolSizeSmallest += 1
+      if smallest2 == alt1SolSize then al1SolSizeSmallest += 1
 
   println(s"Standard was cheapest $standardCheaper times")
   println(s"Alt1 was cheapest $alt1Cheaper times")
@@ -84,6 +75,13 @@ private def datalogAnalysisCost(): Unit = {
   println(s"Heintze-Tardieu solution was smallest $htSolSizeSmallest times")
 }
 
+
+def uniqueSmallest(list: List[Int]): (Boolean, Int) = {
+  val smallest = list.min
+  if list.count(_ == smallest) != 1 then
+    return (false, -1)
+  return (true, smallest)
+}
 
 private def difference(): Unit = {
 
