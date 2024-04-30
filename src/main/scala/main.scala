@@ -5,7 +5,18 @@
 def main(): Unit = {
 //    difference()
 //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
-  datalogAnalysisCost()
+//  datalogAnalysisCost()
+
+  val p = Parser.ParseTemplate("MagicAlt1Compare")
+  val q = 2
+  val alt1 = Alt1()
+  alt1.compileAndAnalyze(p, q)
+  alt1.outputSolution("untitled/alt1Sol.tsv")
+
+  val standard = Standard()
+  standard.compileAndAnalyze(p, q)
+  standard.outputSolution("untitled/standardSol.tsv")
+
 
 }
 

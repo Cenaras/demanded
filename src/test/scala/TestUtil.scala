@@ -46,7 +46,7 @@ object TestUtil {
   // Compare demanded solvers for small programs
   def compareDemandedSolvers(times: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
     for _ <- 0 until times do
-      val (p, q) = randomTest(2, 3, 1)
+      val (p, q) = randomTest(7, 3, 1)
       val sol1 = demandedSolver(sol1Type).solve(p, q)
       val sol2 = demandedSolver(sol2Type).solve(p, q)
 

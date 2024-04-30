@@ -5,11 +5,10 @@ class CompareDemanded extends AnyFunSuite {
   test("Heintze-Tardieu vs FullFS") {
     TestUtil.compareDemandedSolvers(100000, TestUtil.SolverType.HT, TestUtil.SolverType.Magic)
   }
-  
+
   test("MagicSets vs Alt1 on solutions") {
     TestUtil.compareDemandedSolvers(100000, TestUtil.SolverType.Magic, TestUtil.SolverType.Alt1)
   }
-  
 
   // Concrete test case showing that Heintze-Tardieu and MagicSets do no compute the same results
   test("Both non-optimal compared to MagicSets") {

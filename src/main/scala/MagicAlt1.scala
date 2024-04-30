@@ -137,6 +137,18 @@ class MagicAlt1 extends DemandedSolver {
           if v == x then addMagicBF(y) // (5)
         for _ <- magicFB do
           addMagicBF(y) // (6)
+        for (v, t) <- magicBB do
+          if v == x then
+            for (v1, t1) <- pointsToBF do
+              if v1 == y then addMagicBBB(t1, f, t) // (7)
+        for t <- magicFB do
+          for (v1, t1) <- pointsToBF do
+            if v1 == y then addMagicBBB(t1, f, t) // (8)
+        for v <- magicBF do
+          if v == x then
+            for (v1, t1) <- pointsToBF do
+              if v1 ==y then addMagicBBF(t1, f) // (9)
+
 
         for (v, t) <- magicBB do
           if v == x then
