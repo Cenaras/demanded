@@ -147,7 +147,7 @@ class MagicAlt1 extends DemandedSolver {
         for v <- magicBF do
           if v == x then
             for (v1, t1) <- pointsToBF do
-              if v1 ==y then addMagicBBF(t1, f) // (9)
+              if v1 == y then addMagicBBF(t1, f) // (9)
 
 
         for (v, t) <- magicBB do
@@ -181,5 +181,8 @@ class MagicAlt1 extends DemandedSolver {
                 addPointsToBBF(t1, f, t2) // (24)
     }
 
-  override def cost: Int = ???
+  override def cost: Int = {
+    magicBB.size + magicBF.size + magicBF.size + magicBBB.size + magicBBF.size 
+      + pointsToBB.size + pointsToBF.size + pointsToFB.size + pointsToBBB.size + pointsToBBF.size
+  }
 }
