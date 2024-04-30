@@ -36,7 +36,7 @@ class CompareDemanded extends AnyFunSuite {
     var alt1Cheapest = 0
 
 
-    for i <- 1 to 100000 do
+    for i <- 1 to 1000000 do
       if i % 25000 == 0 then println(s"Completed $i solution comparison tests")
       val g = ProgramGenerator(scala.util.Random.nextInt(), 5, 15, 2)
       val p = g.generate()
@@ -53,6 +53,10 @@ class CompareDemanded extends AnyFunSuite {
       val htSolSize = htSol.foldLeft(0)((a, b) => a+b.size)
       val magicSolSize = magicSol.foldLeft(0)((a, b) => a + b.size)
       val alt1SolSize = alt1Sol.foldLeft(0)((a,b) => a+b.size)
+
+      TestUtil.compareSolutionsForQuery(htSol, magicSol, q)
+      TestUtil.compareSolutionsForQuery(magicSol, htSol, q)
+      TestUtil.compareSolutionsForQuery(magicSol, alt1Sol, q)
 
       val (uniqueSize, smallestSize) = uniqueSmallest(List(htSolSize, magicSolSize, alt1SolSize))
       if uniqueSize then
