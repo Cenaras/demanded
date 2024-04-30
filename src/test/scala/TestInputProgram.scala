@@ -65,7 +65,7 @@ class TestInputProgram extends AnyFunSuite {
     val ht = HeintzeTardieu()
     val exSol = ex.solve(p)
     val htSol = ht.solve(p, q)
-    assert(TestUtil.compareSolutions(exSol, htSol, q))
+    assert(TestUtil.compareSolutionsForQuery(exSol, htSol, q))
 
   }
   

@@ -96,6 +96,7 @@ trait DatalogAnalysis {
 
 }
 
+// Default implementation
 class Standard extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive.dl"
   override def demandedPath(): String = datalogDir + "demand.dl"
@@ -106,8 +107,8 @@ class Standard extends DatalogAnalysis {
   override def outputSolution(outfile: String): Unit = {
     ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
   }
-
 }
+// points-to, store, points-to
 class Alt1 extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive1.dl"
   override def demandedPath(): String = datalogDir + "demand1.dl"
@@ -122,6 +123,7 @@ class Alt1 extends DatalogAnalysis {
   }
 }
 
+// points-to, points-to, store
 class Alt2 extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive2.dl"
   override def demandedPath(): String = datalogDir + "demand2.dl"

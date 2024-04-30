@@ -5,6 +5,11 @@ class CompareDemanded extends AnyFunSuite {
   test("Heintze-Tardieu vs FullFS") {
     TestUtil.compareDemandedSolvers(100000, TestUtil.SolverType.HT, TestUtil.SolverType.Magic)
   }
+  
+  test("MagicSets vs Alt1 on solutions") {
+    TestUtil.compareDemandedSolvers(100000, TestUtil.SolverType.Magic, TestUtil.SolverType.Alt1)
+  }
+  
 
   // Concrete test case showing that Heintze-Tardieu and MagicSets do no compute the same results
   test("Both non-optimal compared to MagicSets") {
@@ -25,6 +30,9 @@ class CompareDemanded extends AnyFunSuite {
   test("Compare solution sizes") {
     var htSmallest = 0
     var magicSmallest = 0
+    var htCheapest = 0
+    var magicCheapest = 0
+
     for i <- 0 until 100000 do
       if i != 0 && i % 10000 == 0 then println(s"Completed $i solution comparison tests")
       val g = ProgramGenerator(scala.util.Random.nextInt(), 5, 15, 2)
@@ -40,12 +48,21 @@ class CompareDemanded extends AnyFunSuite {
       val htSolSize = htSol.foldLeft(0)((a, b) => a+b.size)
       val magicSolSize = magicSol.foldLeft(0)((a, b) => a + b.size)
 
+      val htCost = ht.cost
+      val magicCost = magic.cost
+
       if htSolSize < magicSolSize then htSmallest += 1
       if magicSolSize < htSolSize then magicSmallest += 1
 
-    println("Solution comparison results:")
+      if htCost < magicCost then htCheapest += 1
+      if magicCost < htCost then magicCheapest += 1
+
+    println("\nSolution comparison results:")
     println(s"\tHeintze-Tardieu smallest: $htSmallest times")
     println(s"\tMagic sets smallest: $magicSmallest times")
+    println("\nCost comparison results:")
+    println(s"\tHeintze-Tardieu cheapest: $htCheapest times")
+    println(s"\tMagic sets cheapest: $magicCheapest times")
 
   }
 
