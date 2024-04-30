@@ -81,7 +81,7 @@ trait DatalogAnalysis {
     deduplicated.linesIterator.toList.sorted.mkString("\n")
   }
   
-  private def readSolution(path: String): String = {
+  def readSolution(path: String): String = {
     FileManager.readFile(path)
   }
 
@@ -120,4 +120,18 @@ class Alt1 extends DatalogAnalysis {
 
     ("sort -u %s %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf, ptfb) #> new File(outfile)).!
   }
+}
+
+class Alt2 extends DatalogAnalysis {
+  override def exhaustivePath(): String = datalogDir + "exhaustive2.dl"
+  override def demandedPath(): String = datalogDir + "demand2.dl"
+
+  // TODO
+  override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+  override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv")
+
+  override def outputSolution(outfile: String): Unit = {
+    ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
+  }
+  
 }

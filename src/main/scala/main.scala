@@ -5,7 +5,9 @@
 def main(): Unit = {
 //    difference()
 //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
-  datalogAnalysisCost()
+//  datalogAnalysisCost()
+
+Alt2().compileAndAnalyze(Parser.ParseTemplate("slides"), 5)
 
 }
 
@@ -18,6 +20,10 @@ private def datalogAnalysisCost(): Unit = {
   var standardCheaper = 0
   var alt1Cheaper = 0
   var htCheaper = 0
+
+  var standardSolSizeSmallest = 0
+  var al1SolSizeSmallest = 0
+  var htSolSizeSmallest = 0
 
   for i <- 0 until times do
     val seed = scala.util.Random.nextInt()
@@ -46,7 +52,7 @@ private def datalogAnalysisCost(): Unit = {
     assert(msCost == standardCost)
 
     val ht = HeintzeTardieu()
-    ht.solve(p, q)
+    val htSol = ht.solve(p, q)
     val htCost = ht.cost
 
     // Good code :)
@@ -57,12 +63,25 @@ private def datalogAnalysisCost(): Unit = {
     if htCost < alt1Cost && htCost < standardCost then
       htCheaper += 1
 
+    val htSolSize = htSol.foldLeft(0)((a, sol) => {a + sol.size})
+    val standardSolSize = standard.readSolution(standardOutPath).linesIterator.size
+    val alt1SolSize = alt1.readSolution(alt1OutPath).linesIterator.size
 
+    if htSolSize < standardSolSize && htSolSize < alt1SolSize then
+      htSolSizeSmallest += 1
+    if standardSolSize < htSolSize && standardSolSize < alt1SolSize then
+      standardSolSizeSmallest += 1
+    if alt1SolSize < htSolSize && alt1SolSize < standardSolSize then
+      al1SolSizeSmallest += 1
 
 
   println(s"Standard was cheapest $standardCheaper times")
   println(s"Alt1 was cheapest $alt1Cheaper times")
   println(s"Heintze-Tardieu was cheapest $htCheaper times")
+
+  println(s"Standard solution was smallest $standardSolSizeSmallest times")
+  println(s"Alt1 solution was smallest $al1SolSizeSmallest times")
+  println(s"Heintze-Tardieu solution was smallest $htSolSizeSmallest times")
 }
 
 
