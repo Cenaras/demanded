@@ -1,8 +1,8 @@
 .type var <: symbol
 
-.output pointsTo
+.output query
 
-.decl addrOf(X: var, Y: var)
+.decl new(X: var, Y: var)
 .input new
 
 .decl assign(X: var, Y: var)
@@ -16,23 +16,13 @@
 
 
 .decl pointsTo(X: var, Y: var)
+.decl query(Y: var)
+
 
 /** Simple C-style formulation of a points-to analysis. */
 
-pointsTo(X, Y) :- addrOf(X, Y).
+pointsTo(X, Y) :- new(X, Y).
 pointsTo(X, Z) :- assign(X, Y), pointsTo(Y, Z).
 pointsTo(X, Z) :- load(X, Y), pointsTo(Y, R), pointsTo(R, Z).
 pointsTo(X, Z) :- store(R, S), pointsTo(R, X), pointsTo(S, Z).
-
-
-/** An attempt at a magic transformation for the above analysis. */
-// Consider a query on the form: ?pointsTo("x", Y). That is, "what may x points to?"
-
-// A magic fact that allows us to restrict the search space to rules where this fact holds.
-//.decl magic(X: var)
-
-// Magic rules that allow us to produce new magic facts
-//magic(Y) :- magic(X), assign(X, Y).
-
-//pointsTo(X, Y) :- magic(X), addrOf(X, Y).
-//pointsTo(X, Z) :- magic(X), assign(X, Y), pointsTo(Y, Z).
+query(t) :- pointsTo("x5", t).
