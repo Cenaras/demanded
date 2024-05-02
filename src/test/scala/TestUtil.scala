@@ -1,4 +1,5 @@
-import TestUtil.SolverType.Alt1
+import TestUtil.SolverType.{Alt1, HTImp}
+import com.sun.org.apache.bcel.internal.generic.AALOAD
 
 import javax.management.Query
 import scala.collection.mutable
@@ -24,7 +25,7 @@ object TestUtil {
   }
 
   enum SolverType:
-    case HT, Magic, FullFS, Alt1
+    case HT, Magic, FullFS, Alt1, HTImp
 
 
   def demandedSolver(st: SolverType): DemandedSolver = {
@@ -33,6 +34,7 @@ object TestUtil {
       case SolverType.Magic => MagicSets()
       case SolverType.FullFS => FullFS()
       case SolverType.Alt1 => MagicAlt1()
+      case SolverType.HTImp => ImprovedHeintzeTardieu()
   }
 
   def randomTest(size: Int, vars: Int, fields: Int): (Program, Cell) = {
@@ -45,10 +47,18 @@ object TestUtil {
 
   // Compare demanded solvers for small programs
   def compareDemandedSolvers(times: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
+    compareDemandedSolvers(times, 7, 3, 1, sol1Type, sol2Type)
+  }
+
+  def compareDemandedSolvers(times: Int, size: Int, vars: Int, fields: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
     for _ <- 0 until times do
-      val (p, q) = randomTest(7, 3, 1)
-      val sol1 = demandedSolver(sol1Type).solve(p, q)
-      val sol2 = demandedSolver(sol2Type).solve(p, q)
+      val (p, q) = randomTest(size, vars, fields)
+
+      val solver1 = demandedSolver(sol1Type)
+      val solver2 = demandedSolver(sol2Type)
+
+      val sol1 = solver1.solve(p, q)
+      val sol2 = solver2.solve(p, q)
 
       if !compareSolutionsForQuery(sol1, sol2, q) then
         p.print()
@@ -57,6 +67,10 @@ object TestUtil {
         println(sol1)
         println(s"$sol2Type solution: ")
         println(sol2)
+
+        solver2 match
+          case a: ImprovedHeintzeTardieu => println("write reachable: \n" + a.write_reachable)
+          case _ =>
         throw new Error("mismatch")
   }
 

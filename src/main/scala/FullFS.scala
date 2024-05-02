@@ -1,5 +1,6 @@
 import scala.collection.mutable
 
+// TODO: Implement chain program with relation rules as done in Figure 3 of FullFS paper. Compare with MS and FullFS
 class FullFS extends DemandedSolver {
 
   val d = mutable.Set[Cell]()
@@ -69,7 +70,7 @@ class FullFS extends DemandedSolver {
     addDemand(query)
     naiveSolve(p)
   }
-  
+
   override def cost: Int = 0
-  
+
 }
