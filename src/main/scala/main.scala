@@ -39,7 +39,7 @@ private def datalogAnalysisCost(): Unit = {
 
   for i <- 0 until times do
     val seed = scala.util.Random.nextInt()
-    val g = ProgramGenerator(seed, vars, size, fields)
+    val g = SimpleProgramGenerator(seed, vars, size, fields)
     val p = g.generate()
     val q = g.genQuery
 
@@ -152,7 +152,7 @@ private def difference(): Unit = {
 private def compareMagicToHeintzeTardieu(times: Int, size: Int, vars: Int, fields: Int): Unit = {
   for i <- 0 until times do
     val seed = scala.util.Random.nextInt()
-    val g = ProgramGenerator(seed, vars, size, fields)
+    val g = SimpleProgramGenerator(seed, vars, size, fields)
     val p = g.generate()
     val q = g.genQuery
 

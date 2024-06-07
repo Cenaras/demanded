@@ -1,0 +1,7 @@
+x2 = new t0
+x1 = new t1
+x2 = x1
+x0 = new t2
+x0 = x0.f0
+x2.f0 = x2
+x1 = x0

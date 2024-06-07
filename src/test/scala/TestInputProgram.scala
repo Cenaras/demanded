@@ -47,7 +47,7 @@ class TestInputProgram extends AnyFunSuite {
 
   
   test("Track base in store") {
-    compare(Parser.ParseTemplate("track_base_in_store"), 6)
+    compare(Parser.ParseTemplate("track_base_in_store"), 0)
   }
   
   test("Unconditional tracking in store") {
@@ -65,6 +65,10 @@ class TestInputProgram extends AnyFunSuite {
     val ht = HeintzeTardieu()
     val exSol = ex.solve(p)
     val htSol = ht.solve(p, q)
+
+    println(exSol)
+    println(htSol)
+
     assert(TestUtil.compareSolutionsForQuery(exSol, htSol, q))
 
   }

@@ -1,4 +1,6 @@
-import TestUtil.{SolverType, demandedSolver}
+import TestUtil.GeneratorType.Initialized
+import TestUtil.SolverType.HT
+import TestUtil.{GeneratorType, SolverType, demandedSolver}
 import org.scalatest.funsuite.AnyFunSuite
 
 class CompareExhaustiveToDemanded extends AnyFunSuite {
@@ -42,11 +44,11 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
   }
 
   test("medium magic") {
-      val vars = 5
-      val fields = 2
-      val insn = 12
-      compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
-    }
+    val vars = 5
+    val fields = 2
+    val insn = 12
+    compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
+  }
 
   test("large magic") {
     val vars = 5
@@ -79,11 +81,15 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
     compareExhaustiveToDemanded(100000, insn, vars, fields, SolverType.Magic)
   }
 
+  private def compareExhaustiveToDemanded(times: Int, size: Int, vars: Int, fields: Int, st: SolverType): Unit =
+    compareExhaustiveToDemanded(times, size, vars, fields, st, GeneratorType.Simple)
 
-  private def compareExhaustiveToDemanded(times: Int, size: Int, vars: Int, fields: Int, st: SolverType): Unit = {
+  private def compareExhaustiveToDemanded(times: Int, size: Int, vars: Int, fields: Int, st: SolverType, gt: GeneratorType): Unit = {
     for i <- 0 to times do
       val seed = scala.util.Random.nextInt()
-      val g = new ProgramGenerator(seed, vars, size, fields)
+      val g = gt match
+        case GeneratorType.Simple => new SimpleProgramGenerator(seed, vars, size, fields)
+        case GeneratorType.Initialized => new AlwaysInitializedProgramGenerator(seed, vars, size, fields)
       val p = g.generate()
       val query = g.genQuery
 
@@ -104,7 +110,6 @@ class CompareExhaustiveToDemanded extends AnyFunSuite {
       if i != 0 && i % 10000 == 0 then println(f"Completed $i%,d tests")
 
   }
-
 
 
 }

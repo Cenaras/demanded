@@ -80,7 +80,7 @@ class TestMagic extends AnyFunSuite {
   private def repeat(times: Int, size: Int, vars: Int, fields: Int, analysis: DatalogAnalysis = Standard(), compareRelations: Boolean = true): Unit = {
     for i <- 0 to times do
       val seed = scala.util.Random.nextInt()
-      val g = ProgramGenerator(seed, vars, size, fields)
+      val g = SimpleProgramGenerator(seed, vars, size, fields)
       val p = g.generate()
       val q = g.genQuery
       compareToMagicSets(p, q, analysis, "untitled/sol.tsv", compareRelations)

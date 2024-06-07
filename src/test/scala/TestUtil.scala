@@ -1,4 +1,5 @@
-import TestUtil.SolverType.{Alt1, HTImp}
+import TestUtil.GeneratorType.Simple
+import TestUtil.SolverType.{Alias, Alt1, HTImp}
 import com.sun.org.apache.bcel.internal.generic.AALOAD
 
 import javax.management.Query
@@ -25,8 +26,11 @@ object TestUtil {
   }
 
   enum SolverType:
-    case HT, Magic, FullFS, Alt1, HTImp
+    case HT, Magic, FullFS, Alt1, HTImp, Alias
 
+  enum GeneratorType:
+    case Simple, Initialized
+  
 
   def demandedSolver(st: SolverType): DemandedSolver = {
     st match
@@ -35,11 +39,12 @@ object TestUtil {
       case SolverType.FullFS => FullFS()
       case SolverType.Alt1 => MagicAlt1()
       case SolverType.HTImp => ImprovedHeintzeTardieu()
+      case SolverType.Alias => AliasBased()
   }
 
   def randomTest(size: Int, vars: Int, fields: Int): (Program, Cell) = {
     val seed = scala.util.Random.nextInt()
-    val g = new ProgramGenerator(seed, vars, size, fields)
+    val g = new SimpleProgramGenerator(seed, vars, size, fields)
     val p = g.generate()
     val query = g.genQuery
     (p, query)

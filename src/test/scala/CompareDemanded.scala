@@ -122,7 +122,7 @@ class CompareDemanded extends AnyFunSuite {
 
     for i <- 1 to 100000 do
       if i % 25000 == 0 then println(s"Completed $i solution comparison tests")
-      val g = ProgramGenerator(scala.util.Random.nextInt(), 5, 15, 2)
+      val g = SimpleProgramGenerator(scala.util.Random.nextInt(), 5, 15, 2)
       val p = g.generate()
       val q = g.genQuery
 
