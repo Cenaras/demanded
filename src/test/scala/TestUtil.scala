@@ -15,7 +15,7 @@ object TestUtil {
       same = same & tokens.contains(t)
     same
   }
-  
+
   def compareSolutionsForQuery(ex: Solution, de: Solution, query: Cell): Boolean = {
     val querySol = de(query)
     containsExactly(query, querySol.toList, ex)
@@ -30,7 +30,7 @@ object TestUtil {
 
   enum GeneratorType:
     case Simple, Initialized
-  
+
 
   def demandedSolver(st: SolverType): DemandedSolver = {
     st match
@@ -49,6 +49,23 @@ object TestUtil {
     val query = g.genQuery
     (p, query)
   }
+
+  def compareExhaustiveToWP(exSol: Solution, wpSol: WpSolution): Boolean = {
+
+    var same = true
+
+    for (cell, sol) <- exSol do
+      val sol_other = wpSol.sol(cell)
+      same &= sol.size == sol_other.size
+
+      for t <- sol do
+        same &= sol_other.contains(t)
+
+    same
+
+
+  }
+
 
   // Compare demanded solvers for small programs
   def compareDemandedSolvers(times: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
