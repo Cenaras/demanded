@@ -17,9 +17,9 @@ def main(): Unit = {
 //  standard.compileAndAnalyze(p, q)
 //  standard.outputSolution("untitled/standardSol.tsv")
 
-  val p = Parser.ParseTemplate("simple_cycle")
-  val s = new WavePropagation()
-  s.solve(p)
+  val p = Parser.ParseTemplate("alias")
+  val s = new Tidal()
+  s.solve(p, 5)
 
 
 }

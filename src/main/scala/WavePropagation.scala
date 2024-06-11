@@ -10,9 +10,9 @@ class WpSolution(sol_set: mutable.Map[Node, mutable.Set[Token]], repMap: mutable
   def keySet: collection.Set[Node] = sol_set.keySet
   def printSol() = {
     for node <- sol_set.keySet do
-      print(s"${node} -> ")
+      print(s"x${node} -> ")
       for t <- sol(node) do
-        print(t)
+        print(s"t$t")
       println()
   }
 
@@ -169,7 +169,7 @@ class WavePropagation {
           nodes.add(a.x)
           addToken(a.x, a.t)
         case b: Assign =>
-          nodes.add(b.y)
+          nodes.add(b.x)
           nodes.add(b.y)
           addSubsetEdge(b.y, b.x)
         case c: Load =>
