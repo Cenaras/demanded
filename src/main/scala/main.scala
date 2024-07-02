@@ -17,9 +17,15 @@ def main(): Unit = {
 //  standard.compileAndAnalyze(p, q)
 //  standard.outputSolution("untitled/standardSol.tsv")
 
-  val p = Parser.ParseTemplate("alias")
-  val s = new Tidal()
-  s.solve(p, 5)
+  val q = 1
+
+  val p = Parser.ParseTemplate("qwe")
+  val s1 = new NaiveExhaustiveSolver()
+  val sol1 = s1.solve(p)
+  println(s"Naive Solution\n${sol1}")
+  val s2 = new Tidal()
+  val sol2 = s2.solve(p, q)
+  println(s"Tidal Solution\n${sol2}")
 
 
 }
