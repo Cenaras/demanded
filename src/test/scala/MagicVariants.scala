@@ -6,6 +6,8 @@ class MagicVariants extends AnyFunSuite {
   // Value v at index i means that analysis i cost the most for v programs
 
   /** Most expensive computation - removing the worst performing in each iteration */
+  /** Cheapest computation - removing worst performing in each iteration */
+  /** The two metrics start to deviate after some iterations, so therefore the results are separated when this happens */
 
   // m0, m1, m2, m6, m7
   //  most expensive:
