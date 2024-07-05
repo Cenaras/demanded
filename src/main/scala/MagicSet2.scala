@@ -8,21 +8,21 @@ class MagicSet2 extends MagicSet {
 
     while (changed) {
       changed = false
-      for i <- p.getInstructions do 
+      for i <- p.getInstructions do
         process(i)
+      // (10)
+      for (k, v) <- magic_bbb do
+        addMagicFB(k._1)
+
+      // (11)
+      for v <- magic_bbf do
+        addMagicFB(v._1)
     }
 
-    // (10)
-    for (k, v) <- magic_bbb do
-      addMagicFB(k._1)
 
-    // (11)
-    for v <- magic_bbf do
-      addMagicFB(v._1)
-      
-      
+
     mergeSolutions()
-    
+
   }
 
   override def process(i: Instruction): Unit = {
@@ -119,7 +119,7 @@ class MagicSet2 extends MagicSet {
         // (3)
         for t <- pt_fb(x) do
           for v <- magic_bbb(t, f) do
-            addPtBB(y, v)
+            addMagicBB(y, v)
 
         // (8)
         for t <- pt_fb(x) do
@@ -137,7 +137,7 @@ class MagicSet2 extends MagicSet {
         for t <- pt_fb(x) do
           if magic_bbf(t, f) then
             for v <- pt_bf(y) do
-              addPtBBB(t, f, v)
+              addPtBBF(t, f, v)
 
   }
 }

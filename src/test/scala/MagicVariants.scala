@@ -12,38 +12,38 @@ class MagicVariants extends AnyFunSuite {
       val q = g.genQuery
 
       val ex = new NaiveExhaustiveSolver()
-      val m1 = new MagicSet1()
+      val m2 = new MagicSet2()
 
       val exSol = ex.solve(p)
-      val m1Sol = m1.solve(p, q)
+      val m2Sol = m2.solve(p, q)
 
-      if !(exSol.get(q) == m1Sol.get(q)) then
+      if !(exSol.get(q) == m2Sol.get(q)) then
         println(s"Mismatch in solutions for program with query ${q} and seed ${seed}:")
         p.print()
         println("ExSol:")
         println(exSol)
         println("m1Sol:")
-        println(m1Sol)
+        println(m2Sol)
         throw Error()
     }
 
   }
 
   test("temp") {
-    val seed = -1174884031
+    val seed = -1008993739
     val g = new SimpleProgramGenerator(seed, 3, 5, 1)
     val p = g.generate()
-    val q = 0
+    val q = 2
     p.print()
 
     val ex = new NaiveExhaustiveSolver()
-    val m1 = new MagicSet1()
+    val m = new MagicSet2()
 
     val exSol = ex.solve(p)
-    val m1Sol = m1.solve(p, q)
+    val mSol = m.solve(p, q)
 
     println(exSol)
-    println(m1Sol)
+    println(mSol)
 
   }
 
