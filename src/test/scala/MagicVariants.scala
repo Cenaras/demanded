@@ -12,7 +12,7 @@ class MagicVariants extends AnyFunSuite {
       val q = g.genQuery
 
       val ex = new NaiveExhaustiveSolver()
-      val m = new MagicSet6()
+      val m = new MagicSet7()
 
       val exSol = ex.solve(p)
       val mSol = m.solve(p, q)
