@@ -36,7 +36,7 @@ class MagicSet6 extends MagicSet {
           if k._2 == f then
             for t <- v do
               if magic_bb(x).contains(t) then
-                addPtBB(y, k._1)
+                addMagicBB(y, k._1)
 
         // (3)
         if magic_bf(x) then
@@ -68,7 +68,7 @@ class MagicSet6 extends MagicSet {
         // (4)
         if pt_bf(x).nonEmpty then
           for t <- magic_fbb(f) do
-            addPtBB(y, t)
+            addMagicBB(y, t)
 
         // (6)
         if magic_fbb(f).nonEmpty then

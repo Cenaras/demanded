@@ -12,18 +12,18 @@ class MagicVariants extends AnyFunSuite {
       val q = g.genQuery
 
       val ex = new NaiveExhaustiveSolver()
-      val m2 = new MagicSet2()
+      val m = new MagicSet6()
 
       val exSol = ex.solve(p)
-      val m2Sol = m2.solve(p, q)
+      val mSol = m.solve(p, q)
 
-      if !(exSol.get(q) == m2Sol.get(q)) then
+      if !(exSol.get(q) == mSol.get(q)) then
         println(s"Mismatch in solutions for program with query ${q} and seed ${seed}:")
         p.print()
         println("ExSol:")
         println(exSol)
-        println("m1Sol:")
-        println(m2Sol)
+        println("mSol:")
+        println(mSol)
         throw Error()
     }
 
