@@ -41,7 +41,7 @@ class MagicSet1 extends MagicSet {
 
         // (10)
         for t <- pt_bf(y) do
-          for v <- pt_bb(x) do
+          for v <- magic_bb(x) do
             addMagicBBB(t, f, v)
 
         // (11)

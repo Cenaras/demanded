@@ -7,7 +7,6 @@ import java.io.{File, FileWriter, PrintWriter}
 trait DatalogAnalysis {
 
   val datalogDir: String = "untitled/src/datalog/"
-
   val scriptPath: String = datalogDir + "transform_program.sh"
   val ptbb = datalogDir + "pointsTo_bb.csv"
   val ptbf = datalogDir + "pointsTo_bf.csv"
@@ -58,9 +57,11 @@ trait DatalogAnalysis {
 
   // Configurations
   def exhaustivePath(): String
+
   def demandedPath(): String
 
   def demandFiles(): List[String]
+
   def trackFiles(): List[String]
 
   def outputSolution(outfile: String): Unit
@@ -72,6 +73,7 @@ trait DatalogAnalysis {
 
     builder.toString().linesIterator.toSet.mkString("\n").linesIterator.toList.sorted.mkString("\n")
   }
+
   def collectTracked(): String = {
     val builder = StringBuilder()
     for f <- trackFiles() do
@@ -99,21 +101,26 @@ trait DatalogAnalysis {
 // Default implementation
 class Standard extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive.dl"
+
   override def demandedPath(): String = datalogDir + "demand.dl"
 
   override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+
   override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv")
 
   override def outputSolution(outfile: String): Unit = {
     ("sort -u %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf) #> new File(outfile)).!
   }
 }
+
 // points-to, store, points-to
 class Alt1 extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive1.dl"
+
   override def demandedPath(): String = datalogDir + "demand1.dl"
 
   override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+
   override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv", "magic_pointsTo_fb.csv")
 
   override def outputSolution(outfile: String): Unit = {
@@ -126,9 +133,11 @@ class Alt1 extends DatalogAnalysis {
 // points-to, points-to, store
 class Alt2 extends DatalogAnalysis {
   override def exhaustivePath(): String = datalogDir + "exhaustive2.dl"
+
   override def demandedPath(): String = datalogDir + "demand2.dl"
 
   override def demandFiles(): List[String] = List("magic_pointsTo_bf.csv", "magic_pointsToField_bbf.csv")
+
   override def trackFiles(): List[String] = List("magic_pointsTo_bb.csv", "magic_pointsToField_bbb.csv", "magic_pointsTo_fb.csv", "magic_pointsTo_ff.csv")
 
   override def outputSolution(outfile: String): Unit = {
@@ -136,5 +145,4 @@ class Alt2 extends DatalogAnalysis {
     val ptff = datalogDir + "pointsTo_ff.csv"
     ("sort -u %s %s %s %s %s %s".format(ptbb, ptbf, ptfbbb, ptfbbf, ptfb, ptff) #> new File(outfile)).!
   }
-
 }
