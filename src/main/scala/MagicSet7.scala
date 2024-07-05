@@ -1,9 +1,5 @@
 class MagicSet7 extends MagicSet {
 
-  override def solve(p: Program, q: Var): Unit = {
-    addMagicBF(q) // (9)
-  }
-
   override def process(i: Instruction): Unit = {
     i match
       case New(x, t) =>

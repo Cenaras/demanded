@@ -2,6 +2,8 @@ import scala.collection.mutable
 
 trait MagicSet {
 
+  var changed = false 
+  
   var pt_bf= mutable.Map[Var, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
   var pt_bb = mutable.Map[Var, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
   var pt_fb = mutable.Map[Var, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
@@ -30,18 +32,18 @@ trait MagicSet {
       val fresh = mutable.Set[V]()
       m += k -> fresh
     
-    m(k).add(v)
+    changed |= m(k).add(v)
   }
 
 
-  def addMagicBF(x: Var) = magic_bf.add(x)
-  def addMagicBBF(t: Token, f: Field) = magic_bbf.add(t, f)
+  def addMagicBF(x: Var) = changed |= magic_bf.add(x)
+  def addMagicBBF(t: Token, f: Field) = changed |= magic_bbf.add(t, f)
   
   def addMagicBB(x: Var, t: Token) = addMapSet(magic_bb, x, t)
   def addMagicBBB(t1: Token, f: Field, t2: Token) = addMapSet(magic_bbb, (t1, f), t2)
   
   def addMagicFBB(f: Field, t: Token) = addMapSet(magic_fbb, f, t)
-  def addMagicFBF(f: Field) = magic_fbf.add(f)
+  def addMagicFBF(f: Field) = changed |= magic_fbf.add(f)
   
   def addPtBF(x: Var, t: Token) = addMapSet(pt_bf, x, t)
   def addPtBB(x: Var, t: Token) = addMapSet(pt_bb, x, t)
@@ -54,12 +56,62 @@ trait MagicSet {
   
   def addPtFB(x: Var, t: Token) = addMapSet(pt_fb, x, t)
   
-  def addMagicFB(t: Token) = magic_fb.add(t)
+  def addMagicFB(t: Token) = changed |= magic_fb.add(t)
   
-  def solve(p: Program, q: Var): Unit
-  
+  def solve(p: Program, q: Var) = {
+    addMagicBF(q) // (9)
+    
+    while (changed) {
+      changed = false
+      for i <- p.getInstructions do
+        process(i)
+    }
+
+//    println("pt_bf: Correct")
+//    println(pt_bf)
+//    println("pt_bb: Wrong")
+//    println(pt_bb)
+//    println("pt_fb: Correct")
+//    println(pt_fb)
+//    println("pt_bbf: Wrong")
+//    println(pt_bbf)
+//    println("pt_bbb: Wrong")
+//    println(pt_bbb)
+//    println("pt_fbb: Correct")
+//    println(pt_fbb)
+//    println("pt_fbf: Correct")
+//    println(pt_fbf)
+
+    mergeSolutions()
+
+  }
+
+  def mergeSolutions(): mutable.Map[Cell, mutable.Set[Token]] = {
+
+    def addAll(res: mutable.Map[Cell, mutable.Set[Token]], seq: Seq[(Var | (Token, Field), mutable.Set[Token])]) = {
+      seq.map((c, s) => {
+        if res.contains(c) then
+          res(c).addAll(s)
+        else
+          res += c -> s
+      })
+    }
+
+    val res = mutable.Map[Cell, mutable.Set[Token]]().withDefaultValue(mutable.Set.empty)
+    addAll(res, pt_bf.toSeq)
+    addAll(res, pt_bb.toSeq)
+    addAll(res, pt_fb.toSeq)
+    addAll(res, pt_bbf.toSeq)
+    addAll(res, pt_bbb.toSeq)
+    addAll(res, pt_fbb.toSeq)
+    addAll(res, pt_fbf.toSeq)
+
+    res
+  }
+
+
+
+
   def process(i: Instruction): Unit
-  
-  
-  
+
 }

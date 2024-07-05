@@ -1,10 +1,16 @@
+import scala.collection.mutable
+
 class MagicSet2 extends MagicSet {
   // So far this seems closest to Heintze-Tardieu
 
-  override def solve(p: Program, q: Var): Unit = {
+  override def solve(p: Program, q: Var): mutable.Map[Cell, mutable.Set[Token]] = {
     addMagicBF(q) // (9)
 
-    // TODO: Inside the fixpoint
+    while (changed) {
+      changed = false
+      for i <- p.getInstructions do 
+        process(i)
+    }
 
     // (10)
     for (k, v) <- magic_bbb do
@@ -13,6 +19,10 @@ class MagicSet2 extends MagicSet {
     // (11)
     for v <- magic_bbf do
       addMagicFB(v._1)
+      
+      
+    mergeSolutions()
+    
   }
 
   override def process(i: Instruction): Unit = {
