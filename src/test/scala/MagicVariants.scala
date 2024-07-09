@@ -42,6 +42,46 @@ class MagicVariants extends AnyFunSuite {
   //  (185694, 487007)
 
 
+  /** Results where ties are counted in all entries rather than only when uniquely largest/smallest */
+  // m0, m1, m2, m6, m7
+  //  most expensive:
+  //    (273102, 277533, 868140, 369430, 375658)
+  //  cheapest:
+  //    (502002, 498111, 360456, 777980, 772653)
+
+
+  // m0, m1, m6, m7
+  //  most expensive:
+  //    (768088, 741220, 479484, 488202)
+  //  cheapest:
+  //    (502047, 498421, 777879, 771798)
+
+
+  /* Results for most expensive on the remaining strategies */
+
+  //  m1, m6, m7
+  //  most expensive:
+  //    (800418, 498656, 498284)
+
+  // m6, m7
+  //  most expensive:
+  //    (936498, 948161)
+
+  // Winner: m6
+
+
+  /* Results for cheapest on the remaining strategies */
+  //  m0, m6, m7
+  //  cheapest:
+  //    (508855, 783722, 778787)
+
+  // m6, m7
+  //  cheapest:
+  //    (948407, 936015)
+
+  // Winner: m6
+
+
 
   test("Compare costs") {
     // Amount of times index i was the most expensive
@@ -80,11 +120,20 @@ class MagicVariants extends AnyFunSuite {
         }
       }
 
-      // Check if largest value was unique
+      //       Check if largest value was unique
       val maxOccurrences = costs.count(p => p == largest)
       if (maxOccurrences == 1) {
         highest(maxIndex) += 1
       }
+
+
+      // For ties, count both
+      //      for (i <- costs.indices) {
+      //        if (costs(i) == largest) {
+      //          highest(i) += 1
+      //        }
+      //      }
+
 
       var smallest = Int.MaxValue
       var minIndex = -1
@@ -95,10 +144,18 @@ class MagicVariants extends AnyFunSuite {
         }
       }
 
+
       val occurrences = costs.count(p => p == smallest)
       if (occurrences == 1) {
         lowest(minIndex) += 1
       }
+
+      //For ties, count both
+      //      for (i <- costs.indices) {
+      //        if (costs(i) == smallest) {
+      //          lowest(i) += 1
+      //        }
+      //      }
 
     }
 
