@@ -82,6 +82,33 @@ class MagicVariants extends AnyFunSuite {
   // Winner: m6
 
 
+  /** Results for larger experiments: Distribution (15, 300, 4) for 100 iterations - counting all ties.
+   * Using program distribution from Wave Propagation Paper - (14, 49, 25, 12) */
+
+  // m0, m1, m2, m6, m7
+  //  expensive:
+  //    (0, 0, 100, 0 , 0)
+  //  cheap:
+  //    (0, 0, 0, 100, 100)
+
+
+  // m0, m1, m6, m7
+  //  expensive:
+  //    (100, 100, 0, 0)
+  // cheap:
+  //    (0, 0, 100, 100)
+
+
+  // m6, m7
+  //  expensive:
+  //    (100, 100)
+  //  cheap:
+  //    (100, 100)
+
+
+  // It seems like m6 and m7 perform the same work when programs get large enough
+  // and it seems like they are performing better than the other formulations always for large programs
+
 
   test("Compare costs") {
     // Amount of times index i was the most expensive
@@ -91,8 +118,6 @@ class MagicVariants extends AnyFunSuite {
 
     for i <- 0 until 1000000 do {
 
-      if i != 0 && i % 10000 == 0 then
-        println(s"Finished ${i} iterations")
 
       val seed = scala.util.Random.nextInt() // 5, 15, 2
       val g = new SimpleProgramGenerator(seed, 5, 15, 2)
@@ -100,7 +125,7 @@ class MagicVariants extends AnyFunSuite {
       val q = g.genQuery
 
       val m0 = new MagicSet0()
-      val sol = m0.solve(p, q)
+      m0.solve(p, q)
       val m1 = new MagicSet1()
       m1.solve(p, q)
       val m2 = new MagicSet2()
@@ -121,18 +146,18 @@ class MagicVariants extends AnyFunSuite {
       }
 
       //       Check if largest value was unique
-      val maxOccurrences = costs.count(p => p == largest)
-      if (maxOccurrences == 1) {
-        highest(maxIndex) += 1
-      }
+      //      val maxOccurrences = costs.count(p => p == largest)
+      //      if (maxOccurrences == 1) {
+      //        highest(maxIndex) += 1
+      //      }
 
 
       // For ties, count both
-      //      for (i <- costs.indices) {
-      //        if (costs(i) == largest) {
-      //          highest(i) += 1
-      //        }
-      //      }
+      for (i <- costs.indices) {
+        if (costs(i) == largest) {
+          highest(i) += 1
+        }
+      }
 
 
       var smallest = Int.MaxValue
@@ -140,22 +165,21 @@ class MagicVariants extends AnyFunSuite {
       for (i <- costs.indices) {
         if (costs(i) < smallest) {
           smallest = costs(i)
-          minIndex = i
         }
       }
 
 
-      val occurrences = costs.count(p => p == smallest)
-      if (occurrences == 1) {
-        lowest(minIndex) += 1
-      }
+      //      val occurrences = costs.count(p => p == smallest)
+      //      if (occurrences == 1) {
+      //        lowest(minIndex) += 1
+      //      }
 
       //For ties, count both
-      //      for (i <- costs.indices) {
-      //        if (costs(i) == smallest) {
-      //          lowest(i) += 1
-      //        }
-      //      }
+      for (i <- costs.indices) {
+        if (costs(i) == smallest) {
+          lowest(i) += 1
+        }
+      }
 
     }
 
@@ -168,20 +192,22 @@ class MagicVariants extends AnyFunSuite {
   }
 
   test("temp") {
-    val seed = -1008993739
-    val g = new SimpleProgramGenerator(seed, 3, 5, 1)
+    val seed = scala.util.Random.nextInt()
+    val g = new SimpleProgramGenerator(seed, 15, 250, 5)
     val p = g.generate()
     val q = 2
-    p.print()
+    //    p.print()
 
     val ex = new NaiveExhaustiveSolver()
-    val m = new MagicSet2()
+    val m = new MagicSet6()
 
     val exSol = ex.solve(p)
     val mSol = m.solve(p, q)
 
-    println(exSol)
-    println(mSol)
+    //    println(exSol)
+    //    println(mSol)
+
+    println(exSol == mSol)
 
   }
 
