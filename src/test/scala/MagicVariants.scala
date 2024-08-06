@@ -191,9 +191,47 @@ class MagicVariants extends AnyFunSuite {
 
   }
 
+
+  test("Find programs with large performance difference") {
+    for i <- 0 until 100000 do {
+
+
+      val seed = scala.util.Random.nextInt() // 5, 15, 2
+      val g = new SimpleProgramGenerator(seed, 5, 15, 2)
+      val p = g.generate()
+      val q = g.genQuery
+
+
+      val m0 = new MagicSet0()
+      m0.solve(p, q)
+      val m1 = new MagicSet1()
+      m1.solve(p, q)
+      val m2 = new MagicSet2()
+      m2.solve(p, q)
+      val m6 = new MagicSet6()
+      m6.solve(p, q)
+      val m7 = new MagicSet7()
+      m7.solve(p, q)
+
+      val costs = Array(m0.cost, m1.cost, m2.cost, m6.cost, m7.cost)
+      val factor = 200
+
+      // Can even restrict costs to be above some number and still see factors upwards of 20
+
+      for (i <- costs.indices) {
+        for (j <- costs.indices) {
+          if costs(i) >= costs(j) * factor then
+            println(s"Costs(${i}) = ${costs(i)}, Costs(${j}) = ${costs(j)}. Seed = ${seed}")
+        }
+      }
+
+    }
+
+  }
+
   test("temp") {
     val seed = scala.util.Random.nextInt()
-    val g = new SimpleProgramGenerator(seed, 15, 250, 5)
+    val g = new SimpleProgramGenerator(seed, 5, 15, 2)
     val p = g.generate()
     val q = 2
     //    p.print()
@@ -204,10 +242,11 @@ class MagicVariants extends AnyFunSuite {
     val exSol = ex.solve(p)
     val mSol = m.solve(p, q)
 
-    //    println(exSol)
-    //    println(mSol)
+    println(exSol)
+    println(mSol)
 
-    println(exSol == mSol)
+
+    println(exSol(q) == mSol(q))
 
   }
 

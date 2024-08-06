@@ -1,6 +1,5 @@
 
 
-
 @main
 def main(): Unit = {
 //    difference()
@@ -27,14 +26,19 @@ def main(): Unit = {
 //  val sol2 = s2.solve(p, q)
 //  println(s"Tidal Solution\n${sol2}")
 
-  val p = Parser.ParseTemplate("qwe")
-  val q = 5
+//  val p = Parser.ParseTemplate("qwe")
+//  val q = 5
+//
+//  val s = MagicSets()
+////  val s = new HeintzeTardieu()
+//  s.solve(p, q)
+//  s.printSolution()
+//  println(s.cost)
 
-  val s = MagicSets()
-//  val s = new HeintzeTardieu()
-  s.solve(p, q)
-  s.printSolution()
-  println(s.cost)
+  val path = "/home/cenaras/phd/projects/SVF/consCG_final.dot"
+  val program = new SVFParser().parseSVF(path)
+  val solution = new NaiveCExhaustive().solve(program)
+  println(solution)
 
 
 }

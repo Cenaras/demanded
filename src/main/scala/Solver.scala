@@ -2,6 +2,7 @@ import scala.collection.mutable
 
 type Cell = Var | (Token, Field)
 type Solution = mutable.Map[Cell, mutable.Set[Token]]
+type CSolution = mutable.Map[Cell, mutable.Set[Cell]]
 
 // TODO: Make a "naive solver" which uses this solver impl
 trait Solver {
