@@ -49,14 +49,19 @@ sealed trait CInstruction:
   override def toString: String
 
 case class AddrOf(x: Var, y: Var) extends CInstruction:
-  override def toString: String = s"$x = &$y"
+  override def toString: String = s"x$x = &x$y"
 
 case class Copy(x: Var, y: Var) extends CInstruction:
-  override def toString: String = s"$x = $y"
+  override def toString: String = s"x$x = x$y"
   
 // TODO: Field sensitive
 case class CLoad(x: Var, y: Var) extends CInstruction:
-  override def toString: String = s"$x = *$y"
+  override def toString: String = s"x$x = *x$y"
   
 case class CStore(x: Var, y: Var) extends CInstruction:
-  override def toString: String = s"*$x = $y" 
+  override def toString: String = s"*x$x = x$y"
+
+// Instruction representing LLVM GetElementPtr - computes memory address starting from base and following offset
+// TODO: Solving should say: ∀t ∈ ⟦base⟧ : t + offset ∈ ⟦dst⟧
+case class Gep(dst: Var, base: Var, offset: Int) extends CInstruction:
+  override def toString: String = s"x$dst = gep($base, $offset)"

@@ -30,6 +30,8 @@ class NaiveCExhaustive {
       case CStore(x, y) =>
         for c <- sol(x) do 
           propagate(y, c)
+      case Gep(dst, base, offset) =>
+        throw new Error("GEP unsupported")
   }
   
 

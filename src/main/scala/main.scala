@@ -35,10 +35,9 @@ def main(): Unit = {
 //  s.printSolution()
 //  println(s.cost)
 
-  val path = "/home/cenaras/phd/projects/SVF/consCG_final.dot"
-  val program = new SVFParser().parseSVF(path)
-  val solution = new NaiveCExhaustive().solve(program)
-  println(solution)
+  val path = "/home/cenaras/phd/projects/SVF/dumped.json"
+  val program = new SVFParser().parseJsonDump(path)
+  program.print()
 
 
 }
