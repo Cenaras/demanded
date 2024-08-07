@@ -35,8 +35,12 @@ def main(): Unit = {
 //  s.printSolution()
 //  println(s.cost)
 
-  val path = "/home/cenaras/phd/projects/SVF/dumped.json"
-  val program = new SVFParser().parseJsonDump(path)
+  val srcFile = "untitled/field.c"
+  val bcOutFile = "untitled/field.bc"
+  val jsonDumpFile = "untitled/dump.json"
+
+  val svf = new SVFParser()
+  val program = svf.programFromCFile(srcFile, bcOutFile, jsonDumpFile)
   program.print()
 
 

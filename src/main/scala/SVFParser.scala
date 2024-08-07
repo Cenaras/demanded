@@ -1,25 +1,30 @@
 import ujson.Value
-
 import scala.collection.mutable
-import scala.util.matching.Regex
+import scala.sys.process._
 
 class SVFParser {
-  val nodePattern: Regex = """Node0x([0-9a-f]+) \[.*,label="\{([0-9]+):?([\w]+)?}"];""".r
-  val edgePattern: Regex = """Node0x([0-9a-f]+) -> Node0x([0-9a-f]+)\[color=([\w]+)\];""".r
 
-  val node2id = mutable.Map[String, Int]()
+  /** Compiles and outputs a C program into LLVM bytecode, invokes SVF to generate constraints and dumps
+   * a .json file containing information about the program. After this, the dumped .json file is parsed and
+   * a C-style program is generated and returned. */
+  def programFromCFile(inputFile: String, bcFile: String, jsonDumpFile: String): CProgram = {
+    val scriptPath = "./untitled/svf.sh"
+    val cmd = Seq(scriptPath, inputFile, bcFile, jsonDumpFile)
+    val exitCode = Process(cmd).!
+
+    if exitCode == 0 then
+      parseJsonDump(jsonDumpFile)
+    else
+      throw Error(s"Invocation exited with error code $exitCode")
+  }
 
 
-  def parseJsonDump(path: String): CProgram = {
-    var instructions = mutable.ArrayBuffer[CInstruction]()
+  /** Parses a json dump from SVF (generated via -dump-json) and generates a corresponding C-style program. */
+  private def parseJsonDump(path: String): CProgram = {
+    val instructions = mutable.ArrayBuffer[CInstruction]()
 
-    // TODO: Edge type is encoded as first 8 bits of edgeFlag and remaining is call site location
-
+    /** Extracts information from the json encoded edge and adds the corresponding instruction */
     def parseEdgeAndAddInstruction(edge: Value): Unit = {
-      // Extract required edge information
-
-
-
       // The 8 least significant bits describe the edge flag so use 0xFF as mask to extract those
       val FLAG_MASK = 0xFF
       val edgeType = edge("edgeFlag").str.toLong & FLAG_MASK
@@ -42,8 +47,6 @@ class SVFParser {
         case 7 =>
         // BinOp edge
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
-
-
     }
 
     val jsonString = FileManager.readFile(path)
@@ -55,69 +58,4 @@ class SVFParser {
 
     CProgram(instructions.toList)
   }
-
-
-
-
-
-
-
-
-  // TODO: Fields (hardcoded to 0 now)
-  private def generateInstruction(fromId: Int, toId: Int, edgeType: String): CInstruction = {
-    edgeType match
-      case "green" =>
-        AddrOf(toId, fromId)
-      case "black" =>
-        Copy(toId, fromId)
-      case "red" =>
-        CLoad(toId, fromId)
-      case "blue" =>
-        CStore(toId, fromId)
-      case unknown => throw new Error(s"Unsupported edge color ${unknown}")
-  }
-
-  def parseSVF(constraint_file: String): CProgram = {
-
-    val content = FileManager.readFile(constraint_file)
-    val lines = content.trim.split("\n")
-
-    // TODO: Always node declarations before edges. For now just do a two-pass
-
-    for (line <- lines) {
-      line match
-        case nodePattern(id, label, optional) =>
-          println(s"In node pattern\n${line}")
-          node2id += id -> label.toInt
-        case _ =>
-      //          println(s"No match for \n${line}")
-    }
-
-
-    val insn = lines.foldLeft(List[CInstruction]())((acc, line) => {
-      line match
-        case edgePattern(idLeft, idRight, color) => {
-          println(s"In edgePattern ${idLeft}, ${idRight}, ${color}")
-          generateInstruction(node2id(idLeft), node2id(idRight), color) :: acc
-        }
-        case _ => acc // TODO: ...
-    })
-
-    CProgram(insn)
-
-
-    //    for (line <- lines) {
-    //      line match
-    //        case nodePattern(id, label, optional) => println(s"id=${id}, label=${label}, optional=${optional}")
-    //        case edgePattern(idLeft, idRight, color) => println(s"${idLeft} --> ${idRight} with color=${color}")
-    //        case _ =>
-    //    }
-
-
-    // Use id as the identifier for variables - keep map that maps the hex id back into human readable values
-    // Parse the constraint type based on the color of the edge
-
-
-  }
-
 }
