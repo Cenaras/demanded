@@ -1,6 +1,8 @@
 import ujson.Value
+
+import java.io.FileReader
 import scala.collection.mutable
-import scala.sys.process._
+import scala.sys.process.*
 
 
 /** Parsing consists of two phases - since the json dump produced by SVF does not correctly display
@@ -91,6 +93,48 @@ class SVFParser {
 class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummyNodeIds: mutable.ArrayBuffer[Cell], outDir: String) {
 
   def compareWithSVF(sol: CSolution): Unit = {
+
+    // TODO: Method for extracting delimiter indices
+    val anderContent = FileManager.readFile(outDir+"/ander.txt")
+    // Delimiter used by SVF for ander.txt format
+    val delimiter = "------"
+    val lines = anderContent.split("\n").toList
+
+    // Find the indices of the delimiters
+    val delimiterIndices = lines.zipWithIndex.collect {
+      case (content, index) if content == delimiter => index
+    }
+
+    val pointsToLines = lines.slice(delimiterIndices.head +1, delimiterIndices(1))
+    val anderSol = mutable.Map[Cell, mutable.Set[Cell]]().withDefaultValue(mutable.Set.empty)
+
+    pointsToLines.foreach(line => {
+      val content = line.replace(" ", "").split("->")
+      val key = content(0).toInt
+      val pointsToString = content(1)
+
+      val numRegExp = "\\d+".r
+      val pointsToSet = numRegExp.findAllIn(pointsToString).map(_.toInt).toList
+
+      for (t <- pointsToSet) {
+        if !anderSol.contains(key) then
+          val fresh = mutable.Set[Cell]()
+          anderSol += key -> fresh
+        anderSol(key).add(t)
+      }
+    })
+
+    println("Comparing provided solution with SVF produced solution for the input program...")
+    if sol == anderSol then
+      println("Solutions were identical!")
+    else
+      println("Solution mismatch!")
+      println("Provided solution: \n"+sol)
+      println()
+      println("SVF solution: \n"+anderSol)
+      assert(false)
+
+
     // TODO: Parse the ander.txt file and compare the points to sets.
   }
 }

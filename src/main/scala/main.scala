@@ -45,6 +45,7 @@ def main(): Unit = {
   res.program.print()
   val solution = NaiveCExhaustive(res).solve()
   println(solution)
+  res.compareWithSVF(solution)
 
 
 }
