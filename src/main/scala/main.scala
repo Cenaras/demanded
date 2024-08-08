@@ -35,13 +35,16 @@ def main(): Unit = {
 //  s.printSolution()
 //  println(s.cost)
 
+
+
   val srcFile = "untitled/field.c"
-  val bcOutFile = "untitled/field.bc"
-  val jsonDumpFile = "untitled/dump.json"
+  val outDir = "untitled"
 
   val svf = new SVFParser()
-  val program = svf.programFromCFile(srcFile, bcOutFile, jsonDumpFile)
-  program.print()
+  val res = svf.programFromCFile(srcFile, outDir)
+  res.program.print()
+  val solution = NaiveCExhaustive(res).solve()
+  println(solution)
 
 
 }
