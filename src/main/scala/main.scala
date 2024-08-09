@@ -36,9 +36,11 @@ def main(): Unit = {
 //  println(s.cost)
 
 
+  
 
-  val srcFile = "untitled/field.c"
-  val outDir = "untitled"
+
+  val srcFile = FileManager.CPath("field.c")
+  val outDir = FileManager.C_DIR
 
   val svf = new SVFParser()
   val res = svf.programFromCFile(srcFile, outDir)

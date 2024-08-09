@@ -14,14 +14,13 @@ class SVFParser {
    * a .json file and .txt containing information about the program. After this, the dumped .json file and .txt file are
    * parsed and a C-style program is generated and returned. All generated files are written to outDir. */
   def programFromCFile(inputFile: String, outDir: String): SVFResult = {
-    val scriptPath = "./untitled/svf.sh"
-    val cmd = Seq(scriptPath, inputFile, outDir)
+    val cmd = Seq(FileManager.SVF_SCRIPT, inputFile, outDir)
     val exitCode = Process(cmd).!
 
 
     if exitCode == 0 then
-      val (program, dummyNodes) = parseJsonDump(outDir+"/dump.json")
-      val gepVarObjMap = GepVarObjMap(outDir+"/ander.txt")
+      val (program, dummyNodes) = parseJsonDump(outDir+FileManager.JSON_DUMP)
+      val gepVarObjMap = GepVarObjMap(outDir+FileManager.GEP_FILE)
       SVFResult(program, gepVarObjMap, dummyNodes, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
@@ -95,7 +94,7 @@ class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummy
   def compareWithSVF(sol: CSolution): Unit = {
 
     // TODO: Method for extracting delimiter indices
-    val anderContent = FileManager.readFile(outDir+"/ander.txt")
+    val anderContent = FileManager.readFile(outDir+FileManager.GEP_FILE)
     // Delimiter used by SVF for ander.txt format
     val delimiter = "------"
     val lines = anderContent.split("\n").toList
@@ -135,7 +134,6 @@ class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummy
       assert(false)
 
 
-    // TODO: Parse the ander.txt file and compare the points to sets.
   }
 }
 

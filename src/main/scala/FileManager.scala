@@ -13,4 +13,14 @@ object FileManager {
     lines
   }
 
+  /** Names of relevant files */
+  val C_DIR = "untitled/c-programs/"
+  val JSON_DUMP = "/dump.json"
+  val GEP_FILE = "/ander.txt"
+  val SVF_SCRIPT = "./untitled/svf.sh"
+  
+  /** Given a filename of a c program, returns its path in the C_DIR */
+  def CPath(filename: String): String = C_DIR + filename
+  
+  
 }
