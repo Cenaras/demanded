@@ -24,7 +24,7 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
 
   def addPts(x: Cell, y: Cell): Unit = {
 
-    // Only add nodes if they are non-dummy nodes
+    // Dont add dummy - TODO: I dont know if they add these or not or use the nodes from ander.txt only or what...
     if SVFResult.dummyNodeIds.contains(y) then
       return
 
@@ -56,7 +56,7 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
         for t <- sol(base) do
           t match
             case a: Var =>
-              val gepNode = SVFResult.gepVarObjMap.get(a, offset)
+              val gepNode = SVFResult.mapping.gepVarObjMap(a, offset)
               addPts(dst, gepNode)
             case b: Cell =>
               throw new Error("TODO IF THIS CAN HAPPEN")

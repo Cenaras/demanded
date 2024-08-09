@@ -39,12 +39,12 @@ def main(): Unit = {
 
 
 
-  val srcFile = FileManager.CPath("swap.c")
+  val srcFile = FileManager.CPath("wip.c")
   val outDir = FileManager.C_DIR
 
   val svf = new SVFParser()
   val res = svf.programFromCFile(srcFile, outDir)
-//  res.program.print()
+  res.program.print()
   val solution = NaiveCExhaustive(res).solve()
 //  println(solution)
   res.compareWithSVF(solution)

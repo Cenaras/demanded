@@ -20,7 +20,7 @@ class SVFParser {
 
     if exitCode == 0 then
       val (program, dummyNodes) = parseJsonDump(outDir+FileManager.JSON_DUMP)
-      val gepVarObjMap = GepVarObjMap(outDir+FileManager.GEP_FILE)
+      val gepVarObjMap = SVFMapping(outDir+FileManager.GEP_FILE)
       SVFResult(program, gepVarObjMap, dummyNodes, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
@@ -56,6 +56,9 @@ class SVFParser {
         case 4 =>
           // Dashed black: Parameter passing
           instructions.addOne(Copy(dst, src))
+        case 5 =>
+          // Dotted black: Return
+          instructions.addOne(Copy(dst, src))
         case 6 =>
           // Purple: Gep
           // Incoming gep edges holds the base indexing into. The outgoing edge holds the address computed by gep
@@ -74,6 +77,10 @@ class SVFParser {
 
       val id = node("id").num.toInt
       val kind = node("nodeKind").str.toInt
+
+
+      // TODO: Rework this: If ander.txt has the node specified either in the node section or the GEP section, then
+      // we must compute points-to sets for the node. Otherwise it should remain empty.
       if (DUMMY_KINDS.contains(kind)) then
         dummyNodes.addOne(id)
     }
@@ -97,7 +104,7 @@ class SVFParser {
   }
 }
 
-class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummyNodeIds: mutable.ArrayBuffer[Cell], outDir: String) {
+class SVFResult(val program: CProgram, val mapping: SVFMapping, val dummyNodeIds: mutable.ArrayBuffer[Cell], outDir: String) {
 
   def compareWithSVF(sol: CSolution): Unit = {
 
@@ -146,15 +153,13 @@ class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummy
 }
 
 
-class GepVarObjMap(mappingFile: String) {
+class SVFMapping(mappingFile: String) {
 
-  val mapping: mutable.Map[(Var, Int), Var] = parseMappingFile()
+  val (gepVarObjMap: mutable.Map[(Var, Int), Var], nodes: mutable.Set[Cell]) = parseMappingFile()
 
-
-  def get(base: Var, offset: Int): Var = mapping(base, offset)
-
-  private def parseMappingFile(): mutable.Map[(Var, Int), Var] = {
+  private def parseMappingFile(): (mutable.Map[(Var, Int), Var], mutable.Set[Cell]) = {
     val map = mutable.Map[(Var, Int), Var]()
+    val nodes = mutable.Set[Cell] ()
     val mapFileContent = FileManager.readFile(mappingFile)
 
     // Delimiter used by SVF for ander.txt format
@@ -170,6 +175,12 @@ class GepVarObjMap(mappingFile: String) {
     // assert format by ensuring 3 delimiters were found
     assert(delimiterIndices.length == 3)
 
+    // format: nodeid isFieldSensitive
+    val objVarLines = lines.slice(0, delimiterIndices.head)
+    objVarLines.foreach(l => nodes.add(l.split(" ")(0).toInt))
+
+
+
     // The GepVarObjMap is stored between delimiter 1 and 2 (using 0 indexing)
     // Extract lines between delimiter 1 and 2
     val gepLines = lines.slice(delimiterIndices(1)+1, delimiterIndices(2))
@@ -177,12 +188,20 @@ class GepVarObjMap(mappingFile: String) {
     // Format is: baseId offset gepNode
     gepLines.foreach(line => {
       val entry = line.split(" ")
-      map += (entry(0).toInt, entry(1).toInt) -> entry(2).toInt
+      val baseNode = entry(0).toInt
+      val offset = entry(1).toInt
+      val gepNode = entry(2).toInt
+      map += (baseNode, offset) -> gepNode
+
+      // Also add base node (if not always present?) and gep node to nodes
+      nodes.add(baseNode)
+      nodes.add(gepNode)
+
     })
-    map
+    (map, nodes)
   }
 
 
-  override def toString: String = this.mapping.toString()
+  override def toString: String = this.gepVarObjMap.toString()
 
 }
