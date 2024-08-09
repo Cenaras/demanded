@@ -42,19 +42,27 @@ class SVFParser {
       val dst = edge("dst").num.toInt
       edgeType match
         case 0 =>
+          // Green: AddrOf
           instructions.addOne(AddrOf(dst, src))
         case 1 =>
+          // Black: Copy
           instructions.addOne(Copy(dst, src))
         case 2 =>
+          // Blue: Store
           instructions.addOne(CStore(dst, src))
         case 3 =>
+          // Red: Load
           instructions.addOne(CLoad(dst, src))
+        case 4 =>
+          // Dashed black: Parameter passing
+          instructions.addOne(Copy(dst, src))
         case 6 =>
+          // Purple: Gep
           // Incoming gep edges holds the base indexing into. The outgoing edge holds the address computed by gep
           val fieldIdx = edge("ap")("fldIdx").str.toInt
           instructions.addOne(Gep(dst, src, fieldIdx))
         case 7 =>
-        // BinOp edge
+        // Grey: BinOp
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
 
@@ -108,8 +116,8 @@ class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val dummy
     val anderSol = mutable.Map[Cell, mutable.Set[Cell]]().withDefaultValue(mutable.Set.empty)
 
     pointsToLines.foreach(line => {
-      val content = line.replace(" ", "").split("->")
-      val key = content(0).toInt
+      val content = line.split("->")
+      val key = content(0).replace(" ", "").toInt
       val pointsToString = content(1)
 
       val numRegExp = "\\d+".r

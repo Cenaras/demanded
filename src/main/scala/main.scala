@@ -36,17 +36,17 @@ def main(): Unit = {
 //  println(s.cost)
 
 
-  
 
 
-  val srcFile = FileManager.CPath("field.c")
+
+  val srcFile = FileManager.CPath("swap.c")
   val outDir = FileManager.C_DIR
 
   val svf = new SVFParser()
   val res = svf.programFromCFile(srcFile, outDir)
-  res.program.print()
+//  res.program.print()
   val solution = NaiveCExhaustive(res).solve()
-  println(solution)
+//  println(solution)
   res.compareWithSVF(solution)
 
 
