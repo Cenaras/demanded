@@ -39,11 +39,13 @@ def main(): Unit = {
 
 
 
-  val srcFile = FileManager.CPath("wip.c")
+  val srcFile = FileManager.CPath("field.c")
   val outDir = FileManager.C_DIR
 
   val svf = new SVFParser()
-  val res = svf.programFromCFile(srcFile, outDir)
+  val res = svf.programFromJSON(srcFile, outDir)
+//  val res = svf.programFromPrint(srcFile, outDir)
+//  val res = svf.programFromConstraintGraph(srcFile, outDir)
   res.program.print()
   val solution = NaiveCExhaustive(res).solve()
 //  println(solution)

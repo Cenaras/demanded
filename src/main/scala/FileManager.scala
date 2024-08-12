@@ -17,8 +17,15 @@ object FileManager {
   val C_DIR = "untitled/c-programs/"
   val JSON_DUMP = "/dump.json"
   val GEP_FILE = "/ander.txt"
+  val PRINT_FILE = "/output.txt"
+  val CG_FILE = "/consCG_initial.dot"
+
   val SVF_SCRIPT = "./untitled/svf.sh"
-  
+  val SVF_PRINT_SCRIPT = "./untitled/svf-print.sh"
+  val SVF_DUMP_CG_SCRIPT = "./untitled/svf-dump-cg.sh"
+
+
+
   /** Given a filename of a c program, returns its path in the C_DIR */
   def CPath(filename: String): String = C_DIR + filename
   
