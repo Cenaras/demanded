@@ -1,9 +1,10 @@
-import sun.misc.ObjectInputFilter
 import ujson.{Value, read}
-
-import java.io.FileReader
 import scala.collection.mutable
 import scala.sys.process.*
+
+
+// Maps from nodeId, offset to gep node - used to support field sensitivity
+type GepVarObjMap = mutable.Map[(Var, Int), Var]
 
 
 /** Parsing consists of two phases - since the json dump produced by SVF does not correctly display
@@ -18,40 +19,40 @@ class SVFParser {
     val cmd = Seq(FileManager.SVF_SCRIPT, inputFile, outDir)
     val exitCode = Process(cmd).!
 
-
     if exitCode == 0 then
-      val (program, dummyNodes) = parseJsonDump(outDir + FileManager.JSON_DUMP)
-      val gepVarObjMap = SVFMapping(outDir + FileManager.GEP_FILE)
+      val program = parseJsonDump(outDir + FileManager.JSON_DUMP)
+      val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
+
       val nodes = parseNodes(outDir+FileManager.CG_FILE)
-      
+
       // Also add all gep nodes
-      gepVarObjMap.gepVarObjMap.values.foreach(nodes.add)
-      
-      println("Nodes are")
-      println(nodes)
-      
-      SVFResult(program, gepVarObjMap, dummyNodes, outDir)
+      gepVarObjMap.values.foreach(nodes.add)
+
+//      println("Nodes: \n" + nodes)
+
+      SVFResult(program, gepVarObjMap, nodes, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
 
-  private def parseNodes(file: String): mutable.Set[Int] = {
+  private def parseNodes(file: String): mutable.Set[Cell] = {
     // Nodes to use for points-to computations - ALSO INCLUDE GEP NODES
-    val nodes = mutable.Set[Int]()
-    val nodePattern = """Node0x([0-9a-f]+) \[.*,label="\{([0-9]+):?(\w+)?}"];""".r
+    val nodes = mutable.Set[Cell]()
+    val nodePattern = """Node0x([0-9a-f]+) \[.*,label="\{([0-9]+):?(.+)?}"];""".r
 
     val content = FileManager.readFile(file)
     val lines = content.trim.split("\n")
 
     for (line <- lines) {
+      println(line)
       line match
         case nodePattern(id, label, name) =>
           nodes.add(label.toInt)
+          println(s"ADDED ID ${label.toInt}")
         case _ =>
     }
-
     nodes
-    
+
   }
 
   // TODO: I think this might actually be the "solved" constraint graph meaning it would require potentially two
@@ -61,78 +62,14 @@ class SVFParser {
     val exitCode = Process(cmd).!
 
     if exitCode == 0 then
-      val dummyNodes = mutable.ArrayBuffer[Cell]()
+      val dummyNodes = mutable.Set[Cell]()
       val program = parsePrintedCG(outDir + FileManager.PRINT_FILE)
-      val gepVarObjMap = SVFMapping(outDir + FileManager.GEP_FILE)
+      val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
       SVFResult(program, gepVarObjMap, dummyNodes, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
 
-  def programFromConstraintGraph(inputFile: String, outDir: String): SVFResult = {
-    val cmd = Seq(FileManager.SVF_DUMP_CG_SCRIPT, inputFile, outDir)
-    val exitCode = Process(cmd).!
-
-    if exitCode == 0 then
-      val dummyNodes = mutable.ArrayBuffer[Cell]()
-      val program = parseConstraintGraphFile(outDir + FileManager.CG_FILE)
-      val gepVarObjMap = SVFMapping(outDir + FileManager.GEP_FILE)
-      SVFResult(program, gepVarObjMap, dummyNodes, outDir)
-    else
-      throw Error(s"Invocation exited with error code $exitCode")
-  }
-
-  private def parseConstraintGraphFile(str: String): CProgram = {
-    val nodePattern = """Node0x([0-9a-f]+) \[.*,label="\{([0-9]+):?(\w+)?}"];""".r
-    val edgePattern = """Node0x([0-9a-f]+) -> Node0x([0-9a-f]+)\[color=(\w+)];""".r
-
-    val instructions = mutable.ArrayBuffer[CInstruction]()
-
-    val content = FileManager.readFile(str)
-    val lines = content.trim.split("\n")
-
-
-    val node2id = mutable.Map[String, Int]()
-
-    def generateInstruction(fromId: Int, toId: Int, edgeType: String): CInstruction = {
-      edgeType match
-        case "green" => AddrOf(toId, fromId)
-        case "black" => Copy(toId, fromId)
-        case "red" => CLoad(toId, fromId)
-    }
-
-
-    // TODO: Sort to always process node declarations before edges - for now just two-pass
-
-    for (line <- lines) {
-      line match
-        case nodePattern(id, label, name) =>
-          println(s"NodePattern($id, $label, $name")
-          // only if non null?
-          node2id += id -> label.toInt
-        case _ =>
-    }
-
-
-    for (line <- lines) {
-      line match
-        case edgePattern(idLeft, idRight, color) =>
-          println(s"In edgePattern ${idLeft}, ${idRight}, ${color}")
-          // Safe to ignore if not found? (I think so since SVF only reports pts for such nodes, but not sure
-          if (node2id.contains(idLeft) && node2id.contains(idRight)) {
-            instructions.addOne(generateInstruction(node2id(idLeft), node2id(idRight), color))
-          }
-        case _ =>
-
-
-    }
-
-
-
-
-    CProgram(instructions.toList)
-
-  }
 
   private def parsePrintedCG(file: String): CProgram = {
     val instructions = mutable.ArrayBuffer[CInstruction]()
@@ -182,9 +119,8 @@ class SVFParser {
 
 
   /** Parses a json dump from SVF (generated via -dump-json) and generates a corresponding C-style program. */
-  private def parseJsonDump(path: String): (CProgram, mutable.ArrayBuffer[Cell]) = {
+  private def parseJsonDump(path: String): CProgram = {
     val instructions = mutable.ArrayBuffer[CInstruction]()
-    val dummyNodes = mutable.ArrayBuffer[Cell]()
 
     /** Extracts information from the json encoded edge and adds the corresponding instruction */
     def parseEdgeAndAddInstruction(edge: Value): Unit = {
@@ -223,42 +159,50 @@ class SVFParser {
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
 
-    def parseNodeAndMarkIfDummy(node: Value): Unit = {
-
-      // SVF ignores dummy values (i.e., a non-LLVM related values) so mark these based on nodeKind
-      // TODO: Any others?
-      val DUMMY_KINDS = List(7, 8)
-
-      val id = node("id").num.toInt
-      val kind = node("nodeKind").str.toInt
-
-
-      // TODO: Rework this: If ander.txt has the node specified either in the node section or the GEP section, then
-      // we must compute points-to sets for the node. Otherwise it should remain empty.
-      if (DUMMY_KINDS.contains(kind)) then
-        dummyNodes.addOne(id)
-    }
-
     val jsonString = FileManager.readFile(path)
-    val parsed = ujson.read(jsonString)
-    val irGraph = parsed("irGraph")
+    // Parse all edges and add corresponding instructions
+    ujson.read(jsonString)("irGraph")("allEdge").arr.foreach(parseEdgeAndAddInstruction)
 
-    val nodes = irGraph("allNode").arr
-    for (node <- nodes) {
-      parseNodeAndMarkIfDummy(node)
+    CProgram(instructions.toList)
+  }
+
+
+  private def parseGepVarObjMap(file: String): GepVarObjMap = {
+
+    val map = mutable.Map[(Var, Int), Var]()
+    val mapFileContent = FileManager.readFile(file)
+
+    // Delimiter used by SVF for ander.txt format
+    val delimiter = "------"
+
+    val lines = mapFileContent.split("\n").toList
+
+    // Find the indices of the delimiters
+    val delimiterIndices = lines.zipWithIndex.collect {
+      case (content, index) if content == delimiter => index
     }
 
+    // assert format by ensuring 3 delimiters were found
+    assert(delimiterIndices.length == 3)
 
-    val edges = irGraph("allEdge").arr
-    for (edge <- edges) {
-      parseEdgeAndAddInstruction(edge)
-    }
 
-    (CProgram(instructions.toList), dummyNodes)
+    // The GepVarObjMap is stored between delimiter 1 and 2 (using 0 indexing)
+    // Extract lines between delimiter 1 and 2
+    val gepLines = lines.slice(delimiterIndices(1) + 1, delimiterIndices(2))
+
+    // Format is: baseId offset gepNode
+    gepLines.foreach(line => {
+      val entry = line.split(" ")
+      val baseNode = entry(0).toInt
+      val offset = entry(1).toInt
+      val gepNode = entry(2).toInt
+      map += (baseNode, offset) -> gepNode
+    })
+    map
   }
 }
 
-class SVFResult(val program: CProgram, val mapping: SVFMapping, val dummyNodeIds: mutable.ArrayBuffer[Cell], outDir: String) {
+class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val nodes: mutable.Set[Cell], outDir: String) {
 
   def compareWithSVF(sol: CSolution): Unit = {
 
@@ -301,60 +245,6 @@ class SVFResult(val program: CProgram, val mapping: SVFMapping, val dummyNodeIds
       println()
       println("SVF solution: \n" + anderSol)
       assert(false)
-
-
   }
 }
 
-
-class SVFMapping(mappingFile: String) {
-
-  val (gepVarObjMap: mutable.Map[(Var, Int), Var], nodes: mutable.Set[Cell]) = parseMappingFile()
-
-  private def parseMappingFile(): (mutable.Map[(Var, Int), Var], mutable.Set[Cell]) = {
-    val map = mutable.Map[(Var, Int), Var]()
-    val nodes = mutable.Set[Cell]()
-    val mapFileContent = FileManager.readFile(mappingFile)
-
-    // Delimiter used by SVF for ander.txt format
-    val delimiter = "------"
-
-    val lines = mapFileContent.split("\n").toList
-
-    // Find the indices of the delimiters
-    val delimiterIndices = lines.zipWithIndex.collect {
-      case (content, index) if content == delimiter => index
-    }
-
-    // assert format by ensuring 3 delimiters were found
-    assert(delimiterIndices.length == 3)
-
-    // format: nodeid isFieldSensitive
-    val objVarLines = lines.slice(0, delimiterIndices.head)
-    objVarLines.foreach(l => nodes.add(l.split(" ")(0).toInt))
-
-
-    // The GepVarObjMap is stored between delimiter 1 and 2 (using 0 indexing)
-    // Extract lines between delimiter 1 and 2
-    val gepLines = lines.slice(delimiterIndices(1) + 1, delimiterIndices(2))
-
-    // Format is: baseId offset gepNode
-    gepLines.foreach(line => {
-      val entry = line.split(" ")
-      val baseNode = entry(0).toInt
-      val offset = entry(1).toInt
-      val gepNode = entry(2).toInt
-      map += (baseNode, offset) -> gepNode
-
-      // Also add base node (if not always present?) and gep node to nodes
-      nodes.add(baseNode)
-      nodes.add(gepNode)
-
-    })
-    (map, nodes)
-  }
-
-
-  override def toString: String = this.gepVarObjMap.toString()
-
-}
