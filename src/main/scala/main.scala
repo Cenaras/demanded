@@ -36,14 +36,14 @@ def main(): Unit = {
 //  println(s.cost)
 
 
-  val srcFile = FileManager.CPath("swap-funcptr.c")
+  val srcFile = FileManager.CPath("indirect-call.c")
   val outDir = FileManager.C_DIR
 
   val svf = new SVFParser()
   val res = svf.programFromJSON(srcFile, outDir)
 //  val res = svf.programFromPrint(srcFile, outDir)
 
-    res.program.print()
+//    res.program.print()
   val solution = NaiveCExhaustive(res).solve()
 //  println(solution)
   res.compareWithSVF(solution)

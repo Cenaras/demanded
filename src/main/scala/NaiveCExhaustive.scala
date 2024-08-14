@@ -10,7 +10,7 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
   val sol = mutable.Map[Int, mutable.Set[Int]]().withDefaultValue(mutable.Set.empty)
   var changed = true
 
-  val DEBUG = true
+  val DEBUG = false
 
   val debugEdges = mutable.Set[(Int, Int)]()
   val debugAddrOf = mutable.Set[(Int, Int)]()
@@ -25,7 +25,31 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
       SVFResult.program.getInstructions.foreach(i => {
         process(i)
       })
-      
+
+      // Iterate all indirect call sites
+      for (indCallSite <- SVFResult.indCallsiteMap.keys) {
+
+        // Find actual parameters for call site
+        val actualParamList = SVFResult.callsiteArgMap(indCallSite)
+
+        // Find the target function pointers...
+        val funPtr = SVFResult.indCallsiteMap(indCallSite)
+        // ... resolve the objVarIds ...
+        val funMemIds = sol(funPtr)
+        for (funMemId <- funMemIds) {
+          // ... retrieve the target function ID
+          val funID = SVFResult.funMemToFunID(funMemId)
+          val formalArgList = SVFResult.funArgsMap(funID)
+
+          // Finally propagate from actual to formal
+          for (i <- actualParamList.indices) {
+            propagate(actualParamList(i), formalArgList(i))
+          }
+
+        }
+      }
+
+
       // TODO: After each iteration/worklist order, check all indirect call sites and see if we need to add new 
       //  copy edges from formal to actual parameters
       

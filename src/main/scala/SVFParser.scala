@@ -22,11 +22,15 @@ class SVFParser {
     val exitCode = Process(cmd).!
 
     if exitCode == 0 then
-      val (program, indCallSiteMap) = parseJsonDump(outDir + FileManager.JSON_DUMP)
+      val jsonResult = parseJsonDump(outDir + FileManager.JSON_DUMP)
       val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
 
-      val nodes = parseNodes(outDir + FileManager.CG_FILE, gepVarObjMap)
+      val nodes = parseNodes(outDir + FileManager.CONSTRAINT_GRAPH_FILE, gepVarObjMap)
       println("Nodes: \n" + nodes)
+
+      // Mapping ObjVar of functions to their function ID
+      val funMemToFunID = generateFunMemToFunIDMapping(outDir + FileManager.PAG_FILE, outDir + FileManager.CALLGRAPH_FILE)
+
 
       // TODO: Need a JSON Result that we can throw everything into. We need the map from callSite to arguments
       //  (callsiteArgList) and the map from function to formal (funArgListMap)
@@ -41,9 +45,9 @@ class SVFParser {
       // This is correct! - However the mapping information maps not from this, but from some other index, into the parameters.
       // It seems that the function ID that is used is just the reverse declaration order, i.e. bottom-up, maybe we
       // could use that?
-      
-      
-      SVFResult(program, gepVarObjMap, nodes, indCallSiteMap, outDir)
+
+
+      SVFResult(jsonResult, gepVarObjMap, nodes, funMemToFunID, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
@@ -78,10 +82,11 @@ class SVFParser {
       val program = parsePrintedCG(outDir + FileManager.PRINT_FILE)
       val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
 
-      val nodes = parseNodes(outDir + FileManager.CG_FILE, gepVarObjMap)
+      val nodes = parseNodes(outDir + FileManager.CONSTRAINT_GRAPH_FILE, gepVarObjMap)
 
       // TODO...
-      SVFResult(program, gepVarObjMap, nodes, mutable.Map[Int, Int](), outDir)
+      val jsonResult = JSONResult(program)
+      SVFResult(jsonResult, gepVarObjMap, nodes, mutable.Map[Int, Int](), outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
@@ -135,7 +140,7 @@ class SVFParser {
 
 
   /** Parses a json dump from SVF (generated via -dump-json) and generates a corresponding C-style program. */
-  private def parseJsonDump(path: String): (CProgram, mutable.Map[Int, Int]) = {
+  private def parseJsonDump(path: String): JSONResult = {
     val instructions = mutable.ArrayBuffer[CInstruction]()
 
     // TODO: Enum for colors
@@ -182,28 +187,65 @@ class SVFParser {
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
 
-
-    def parseIndirectCallsiteMap(arr: ArrayBuffer[Value]): mutable.Map[Int, Int] = {
-      arr.foldLeft(mutable.Map[Int, Int]())((map, value) => {
-        map += value.arr(0).num.toInt -> value.arr(1).num.toInt
-      })
-    }
-
-
     val jsonString = FileManager.readFile(path)
     // Parse all edges and add corresponding instructions
     ujson.read(jsonString)("irGraph")("allEdge").arr.foreach(parseEdgeAndAddInstruction)
 
     // Parse map from array of tuples
-    val map = ujson.read(jsonString)("indCallSiteToFunPtrMap").arr
+    val indCallsiteMap = ujson.read(jsonString)("indCallSiteToFunPtrMap").arr
       .foldLeft(
         mutable.Map[Int, Int]())
       ((map, value) =>
         map += value.arr(0).num.toInt -> value.arr(1).num.toInt)
 
-    (CProgram(instructions.toList), map)
+
+    // Entry x -> list(y, z) represented as List(x, List(x, y))
+
+    val callSiteArgsMap = ujson.read(jsonString)("callSiteArgsListMap").arr
+      .foldLeft(mutable.Map[Int, List[Int]]())((map, value) => map += value.arr(0).num.toInt -> value.arr(1).arr.map(_.num.toInt).toList)
+
+    val funArgsMap = ujson.read(jsonString)("funArgsListMap").arr
+      .foldLeft(mutable.Map[Int, List[Int]]())((map, value) => map += value.arr(0).num.toInt -> value.arr(1).arr.map(_.num.toInt).toList)
+
+    JSONResult(CProgram(instructions.toList), indCallsiteMap, callSiteArgsMap, funArgsMap)
   }
 
+  private def generateFunMemToFunIDMapping(pagFile: String, cgFile: String): mutable.Map[Int, Int] = {
+
+    val pagContents = FileManager.readFile(pagFile)
+    val funObjVarList = pagContents.split("\n").filter(s => s.contains("FIObjVar") && s.contains("Function:")).toList
+
+    var idNameRegExp = """.+ FIObjVar ID: (\d+).+Function: (\w+).+""".r
+
+    val id2name = funObjVarList.foldLeft(mutable.Map[Int, String]())((acc, line) => {
+      line match
+        case idNameRegExp(id, name) => acc += id.toInt -> name
+        case _ => throw new Exception("String contains FIObjVar and Function, but failed on RegExp to determine id and name")
+    })
+
+    println(id2name)
+
+
+    val cgContents = FileManager.readFile(cgFile)
+    val callNodeList = cgContents.split("\n").filter(s => s.contains("CallGraphNode ID:") && s.contains("fun:")).toList
+
+    idNameRegExp = """.+CallGraphNode ID: (\d+).+fun: (\w+).+""".r
+    val name2funId = callNodeList.foldLeft(mutable.Map[String, Int]())((acc, line) => {
+      line match
+        case idNameRegExp(id, name) => acc += name -> id.toInt
+        case _ => throw new Exception("String contains CallGraphNode and fun, but failed on RegExp to determine id and name")
+    })
+
+    println(name2funId)
+
+    // I think the ID's are off-by-one? Since the json file says ID's are [1, 2, 3]
+    val objVarID2FunIDMap = id2name.collect {
+      case (key, value) if name2funId.contains(value) => key -> (name2funId(value) + 1)
+    }
+
+    objVarID2FunIDMap
+
+  }
 
   private def parseGepVarObjMap(file: String): GepVarObjMap = {
 
@@ -240,7 +282,33 @@ class SVFParser {
   }
 }
 
-class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val nodes: mutable.Set[Cell], indCallsiteMap: mutable.Map[Int, Int], outDir: String) {
+
+// TODO: More things?
+
+/** C Program,
+ * mapping from indirect call site to function pointer,
+ * map from call site to actual arguments,
+ * map from function ID to formal parameters. */
+class JSONResult(
+                  val program: CProgram,
+                  val indCallsiteMap: mutable.Map[Int, Int] = mutable.Map[Int, Int](),
+                  val callsiteArgMap: mutable.Map[Int, List[Int]] = mutable.Map[Int, List[Int]](),
+                  val funArgsMap: mutable.Map[Int, List[Int]] = mutable.Map[Int, List[Int]]())
+
+class SVFResult(
+                 val jsonResult: JSONResult,
+                 val gepVarObjMap: GepVarObjMap,
+                 val nodes: mutable.Set[Cell],
+                 val funMemToFunID: mutable.Map[Int, Int],
+                 outDir: String) {
+
+  def program: CProgram = jsonResult.program
+
+  def indCallsiteMap: mutable.Map[Int, Int] = jsonResult.indCallsiteMap
+
+  def funArgsMap: mutable.Map[Int, List[Int]] = jsonResult.funArgsMap
+
+  def callsiteArgMap: mutable.Map[Int, List[Int]] = jsonResult.callsiteArgMap
 
   def compareWithSVF(sol: CSolution): Unit = {
 

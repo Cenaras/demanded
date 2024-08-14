@@ -20,7 +20,9 @@ rm "$byteout" -f
 rm "$jsonOut" -f
 rm "$anderOut" -f
 
-
+# TODO: Delete unused files instead of moving them
 clang -S -emit-llvm "$1" -o "$byteout" -fno-discard-value-names
-$SVF_BIN -nander "$byteout" -dump-json "$jsonOut" -write-ander "$anderOut" -dump-constraint-graph #-extapi="../SVF/node_modules/svf-lib/SVF-linux/Release-build/lib/extapi.bc"
+$SVF_BIN -nander "$byteout" -dump-json "$jsonOut" -write-ander "$anderOut" -dump-constraint-graph -dump-pag -dump-callgraph #-extapi="../SVF/node_modules/svf-lib/SVF-linux/Release-build/lib/extapi.bc"
 mv consCG_final.dot consCG_initial.dot untitled/c-programs/
+mv svfir_initial.dot untitled/c-programs/
+mv callgraph_initial.dot callgraph_final.dot untitled/c-programs/

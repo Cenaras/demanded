@@ -18,7 +18,9 @@ object FileManager {
   val JSON_DUMP = "/dump.json"
   val GEP_FILE = "/ander.txt"
   val PRINT_FILE = "/output.txt"
-  val CG_FILE = "/consCG_initial.dot"
+  val CONSTRAINT_GRAPH_FILE = "/consCG_initial.dot"
+  val PAG_FILE = "/svfir_initial.dot"
+  val CALLGRAPH_FILE = "/callgraph_final.dot"
 
   val SVF_SCRIPT = "./untitled/svf.sh"
   val SVF_PRINT_SCRIPT = "./untitled/svf-print.sh"
