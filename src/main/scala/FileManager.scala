@@ -1,3 +1,5 @@
+import java.nio.file.{FileSystems, Files}
+import scala.collection.JavaConverters._
 object FileManager {
 
   /** Reads a file and returns the contents as a newline separated string. Contents from the file is trimmed according
@@ -30,6 +32,10 @@ object FileManager {
 
   /** Given a filename of a c program, returns its path in the C_DIR */
   def CPath(filename: String): String = C_DIR + filename
-  
+
+  def filesInDir(dir: String): List[String] = {
+    Files.list(FileSystems.getDefault.getPath(dir)).iterator().asScala.map(_.toString).toList
+  }
+
   
 }

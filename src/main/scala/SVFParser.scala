@@ -26,26 +26,10 @@ class SVFParser {
       val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
 
       val nodes = parseNodes(outDir + FileManager.CONSTRAINT_GRAPH_FILE, gepVarObjMap)
-      println("Nodes: \n" + nodes)
+//      println("Nodes: \n" + nodes)
 
       // Mapping ObjVar of functions to their function ID
       val funMemToFunID = generateFunMemToFunIDMapping(outDir + FileManager.PAG_FILE, outDir + FileManager.CALLGRAPH_FILE)
-
-
-      // TODO: Need a JSON Result that we can throw everything into. We need the map from callSite to arguments
-      //  (callsiteArgList) and the map from function to formal (funArgListMap)
-      // 23 --> 32, 34 which are the actual params for indirect call site 23.
-      // 1 --> 9, 10 which are the formal parameters - IDK why the key is 1 though...
-
-      // The issue is the call graph stuff - we need a way to resolve it...
-      // We can dump the call graph to get call graph node id's
-
-      // We know that node 23 is an indirect function call and targets function pointer 41
-      // That means the function we are calling is whatever is in pts(41) - in this case 7 which is the base object for function swap
-      // This is correct! - However the mapping information maps not from this, but from some other index, into the parameters.
-      // It seems that the function ID that is used is just the reverse declaration order, i.e. bottom-up, maybe we
-      // could use that?
-
 
       SVFResult(jsonResult, gepVarObjMap, nodes, funMemToFunID, outDir)
     else
@@ -295,6 +279,9 @@ class JSONResult(
                   val callsiteArgMap: mutable.Map[Int, List[Int]] = mutable.Map[Int, List[Int]](),
                   val funArgsMap: mutable.Map[Int, List[Int]] = mutable.Map[Int, List[Int]]())
 
+
+/** funMemToFunID is a map from the ObjVar memory of a function, to the actual function.
+ * It is constructed by looking at the final call graph and the svfir dumps - it might not be the best solution. */
 class SVFResult(
                  val jsonResult: JSONResult,
                  val gepVarObjMap: GepVarObjMap,

@@ -1,53 +1,68 @@
-
+import java.nio.file.{FileSystems, Files}
 
 @main
 def main(): Unit = {
-//    difference()
-//    compareMagicToHeintzeTardieu(100, 7, 3, 1)
-//  datalogAnalysisCost()
+  //    difference()
+  //    compareMagicToHeintzeTardieu(100, 7, 3, 1)
+  //  datalogAnalysisCost()
 
-//  val p = Parser.ParseTemplate("MagicAlt1Compare")
-//  val q = 2
-//  val alt1 = Alt1()
-//  alt1.compileAndAnalyze(p, q)
-//  alt1.outputSolution("untitled/alt1Sol.tsv")
-//
-//  val standard = Standard()
-//  standard.compileAndAnalyze(p, q)
-//  standard.outputSolution("untitled/standardSol.tsv")
+  //  val p = Parser.ParseTemplate("MagicAlt1Compare")
+  //  val q = 2
+  //  val alt1 = Alt1()
+  //  alt1.compileAndAnalyze(p, q)
+  //  alt1.outputSolution("untitled/alt1Sol.tsv")
+  //
+  //  val standard = Standard()
+  //  standard.compileAndAnalyze(p, q)
+  //  standard.outputSolution("untitled/standardSol.tsv")
 
-//  val q = 1
-//
-//  val p = Parser.ParseTemplate("qwe")
-//  val s1 = new NaiveExhaustiveSolver()
-//  val sol1 = s1.solve(p)
-//  println(s"Naive Solution\n${sol1}")
-//  val s2 = new Tidal()
-//  val sol2 = s2.solve(p, q)
-//  println(s"Tidal Solution\n${sol2}")
+  //  val q = 1
+  //
+  //  val p = Parser.ParseTemplate("qwe")
+  //  val s1 = new NaiveExhaustiveSolver()
+  //  val sol1 = s1.solve(p)
+  //  println(s"Naive Solution\n${sol1}")
+  //  val s2 = new Tidal()
+  //  val sol2 = s2.solve(p, q)
+  //  println(s"Tidal Solution\n${sol2}")
 
-//  val p = Parser.ParseTemplate("qwe")
-//  val q = 5
-//
-//  val s = MagicSets()
-////  val s = new HeintzeTardieu()
-//  s.solve(p, q)
-//  s.printSolution()
-//  println(s.cost)
+  //  val p = Parser.ParseTemplate("qwe")
+  //  val q = 5
+  //
+  //  val s = MagicSets()
+  ////  val s = new HeintzeTardieu()
+  //  s.solve(p, q)
+  //  s.printSolution()
+  //  println(s.cost)
 
 
-  val srcFile = FileManager.CPath("indirect-call.c")
-  val outDir = FileManager.C_DIR
+    val srcFile = FileManager.CPath("struct.c")
+    val outDir = FileManager.C_DIR
 
-  val svf = new SVFParser()
-  val res = svf.programFromJSON(srcFile, outDir)
-//  val res = svf.programFromPrint(srcFile, outDir)
+    val svf = new SVFParser()
+    val res = svf.programFromJSON(srcFile, outDir)
+  //  val res = svf.programFromPrint(srcFile, outDir)
 
-//    res.program.print()
-  val solution = NaiveCExhaustive(res).solve()
-//  println(solution)
-  res.compareWithSVF(solution)
+  //    res.program.print()
+    val solution = NaiveCExhaustive(res).solve()
+  //  println(solution)
+    res.compareWithSVF(solution)
+
+//  testSVF()
+
 }
+
+
+private def testSVF(): Unit = {
+  val cFiles = FileManager.filesInDir(FileManager.C_DIR).filter(f => f.endsWith(".c"))
+  for (file <- cFiles) {
+    val svf = new SVFParser()
+    val res = svf.programFromJSON(file, FileManager.C_DIR)
+    val solution = new NaiveCExhaustive(res).solve()
+    res.compareWithSVF(solution)
+  }
+}
+
 
 // TODO: Implement these in the framework and compare then in the CompareDemanded test case
 private def datalogAnalysisCost(): Unit = {
@@ -104,14 +119,14 @@ private def datalogAnalysisCost(): Unit = {
       if smallest1 == alt2Cost then alt2Cheaper += 1
 
 
-
-
-    val htSolSize = htSol.foldLeft(0)((a, sol) => {a + sol.size})
+    val htSolSize = htSol.foldLeft(0)((a, sol) => {
+      a + sol.size
+    })
     val standardSolSize = standard.readSolution(standardOutPath).linesIterator.size
     val alt1SolSize = alt1.readSolution(alt1OutPath).linesIterator.size
     val alt2SolSize = alt2.readSolution(alt2OutPath).linesIterator.size
 
-     val (unique2, smallest2) = uniqueSmallest(List(htSolSize, standardSolSize, alt1SolSize, alt2SolSize))
+    val (unique2, smallest2) = uniqueSmallest(List(htSolSize, standardSolSize, alt1SolSize, alt2SolSize))
     if unique2 then
       if smallest2 == htSolSize then htSolSizeSmallest += 1
       if smallest2 == standardSolSize then standardSolSizeSmallest += 1
@@ -174,8 +189,6 @@ private def difference(): Unit = {
   datalogAnalysis.compileAndAnalyze(p, 1)
   datalogAnalysis.outputSolution("untitled/diff_mebe")
 }
-
-
 
 
 private def compareMagicToHeintzeTardieu(times: Int, size: Int, vars: Int, fields: Int): Unit = {
