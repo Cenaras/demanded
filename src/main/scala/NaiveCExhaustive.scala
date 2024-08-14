@@ -7,16 +7,16 @@ import scala.collection.mutable
 
 class NaiveCExhaustive(SVFResult: SVFResult) {
 
-  val sol = mutable.Map[Cell, mutable.Set[Cell]]().withDefaultValue(mutable.Set.empty)
+  val sol = mutable.Map[Int, mutable.Set[Int]]().withDefaultValue(mutable.Set.empty)
   var changed = true
 
-  val DEBUG = false
+  val DEBUG = true
 
-  val debugEdges = mutable.Set[(Cell, Cell)]()
-  val debugAddrOf = mutable.Set[(Cell, Cell)]()
-  val debugLoad = mutable.Set[(Cell, Cell)]()
-  val debugStore = mutable.Set[(Cell, Cell)]()
-  val debugGep = mutable.Set[(Cell, Int, Cell)]()
+  val debugEdges = mutable.Set[(Int, Int)]()
+  val debugAddrOf = mutable.Set[(Int, Int)]()
+  val debugLoad = mutable.Set[(Int, Int)]()
+  val debugStore = mutable.Set[(Int, Int)]()
+  val debugGep = mutable.Set[(Int, Int, Int)]()
 
   /** Since solving GEP instructions require knowing the mapping that SVF chose, this must be provided. */
   def solve(): CSolution = {
@@ -25,25 +25,61 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
       SVFResult.program.getInstructions.foreach(i => {
         process(i)
       })
+      
+      // TODO: After each iteration/worklist order, check all indirect call sites and see if we need to add new 
+      //  copy edges from formal to actual parameters
+      
     }
+
+   // Addr: OK
+   // Copy: Missing 24 --> 45, 27 --> 47, 44 --> 9, 45 --> 21, 46 --> 10, 47 --> 24,
+   //   It is NOT in initial, but it IS in final. So it is an edge spawned from a constraint that is missing (for 24 --> 45)
+
+    // 24 --> 45 is missed due to store 24 --> 25 and 25 not containing 45
+
+    if DEBUG then
+      debugAddrOf.toList.sortBy(e => (e._2, e._1)).foreach(e => {
+        if SVFResult.nodes.contains(e._2) then
+          println(s"${e._2} -- Addr --> ${e._1}")
+      })
+
+      debugEdges.toList.sortBy(e => (e._2, e._1)).foreach(e => {
+        if SVFResult.nodes.contains(e._2) then
+          println(s"${e._2} -- Copy --> ${e._1}")
+      })
+
+      debugGep.toList.sortBy(e => (e._3, e._1)).foreach(e => {
+        if SVFResult.nodes.contains(e._3) then
+          println(s"${e._3} -- NormalGep (${e._2})--> ${e._1}")
+      })
+
+      debugLoad.toList.sortBy(e => (e._2, e._1)).foreach(e => {
+        if SVFResult.nodes.contains(e._2) then
+          println(s"${e._2} -- Load --> ${e._1}")
+      })
+
+      debugStore.toList.sortBy(e => (e._2, e._1)).foreach(e => {
+        if SVFResult.nodes.contains(e._2) then
+          println(s"${e._2} -- Store --> ${e._1}")
+      })
+
     sol
   }
 
-  def addPts(x: Cell, y: Cell): Unit = {
-    if !SVFResult.nodes.contains(y) then
+  def addPts(x: Int, y: Int): Unit = {
+    if !SVFResult.nodes.contains(x) then
       return
 
     if !sol.contains(x) then
-      val fresh = mutable.Set[Cell]()
+      val fresh = mutable.Set[Int]()
       sol += x -> fresh
 
     changed |= sol(x).add(y)
   }
 
-  def propagate(from: Cell, to: Cell): Unit = {
-    if !debugEdges(to, from) && DEBUG then
+  private def propagate(from: Int, to: Int): Unit = {
+    if !debugEdges(to, from) && DEBUG && SVFResult.nodes(to) then
       debugEdges.add(to, from)
-      println(s"$from -- Copy --> $to")
     sol(from).foreach(c => addPts(to, c))
   }
 
@@ -51,36 +87,28 @@ class NaiveCExhaustive(SVFResult: SVFResult) {
     i match
       case AddrOf(x, y) =>
         addPts(x, y)
-        if !debugAddrOf(x, y) && DEBUG then
-          debugAddrOf.add(x,y)
-          println(s"$y -- Addr --> $x")
+        if !debugAddrOf(x, y) && DEBUG && SVFResult.nodes(x) then
+          debugAddrOf.add(x, y)
       case Copy(x, y) =>
         propagate(y, x)
       case CLoad(x, y) =>
-        if !debugLoad(x, y) && DEBUG then
+        if !debugLoad(x, y) && DEBUG && SVFResult.nodes(x) then
           debugLoad.add(x, y)
-          println(s"$y -- Load --> $x")
         for c <- sol(y) do
           propagate(c, x)
       case CStore(x, y) =>
-        if !debugStore(x, y) && DEBUG then
+        if !debugStore(x, y) && DEBUG && SVFResult.nodes(x) then
           debugStore.add(x, y)
-          println(s"$y -- Store --> $x")
         for c <- sol(x) do
           propagate(y, c)
       case Gep(dst, base, offset) =>
-        if !debugGep(dst, offset, base) && DEBUG then
+        if !debugGep(dst, offset, base) && DEBUG && SVFResult.nodes(dst) then
           debugGep.add(dst, offset, base)
-          println(s"$base -- NormalGep($offset) --> $dst")
-          
+
         // Following the SVF implementation (Andersen.cpp#processGep) - ∀t ⟦base⟧ : gepMap(t, offset) ∈ ⟦dst⟧
         for t <- sol(base) do
-          t match
-            case a: Var =>
-              val gepNode = SVFResult.gepVarObjMap(a, offset)
-              addPts(dst, gepNode)
-            case b: Cell =>
-              throw new Error("TODO IF THIS CAN HAPPEN")
+          val gepNode = SVFResult.gepVarObjMap(t, offset)
+          addPts(dst, gepNode)
   }
 
 

@@ -1,5 +1,7 @@
 import ujson.{Value, read}
+
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.sys.process.*
 
 
@@ -20,22 +22,33 @@ class SVFParser {
     val exitCode = Process(cmd).!
 
     if exitCode == 0 then
-      val program = parseJsonDump(outDir + FileManager.JSON_DUMP)
+      val (program, indCallSiteMap) = parseJsonDump(outDir + FileManager.JSON_DUMP)
       val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
 
-      val nodes = parseNodes(outDir+FileManager.CG_FILE)
+      val nodes = parseNodes(outDir + FileManager.CG_FILE, gepVarObjMap)
+      println("Nodes: \n" + nodes)
 
-      // Also add all gep nodes
-      gepVarObjMap.values.foreach(nodes.add)
+      // TODO: Need a JSON Result that we can throw everything into. We need the map from callSite to arguments
+      //  (callsiteArgList) and the map from function to formal (funArgListMap)
+      // 23 --> 32, 34 which are the actual params for indirect call site 23.
+      // 1 --> 9, 10 which are the formal parameters - IDK why the key is 1 though...
 
-//      println("Nodes: \n" + nodes)
+      // The issue is the call graph stuff - we need a way to resolve it...
+      // We can dump the call graph to get call graph node id's
 
-      SVFResult(program, gepVarObjMap, nodes, outDir)
+      // We know that node 23 is an indirect function call and targets function pointer 41
+      // That means the function we are calling is whatever is in pts(41) - in this case 7 which is the base object for function swap
+      // This is correct! - However the mapping information maps not from this, but from some other index, into the parameters.
+      // It seems that the function ID that is used is just the reverse declaration order, i.e. bottom-up, maybe we
+      // could use that?
+      
+      
+      SVFResult(program, gepVarObjMap, nodes, indCallSiteMap, outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
 
-  private def parseNodes(file: String): mutable.Set[Cell] = {
+  private def parseNodes(file: String, gepVarObjMap: GepVarObjMap): mutable.Set[Cell] = {
     // Nodes to use for points-to computations - ALSO INCLUDE GEP NODES
     val nodes = mutable.Set[Cell]()
     val nodePattern = """Node0x([0-9a-f]+) \[.*,label="\{([0-9]+):?(.+)?}"];""".r
@@ -44,15 +57,15 @@ class SVFParser {
     val lines = content.trim.split("\n")
 
     for (line <- lines) {
-      println(line)
       line match
         case nodePattern(id, label, name) =>
           nodes.add(label.toInt)
-          println(s"ADDED ID ${label.toInt}")
         case _ =>
     }
-    nodes
 
+    // Also add all gep nodes
+    gepVarObjMap.values.foreach(nodes.add)
+    nodes
   }
 
   // TODO: I think this might actually be the "solved" constraint graph meaning it would require potentially two
@@ -62,10 +75,13 @@ class SVFParser {
     val exitCode = Process(cmd).!
 
     if exitCode == 0 then
-      val dummyNodes = mutable.Set[Cell]()
       val program = parsePrintedCG(outDir + FileManager.PRINT_FILE)
       val gepVarObjMap = parseGepVarObjMap(outDir + FileManager.GEP_FILE)
-      SVFResult(program, gepVarObjMap, dummyNodes, outDir)
+
+      val nodes = parseNodes(outDir + FileManager.CG_FILE, gepVarObjMap)
+
+      // TODO...
+      SVFResult(program, gepVarObjMap, nodes, mutable.Map[Int, Int](), outDir)
     else
       throw Error(s"Invocation exited with error code $exitCode")
   }
@@ -119,8 +135,10 @@ class SVFParser {
 
 
   /** Parses a json dump from SVF (generated via -dump-json) and generates a corresponding C-style program. */
-  private def parseJsonDump(path: String): CProgram = {
+  private def parseJsonDump(path: String): (CProgram, mutable.Map[Int, Int]) = {
     val instructions = mutable.ArrayBuffer[CInstruction]()
+
+    // TODO: Enum for colors
 
     /** Extracts information from the json encoded edge and adds the corresponding instruction */
     def parseEdgeAndAddInstruction(edge: Value): Unit = {
@@ -155,15 +173,35 @@ class SVFParser {
           val fieldIdx = edge("ap")("fldIdx").str.toInt
           instructions.addOne(Gep(dst, src, fieldIdx))
         case 7 =>
-        // Grey: BinOp
+          // Black: Copy
+          instructions.addOne(Copy(dst, src))
+        case 9 | 10 | 12 =>
+          // Grey: NO-OP (Path/flow sensitive edges)
+          println("Are these truly NOOPS?")
+
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
+
+
+    def parseIndirectCallsiteMap(arr: ArrayBuffer[Value]): mutable.Map[Int, Int] = {
+      arr.foldLeft(mutable.Map[Int, Int]())((map, value) => {
+        map += value.arr(0).num.toInt -> value.arr(1).num.toInt
+      })
+    }
+
 
     val jsonString = FileManager.readFile(path)
     // Parse all edges and add corresponding instructions
     ujson.read(jsonString)("irGraph")("allEdge").arr.foreach(parseEdgeAndAddInstruction)
 
-    CProgram(instructions.toList)
+    // Parse map from array of tuples
+    val map = ujson.read(jsonString)("indCallSiteToFunPtrMap").arr
+      .foldLeft(
+        mutable.Map[Int, Int]())
+      ((map, value) =>
+        map += value.arr(0).num.toInt -> value.arr(1).num.toInt)
+
+    (CProgram(instructions.toList), map)
   }
 
 
@@ -202,7 +240,7 @@ class SVFParser {
   }
 }
 
-class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val nodes: mutable.Set[Cell], outDir: String) {
+class SVFResult(val program: CProgram, val gepVarObjMap: GepVarObjMap, val nodes: mutable.Set[Cell], indCallsiteMap: mutable.Map[Int, Int], outDir: String) {
 
   def compareWithSVF(sol: CSolution): Unit = {
 
