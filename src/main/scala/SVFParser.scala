@@ -166,7 +166,7 @@ class SVFParser {
           instructions.addOne(Copy(dst, src))
         case 9 | 10 | 12 =>
           // Grey: NO-OP (Path/flow sensitive edges)
-          println("Are these truly NOOPS?")
+//          println("Are these truly NOOPS?")
 
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
@@ -207,9 +207,6 @@ class SVFParser {
         case _ => throw new Exception("String contains FIObjVar and Function, but failed on RegExp to determine id and name")
     })
 
-    println(id2name)
-
-
     val cgContents = FileManager.readFile(cgFile)
     val callNodeList = cgContents.split("\n").filter(s => s.contains("CallGraphNode ID:") && s.contains("fun:")).toList
 
@@ -219,8 +216,6 @@ class SVFParser {
         case idNameRegExp(id, name) => acc += name -> id.toInt
         case _ => throw new Exception("String contains CallGraphNode and fun, but failed on RegExp to determine id and name")
     })
-
-    println(name2funId)
 
     // I think the ID's are off-by-one? Since the json file says ID's are [1, 2, 3]
     val objVarID2FunIDMap = id2name.collect {
@@ -265,9 +260,6 @@ class SVFParser {
     map
   }
 }
-
-
-// TODO: More things?
 
 /** C Program,
  * mapping from indirect call site to function pointer,
