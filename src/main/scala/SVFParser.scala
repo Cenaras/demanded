@@ -165,8 +165,8 @@ class SVFParser {
           // Black: Copy
           instructions.addOne(Copy(dst, src))
         case 9 | 10 | 12 =>
-          // Grey: NO-OP (Path/flow sensitive edges)
-//          println("Are these truly NOOPS?")
+        // Grey: NO-OP (Path/flow sensitive edges)
+        //          println("Are these truly NOOPS?")
 
         case x => throw new Error(s"Unsupported edge type $x from $src -> $dst -- check dot file to determine color")
     }
@@ -289,7 +289,7 @@ class SVFResult(
 
   def callsiteArgMap: mutable.Map[Int, List[Int]] = jsonResult.callsiteArgMap
 
-  def compareWithSVF(sol: CSolution): Unit = {
+  def compareWithSVF(sol: CSolution): Boolean = {
 
     // TODO: Method for extracting delimiter indices
     val anderContent = FileManager.readFile(outDir + FileManager.GEP_FILE)
@@ -324,12 +324,13 @@ class SVFResult(
     println("Comparing provided solution with SVF produced solution for the input program...")
     if sol == anderSol then
       println("Solutions were identical!")
+      true
     else
       println("Solution mismatch!")
       println("Provided solution: \n" + sol)
       println()
       println("SVF solution: \n" + anderSol)
-      assert(false)
+      false
   }
 }
 

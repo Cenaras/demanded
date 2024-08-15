@@ -36,31 +36,66 @@ def main(): Unit = {
   //  println(s.cost)
 
 
-    val srcFile = FileManager.CPath("struct.c")
-    val outDir = FileManager.C_DIR
+  val srcFile = FileManager.CPath("field.c")
+  val outDir = FileManager.C_DIR
+  //
+//    val svf = new SVFParser()
+//    val res = svf.programFromJSON(srcFile, outDir)
+//      val res = svf.programFromPrint(srcFile, outDir)
 
-    val svf = new SVFParser()
-    val res = svf.programFromJSON(srcFile, outDir)
-  //  val res = svf.programFromPrint(srcFile, outDir)
+//    val solution = NaiveSVFSolver(res).solve()
+    //  println(solution)
+//    res.compareWithSVF(solution)
+  //
+    //  testSVF()
 
-  //    res.program.print()
-    val solution = NaiveCExhaustive(res).solve()
-  //  println(solution)
-    res.compareWithSVF(solution)
-
-//  testSVF()
+  val allFiles = FileManager.filesInDir(FileManager.C_DIR).filter(f => f.endsWith(".c"))
+//  applyAndAssertOnFiles(allFiles, testSVF)
+//  applyAndAssertOnFiles(allFiles, testDemandedSVF)
 
 }
 
 
-private def testSVF(): Unit = {
+private def applyAndAssertOnFiles(files: List[String], f: (String, String) => Boolean) = {
+  for file <- files do
+    println(s"Testing file ${file}")
+    assert(f(file, FileManager.C_DIR))
+}
+
+
+private def testDemandedSVF(srcFile: String, outDir: String): Boolean = {
+  val svfRes = new SVFParser().programFromJSON(srcFile, outDir)
+  val exSol = NaiveSVFSolver(svfRes).solve()
+
+  for varId <- exSol.keys do
+    val ex = exSol(varId)
+    val demSol = CHT(svfRes).solve(varId)
+    val dem = demSol(varId)
+
+    if dem != ex then
+      return false
+
+  true
+}
+
+
+private def testSVF(srcFile: String, outDir: String): Boolean = {
+  val res = new SVFParser().programFromJSON(srcFile, outDir)
+  val solution = new NaiveSVFSolver(res).solve()
+  res.compareWithSVF(solution)
+}
+
+
+private def testSVF(): Boolean = {
   val cFiles = FileManager.filesInDir(FileManager.C_DIR).filter(f => f.endsWith(".c"))
+
   for (file <- cFiles) {
     val svf = new SVFParser()
     val res = svf.programFromJSON(file, FileManager.C_DIR)
-    val solution = new NaiveCExhaustive(res).solve()
-    res.compareWithSVF(solution)
+    val solution = new NaiveSVFSolver(res).solve()
+    if !res.compareWithSVF(solution) then return false
   }
+  true
 }
 
 
