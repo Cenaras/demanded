@@ -1,7 +1,9 @@
 class CHT(res: SVFResult) extends DemandedSVFSolver(res) {
 
   override def solve(query: Int): CSolution = {
+    // C-HT requires that all queries must both be demanded and tracked
     addDemand(query)
+    addTracked(query)
 
     while (changed) {
       changed = false
@@ -24,6 +26,7 @@ class CHT(res: SVFResult) extends DemandedSVFSolver(res) {
           addDemand(y)
           addTracked(y)
           propagate(y, x)
+
         for z <- sol(y) do
           if tracked(z) then
             addPts(x, z)
@@ -71,6 +74,7 @@ class CHT(res: SVFResult) extends DemandedSVFSolver(res) {
           for z <- sol(base) do
             val gepNode = res.gepVarObjMap(z, offset)
             addPts(dst, gepNode)
+
 
 
 

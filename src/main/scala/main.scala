@@ -36,7 +36,7 @@ def main(): Unit = {
   //  println(s.cost)
 
 
-  val srcFile = FileManager.CPath("field.c")
+  val srcFile = FileManager.CPath("swap.c")
   val outDir = FileManager.C_DIR
   //
 //    val svf = new SVFParser()
@@ -47,7 +47,8 @@ def main(): Unit = {
     //  println(solution)
 //    res.compareWithSVF(solution)
   //
-    //  testSVF()
+
+  testDemandedSVF(srcFile,outDir)
 
   val allFiles = FileManager.filesInDir(FileManager.C_DIR).filter(f => f.endsWith(".c"))
 //  applyAndAssertOnFiles(allFiles, testSVF)
@@ -64,7 +65,7 @@ private def applyAndAssertOnFiles(files: List[String], f: (String, String) => Bo
 
 
 private def testDemandedSVF(srcFile: String, outDir: String): Boolean = {
-  val svfRes = new SVFParser().programFromJSON(srcFile, outDir)
+  val svfRes = SVFParser().programFromJSON(srcFile, outDir)
   val exSol = NaiveSVFSolver(svfRes).solve()
 
   for varId <- exSol.keys do
@@ -73,6 +74,11 @@ private def testDemandedSVF(srcFile: String, outDir: String): Boolean = {
     val dem = demSol(varId)
 
     if dem != ex then
+      println("Program:")
+      svfRes.program.print()
+      println(s"Query: ${varId}")
+      println(s"ex: ${ex}")
+      println(s"dem: ${dem}")
       return false
 
   true
