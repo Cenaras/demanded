@@ -1,0 +1,29 @@
+.type var <: symbol
+.type token <: symbol
+.type field <: symbol
+
+.output query
+
+
+.decl New(x: var, t: token)
+.input New
+
+.decl Assign(x: var, y: var)
+.input Assign
+
+// x = y.f
+.decl Load(dst: var, base: var, f: field)
+.input Load
+
+// x.f = y
+.decl Store(base: var, f: field, src: var)
+.input Store
+
+// ⟦x⟧
+.decl PointsTo(x: var, t: token)
+
+// ⟦t.f⟧
+.decl PointsToField(t: token, f: field, v: token)
+
+// analysis - automatically filled in by permutations.py script
+

@@ -6,4 +6,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "demanded"
   )
+libraryDependencies += "com.lihaoyi" %% "upickle" % "3.1.0"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test"

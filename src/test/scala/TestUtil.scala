@@ -1,114 +1,99 @@
-import main.constraint.{ConstraintGenerator, ConstraintVariables}
-import main.program.{Program, ProgramDistribution, ProgramGenerator}
-import main.solver.*
-import main.solver.SolverUtil.compareSolutions
-import main.util.PrettyPrinter
+import TestUtil.GeneratorType.Simple
+import TestUtil.SolverType.{Alias, Alt1, HTImp}
+import com.sun.org.apache.bcel.internal.generic.AALOAD
+
+import javax.management.Query
+import scala.collection.mutable
 
 object TestUtil {
-  def solveDemanded(p: Program, queryId: QueryID, solver: Demanded): ConstraintVariables = {
-    val constraints = ConstraintGenerator.generate(p)
-    solver.solve(constraints, queryId)
+
+  def containsExactly(x: Cell, tokens: List[Token], sol: Solution): Boolean = {
+    val res = sol(x)
+    var same = true
+    same = same & res.size == tokens.size
+    for t <- res do
+      same = same & tokens.contains(t)
+    same
   }
 
-  def repeatTest(times: Int, generator: ProgramGenerator): Unit = {
-    for (i <- 0 until times) {
-      val program = generator.generate()
-      val query = program.getRandomVar
-
-      val (exhaustiveSolution, demandedSolution) = solveBoth(program, query)
-      if (!compareSolutions(exhaustiveSolution, demandedSolution, query)) {
-        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.stringifyProgram(program)))
-      }
-
-      val demandedSolutionSize = SolverUtil.solutionSize(demandedSolution)
-      val exhaustiveSolutionSize = SolverUtil.solutionSize(exhaustiveSolution)
-      assert(demandedSolutionSize <= exhaustiveSolutionSize)
-    }
+  def compareSolutionsForQuery(ex: Solution, de: Solution, query: Cell): Boolean = {
+    val querySol = de(query)
+    containsExactly(query, querySol.toList, ex)
   }
 
-
-  def repeatSolveBoth(times: Int,
-                      generator: ProgramGenerator,
-                      solve: (Program, QueryID, Demanded, Demanded) => (ConstraintVariables, ConstraintVariables),
-                      sol1: Demanded,
-                      sol2: Demanded): Unit = {
-
-    for (i <- 0 until times) {
-      val program = generator.generate()
-      val query = program.getRandomVar
-
-      val (solution1, solution2) = solve(program, query, sol1, sol2)
-      if (!compareSolutions(solution1, solution2, query)) {
-        throw Error("Solutions did not match with query %d for program\n%s".format(query, PrettyPrinter.stringifyProgram(program)))
-      }
-      val sol1Size = SolverUtil.solutionSize(solution1)
-      val sol2Size = SolverUtil.solutionSize(solution2)
-      if (sol1Size != sol2Size) {
-        println("Solution 1:")
-        println(PrettyPrinter.stringifySolution(solution1))
-        println("Solution 2:")
-        println(PrettyPrinter.stringifySolution(solution2))
-        println("Program (query " + query + "): ")
-        println(PrettyPrinter.stringifyProgram(program))
-        assert(false)
-      }
-    }
+  def assertSolution(x: Cell, tokens: List[Token], sol: Solution): Unit = {
+    assert(containsExactly(x, tokens, sol))
   }
 
-  def newGenerator(varNumber: Int, tokenNum: Int, size: Int, dist: ProgramDistribution): ProgramGenerator = {
-    new ProgramGenerator(varNumber, tokenNum, size, dist)
+  enum SolverType:
+    case HT, Magic, FullFS, Alt1, HTImp, Alias
+
+  enum GeneratorType:
+    case Simple, Initialized
+
+
+  def demandedSolver(st: SolverType): DemandedSolver = {
+    st match
+      case SolverType.HT => HeintzeTardieu()
+      case SolverType.Magic => MagicSets()
+      case SolverType.FullFS => FullFS()
+      case SolverType.Alt1 => MagicAlt1()
+      case SolverType.HTImp => ImprovedHeintzeTardieu()
+      case SolverType.Alias => AliasBased()
   }
 
-  def newDist(newObj: Int, assign: Int, load: Int, store: Int): ProgramDistribution = {
-    newDist(newObj, assign, load, store, 0, 0)
+  def randomTest(size: Int, vars: Int, fields: Int): (Program, Cell) = {
+    val seed = scala.util.Random.nextInt()
+    val g = new SimpleProgramGenerator(seed, vars, size, fields)
+    val p = g.generate()
+    val query = g.genQuery
+    (p, query)
   }
 
-  def newDist(newObj: Int, assign: Int, load: Int, store: Int, newFun: Int, call: Int): ProgramDistribution = {
-    new ProgramDistribution(newObj, assign, load, store, newFun, call)
-  }
+  def compareExhaustiveToWP(exSol: Solution, wpSol: WpSolution): Boolean = {
 
-  /**
-   * Solves two instances of a program (TODO: Allow us to specify solvers here)
-   */
-  def solveBoth(p: Program, queryId: QueryID): (ConstraintVariables, ConstraintVariables) = {
-    val eConstraints = ConstraintGenerator.generate(p)
-    val dConstraints = ConstraintGenerator.generate(p)
+    var same = true
 
-    val exhaustive = ExhaustiveSolver()
-    val ht = new HTSolver()
+    for (cell, sol) <- exSol do
+      val sol_other = wpSol.sol(cell)
+      same &= sol.size == sol_other.size
 
-    val exhaustiveSolution = exhaustive.solve(eConstraints)
-    val demandedSolution = ht.solve(dConstraints, queryId)
+      for t <- sol do
+        same &= sol_other.contains(t)
 
-    //    println(PrettyPrinter.stringifySolution(exhaustiveSolution))
-    //    println(PrettyPrinter.stringifySolution(demandedSolution))
+    same
 
-    (exhaustiveSolution, demandedSolution)
-  }
 
-  def solveBothDemanded(p: Program, queryID: QueryID, sol1: Demanded, sol2: Demanded): (ConstraintVariables, ConstraintVariables) = {
-    val constraints1 = ConstraintGenerator.generate(p)
-    val constraints2 = ConstraintGenerator.generate(p)
-
-    val solution1 = sol1.solve(constraints1, queryID)
-    val solution2 = sol2.solve(constraints2, queryID)
-    (solution1, solution2)
   }
 
 
-  def compareOptimality(p: Program, queryID: QueryID, sol1: Demanded, sol2: Demanded): ((Int, Int, Int), (Int, Int, Int)) = {
-    val c1 = ConstraintGenerator.generate(p)
-    val c2 = ConstraintGenerator.generate(p)
-
-    val s1 = sol1.solve(c1, queryID)
-    val s2 = sol2.solve(c2, queryID)
-
-    val res1 = (sol1.Q.size, sol1.W.size, SolverUtil.solutionSize(s1))
-    val res2 = (sol2.Q.size, sol2.W.size, SolverUtil.solutionSize(s2))
-
-    (res1, res2)
-
+  // Compare demanded solvers for small programs
+  def compareDemandedSolvers(times: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
+    compareDemandedSolvers(times, 7, 3, 1, sol1Type, sol2Type)
   }
 
+  def compareDemandedSolvers(times: Int, size: Int, vars: Int, fields: Int, sol1Type: SolverType, sol2Type: SolverType): Unit = {
+    for _ <- 0 until times do
+      val (p, q) = randomTest(size, vars, fields)
+
+      val solver1 = demandedSolver(sol1Type)
+      val solver2 = demandedSolver(sol2Type)
+
+      val sol1 = solver1.solve(p, q)
+      val sol2 = solver2.solve(p, q)
+
+      if !compareSolutionsForQuery(sol1, sol2, q) then
+        p.print()
+        println("Query: " + q)
+        println(s"$sol1Type solution: ")
+        println(sol1)
+        println(s"$sol2Type solution: ")
+        println(sol2)
+
+        solver2 match
+          case a: ImprovedHeintzeTardieu => println("write reachable: \n" + a.write_reachable)
+          case _ =>
+        throw new Error("mismatch")
+  }
 
 }

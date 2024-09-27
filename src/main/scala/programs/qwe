@@ -1,0 +1,6 @@
+x4 = x2.f1
+x4.f1 = x1
+x3 = new t2
+x5 = x3.f1
+x2 = new t13
+x2 = new t14
